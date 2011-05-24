@@ -1,0 +1,8 @@
+ri.iml
+ri.ipr
+ri.iws
+.idea
+target
+/.settings
+/.project
+/.classpath
