@@ -1,4 +1,4 @@
-package javax.cache;
+package javax.cache.implementation;
 
 /**
  * Hello world!
