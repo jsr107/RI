@@ -1,7 +1,5 @@
 package javax.cache.implementation;
 
-import com.sun.deploy.cache.CacheEntry;
-
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
