@@ -7,6 +7,7 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.listeners.CacheEntryListener;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -15,7 +16,7 @@ import java.util.concurrent.Future;
  * RI
  */
 public class RICache<K,V> implements Cache<K,V> {
-
+    private final HashMap<K,V> store = new HashMap<K,V>();
 
     /**
      * Gets an entry from the cache.
@@ -29,10 +30,14 @@ public class RICache<K,V> implements Cache<K,V> {
      * @param key the key whose associated value is to be returned
      * @return the element, or null, if it does not exist.
      * @throws IllegalStateException      if the cache is not {@link javax.cache.Status#STARTED}
+     * @throws IllegalArgumentException if the key is null
      * @throws javax.cache.CacheException
      */
     public V get(Object key) throws CacheException {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new IllegalArgumentException("null key");
+        }
+        return store.get(key);
     }
 
     /**
@@ -166,7 +171,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * @see java.util.Map#put(Object, Object)
      */
     public void put(K key, V value) {
-        throw new UnsupportedOperationException();
+        store.put(key, value);
     }
 
     /**
