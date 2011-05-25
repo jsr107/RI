@@ -5,9 +5,9 @@ import com.sun.deploy.cache.CacheEntry;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
-import javax.cache.CacheListener;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatisticsMBean;
+import javax.cache.listeners.CacheEntryListener;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -151,14 +151,14 @@ public class RICache<K,V> implements Cache<K,V> {
     /**
      * Add a listener to the list of cache listeners
      */
-    public void addListener(CacheListener listener) {
+    public void addListener(CacheEntryListener listener) {
         throw new UnsupportedOperationException();
     }
 
     /**
      * Remove a listener from the list of cache listeners
      */
-    public void removeListener(CacheListener listener) {
+    public void removeListener(CacheEntryListener listener) {
         throw new UnsupportedOperationException();
     }
 
