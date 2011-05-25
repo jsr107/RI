@@ -1,5 +1,7 @@
 package javax.cache.implementation;
 
+import com.sun.deploy.cache.CacheEntry;
+
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
@@ -14,7 +16,7 @@ import java.util.concurrent.Future;
 /**
  * RI
  */
-public class RICache implements javax.cache.Cache {
+public class RICache<K,V> implements Cache<K,V> {
 
 
     /**
@@ -31,8 +33,8 @@ public class RICache implements javax.cache.Cache {
      * @throws IllegalStateException      if the cache is not {@link javax.cache.Status#STARTED}
      * @throws javax.cache.CacheException
      */
-    public Object get(Object key) throws CacheException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public V get(Object key) throws CacheException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -55,8 +57,8 @@ public class RICache implements javax.cache.Cache {
      * @param keys The keys whose associated values are to be returned.
      * @return The entries for the specified keys.
      */
-    public Map getAll(Collection keys) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Map<K, V> getAll(Collection<? extends K> keys) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -72,7 +74,7 @@ public class RICache implements javax.cache.Cache {
      * @return <tt>true</tt> if this map contains a mapping for the specified key
      */
     public boolean containsKey(Object key) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -91,13 +93,13 @@ public class RICache implements javax.cache.Cache {
      * method will not distinguish returning a null stored in the cache and not
      * finding the object in the cache. In both cases a null is returned.
      *
-     * @param key
+     * @param key the key
      * @param specificLoader a specific loader to use. If null the default loader is used.
      * @param loaderArgument provision for additional parameters to be passed to the loader
      * @return a Future which can be used to monitor execution
      */
-    public Future load(Object key, CacheLoader specificLoader, Object loaderArgument) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Future load(K key, CacheLoader specificLoader, Object loaderArgument) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -121,21 +123,21 @@ public class RICache implements javax.cache.Cache {
      * If no "arg" value is provided a null will be passed to the loadAll
      * method.
      *
-     * @param keys
+     * @param keys the keys
      * @param specificLoader a specific loader to use. If null the default loader is used.
      * @param loaderArgument provision for additional parameters to be passed to the loader
      * @return a Future which can be used to monitor execution
      */
-    public Future loadAll(Collection keys, CacheLoader specificLoader, Object loaderArgument) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Future loadAll(Collection<? extends K> keys, CacheLoader specificLoader, Object loaderArgument) {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Returns the CacheEntry object associated with the object identified by
      * "key". If the object is not in the cache a null is returned.
      */
-    public Entry getCacheEntry(Object key) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Entry<K,V> getCacheEntry(Object key) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -143,21 +145,21 @@ public class RICache implements javax.cache.Cache {
      * May return null if the cache does not support statistics gathering.
      */
     public CacheStatisticsMBean getCacheStatistics() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Add a listener to the list of cache listeners
      */
     public void addListener(CacheListener listener) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
      * Remove a listener from the list of cache listeners
      */
     public void removeListener(CacheListener listener) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -165,15 +167,15 @@ public class RICache implements javax.cache.Cache {
      *
      * @see java.util.Map#put(Object, Object)
      */
-    public void put(Object key, Object value) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void put(K key, V value) {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @see java.util.Map#putAll(java.util.Map)
      */
-    public void putAll(Map m) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void putAll(Map<? extends K, ? extends V> m) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -181,8 +183,8 @@ public class RICache implements javax.cache.Cache {
      *
      * @see java.util.concurrent.ConcurrentMap#putIfAbsent(Object, Object)
      */
-    public boolean putIfAbsent(Object key, Object value) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public boolean putIfAbsent(K key, V value) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -192,7 +194,7 @@ public class RICache implements javax.cache.Cache {
      * @see java.util.Map#remove(Object)
      */
     public boolean remove(Object key) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -215,29 +217,29 @@ public class RICache implements javax.cache.Cache {
      * @throws NullPointerException          if the specified key or value is null,
      *                                       and this cache does not permit null keys or values (optional)
      */
-    public Object getAndRemove(Object key) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public V getAndRemove(Object key) {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @see java.util.concurrent.ConcurrentMap#replace(Object, Object, Object)
      */
-    public boolean replace(Object key, Object oldValue, Object newValue) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public boolean replace(K key, V oldValue, V newValue) {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @see java.util.concurrent.ConcurrentMap#replace(Object, Object)
      */
-    public boolean replace(Object key, Object value) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public boolean replace(K key, V value) {
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @see java.util.concurrent.ConcurrentMap#replace(Object, Object)
      */
-    public Object getAndReplace(Object key, Object value) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public V getAndReplace(K key, V value) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -248,14 +250,14 @@ public class RICache implements javax.cache.Cache {
      * <p/>
      */
     public void removeAll() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @return the CacheConfiguration, which is immutable
      */
     public CacheConfiguration getConfiguration() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -263,7 +265,7 @@ public class RICache implements javax.cache.Cache {
      *
      * @return an Iterator.
      */
-    public Iterator iterator() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Iterator<Entry<K, V>> iterator() {
+        throw new UnsupportedOperationException();
     }
 }
