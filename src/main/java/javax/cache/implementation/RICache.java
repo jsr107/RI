@@ -15,9 +15,10 @@ import java.util.concurrent.Future;
  */
 public class RICache<K,V> implements Cache<K,V> {
     private final ConcurrentHashMap<K,V> store = new ConcurrentHashMap<K,V>();
-    private CacheConfiguration configuration;
+    private final CacheConfiguration configuration;
 
     private RICache(CacheConfiguration configuration) {
+        assert configuration != null;
         this.configuration = new UnmodifiableCacheConfiguration(configuration);
     }
 
@@ -71,14 +72,16 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public Entry<K,V> getCacheEntry(Object key) {
-        throw new UnsupportedOperationException();
+        V value = store.get(key);
+        return value == null ? null : new RIEntry<K,V>((K) key, value);
     }
 
     /**
      * {@inheritDoc}
      */
     public CacheStatisticsMBean getCacheStatistics() {
-        throw new UnsupportedOperationException();
+        //TODO: this satisfies API but maybe we want a real impl?
+        return null;
     }
 
     /**
@@ -180,7 +183,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public void removeAll() {
-        throw new UnsupportedOperationException();
+        store.clear();
     }
 
     /**
@@ -226,6 +229,44 @@ public class RICache<K,V> implements Cache<K,V> {
 
         public void setStoreByValue(boolean storeByValue) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    private static class RIEntry<K,V> implements Entry<K,V> {
+        private final K key;
+        private final V value;
+
+        private RIEntry(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RIEntry riEntry = (RIEntry) o;
+
+            if (key != null ? !key.equals(riEntry.key) : riEntry.key != null) return false;
+            if (value != null ? !value.equals(riEntry.value) : riEntry.value != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = key != null ? key.hashCode() : 0;
+            result = 31 * result + (value != null ? value.hashCode() : 0);
+            return result;
         }
     }
 
