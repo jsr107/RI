@@ -171,6 +171,12 @@ public class RICache<K,V> implements Cache<K,V> {
      * @see java.util.Map#put(Object, Object)
      */
     public void put(K key, V value) {
+        if (key == null) {
+            throw new IllegalArgumentException("null key");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("null value");
+        }
         store.put(key, value);
     }
 
@@ -197,7 +203,10 @@ public class RICache<K,V> implements Cache<K,V> {
      * @see java.util.Map#remove(Object)
      */
     public boolean remove(Object key) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new IllegalArgumentException("null key");
+        }
+        return (store.remove(key) == null);
     }
 
     /**
