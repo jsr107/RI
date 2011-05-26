@@ -206,7 +206,7 @@ public class RICache<K,V> implements Cache<K,V> {
         if (key == null) {
             throw new IllegalArgumentException("null key");
         }
-        return (store.remove(key) == null);
+        return (store.remove(key) != null);
     }
 
     /**
