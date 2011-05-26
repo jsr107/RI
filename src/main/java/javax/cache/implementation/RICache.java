@@ -6,10 +6,7 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.listeners.CacheEntryListener;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
@@ -18,6 +15,11 @@ import java.util.concurrent.Future;
  */
 public class RICache<K,V> implements Cache<K,V> {
     private final ConcurrentHashMap<K,V> store = new ConcurrentHashMap<K,V>();
+    private CacheConfiguration configuration;
+
+    private RICache(CacheConfiguration configuration) {
+        this.configuration = new UnmodifiableCacheConfiguration(configuration);
+    }
 
     /**
      * {@inheritDoc}
@@ -185,7 +187,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public CacheConfiguration getConfiguration() {
-        throw new UnsupportedOperationException();
+        return configuration;
     }
 
     /**
@@ -193,5 +195,53 @@ public class RICache<K,V> implements Cache<K,V> {
      */
     public Iterator<Entry<K, V>> iterator() {
         throw new UnsupportedOperationException();
+    }
+
+    private static class UnmodifiableCacheConfiguration implements CacheConfiguration {
+        private final CacheConfiguration config;
+
+        UnmodifiableCacheConfiguration(CacheConfiguration config) {
+            this.config = config;
+        }
+
+        public boolean isReadThrough() {
+            return config.isReadThrough();
+        }
+
+        public void setReadThrough(boolean readThrough) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isWriteThrough() {
+            return config.isWriteThrough();
+        }
+
+        public void setWriteThrough(boolean writeThrough) {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean isStoreByValue() {
+            return config.isStoreByValue();
+        }
+
+        public void setStoreByValue(boolean storeByValue) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public static class Builder<K,V> {
+        private CacheConfiguration configuration;
+
+        public RICache<K,V> build() {
+            if (configuration == null) {
+                configuration = new RICacheConfiguration.Builder().build();
+            }
+            return new RICache<K,V>(configuration);
+        }
+
+        public Builder<K,V> setCacheConfiguration(CacheConfiguration configuration) {
+            this.configuration = configuration;
+            return this;
+        }
     }
 }
