@@ -15,6 +15,21 @@
     </properties>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>jsr107-api</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
     <build>
         <plugins>
 
@@ -55,20 +70,21 @@
                 </executions>
             </plugin>
         </plugins>
+
+
     </build>
 
+    <repositories>
+        <repository>
+            <id>cloudbees-snapshots</id>
+            <url>https://repository-jsr107.forge.cloudbees.com/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>javax.cache</groupId>
-            <artifactId>jsr107-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>
