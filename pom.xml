@@ -74,6 +74,7 @@
 
     </build>
 
+    <!--Required for CloudBees CI. Local builds will still work if you mvn install jsr107api first-->
     <repositories>
         <repository>
             <id>cloudbees-snapshots</id>
