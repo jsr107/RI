@@ -7,19 +7,22 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.listeners.CacheEntryListener;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /**
  * RI
  */
 public class RICache<K,V> implements Cache<K,V> {
-    private final ConcurrentHashMap<K,V> store = new ConcurrentHashMap<K,V>();
+    private final HashMap<K,V> store = new HashMap<K,V>();
     private final CacheConfiguration configuration;
+    private final boolean ignoreNullKeyOnRead;
+    private final boolean allowNullValue;
 
-    private RICache(CacheConfiguration configuration) {
+    private RICache(CacheConfiguration configuration, boolean ignoreNullKeyOnRead, boolean allowNullValue) {
         assert configuration != null;
         this.configuration = new UnmodifiableCacheConfiguration(configuration);
+        this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
+        this.allowNullValue = allowNullValue;
     }
 
     /**
@@ -27,9 +30,14 @@ public class RICache<K,V> implements Cache<K,V> {
      */
     public V get(Object key) throws CacheException {
         if (key == null) {
-            throw new NullPointerException("key");
+            if (ignoreNullKeyOnRead) {
+                return null;
+            } else {
+                throw new NullPointerException("key");
+            }
+        } else {
+            return store.get(key);
         }
-        return store.get(key);
     }
 
     /**
@@ -39,7 +47,13 @@ public class RICache<K,V> implements Cache<K,V> {
          // will throw NPE if keys=null
         HashMap<K,V> map = new HashMap<K,V>(keys.size());
         for (K key : keys) {
-            map.put(key, store.get(key));
+            if (key == null) {
+                if (!ignoreNullKeyOnRead) {
+                    throw new NullPointerException();
+                }
+            } else {
+                map.put(key, store.get(key));
+            }
         }
         return map;
     }
@@ -49,9 +63,14 @@ public class RICache<K,V> implements Cache<K,V> {
      */
     public boolean containsKey(Object key) {
         if (key == null) {
-            throw new NullPointerException("key");
+            if (ignoreNullKeyOnRead) {
+                return false;
+            } else {
+                throw new NullPointerException("key");
+            }
+        } else {
+            return store.containsKey(key);
         }
-        return store.containsKey(key);
     }
 
     /**
@@ -66,14 +85,6 @@ public class RICache<K,V> implements Cache<K,V> {
      */
     public Future loadAll(Collection<? extends K> keys, CacheLoader specificLoader, Object loaderArgument) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Entry<K,V> getCacheEntry(Object key) {
-        V value = store.get(key);
-        return value == null ? null : new RIEntry<K,V>((K) key, value);
     }
 
     /**
@@ -105,33 +116,53 @@ public class RICache<K,V> implements Cache<K,V> {
         if (key == null) {
             throw new NullPointerException("key");
         }
-        if (value == null) {
+        if (!allowNullValue && value == null) {
             throw new NullPointerException("value");
+        } else {
+            store.put(key, value);
         }
-        store.put(key, value);
     }
 
     /**
      * {@inheritDoc}
      */
-    public void putAll(Map<? extends K, ? extends V> m) {
-        if (m == null) {
+    public void putAll(Map<? extends K, ? extends V> map) {
+        if (map == null) {
             throw new NullPointerException();
         }
-        if (m.containsKey(null)) {
-            throw new NullPointerException();
+        if (!ignoreNullKeyOnRead) {
+            if (map.containsKey(null)) {
+                throw new NullPointerException("key");
+            }
         }
-        if (m.containsValue(null)) {
-            throw new NullPointerException();
+        if (!allowNullValue) {
+            if (map.containsValue(null)) {
+                throw new NullPointerException("key");
+            }
         }
-        store.putAll(m);
+        for (Map.Entry<? extends K, ? extends V> entry: map.entrySet()) {
+            if (entry.getKey() != null) {
+                store.put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean putIfAbsent(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (key == null && !ignoreNullKeyOnRead) {
+            throw new NullPointerException("key");
+        }
+        if (value == null && !allowNullValue) {
+            throw new NullPointerException("value");
+        }
+        if (key != null && !store.containsKey(key)) {
+            store.put(key, value);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -139,9 +170,14 @@ public class RICache<K,V> implements Cache<K,V> {
      */
     public boolean remove(Object key) {
         if (key == null) {
-            throw new NullPointerException("key");
+            if (ignoreNullKeyOnRead) {
+                return false;
+            } else {
+                throw new NullPointerException();
+            }
+        } else {
+            return (store.remove(key) != null);
         }
-        return (store.remove(key) != null);
     }
 
     /**
@@ -155,28 +191,65 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public boolean replace(K key, V oldValue, V newValue) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+        if (!allowNullValue && (oldValue == null || newValue == null)) {
+            throw new NullPointerException("value");
+        }
+        if (store.containsKey(key)) {
+            V old = store.get(key);
+            boolean replace = (old == null) ? (oldValue == null) : old.equals(oldValue);
+            if (replace) {
+                store.put(key, newValue);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean replace(K key, V value) {
-        throw new UnsupportedOperationException();
+        return getAndReplace(key, value) != null;
     }
 
     /**
      * {@inheritDoc}
      */
     public V getAndReplace(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+        if (!allowNullValue && value == null) {
+            throw new NullPointerException("value");
+        }
+        if (store.containsKey(key)) {
+            V old = store.get(key);
+            store.put(key, value);
+            return old;
+        } else {
+            return null;
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     public void removeAll(Collection<? extends K> keys) {
-        throw new UnsupportedOperationException();
+        if (keys == null) {
+            throw new NullPointerException("keys");
+        }
+        if (!ignoreNullKeyOnRead && keys.contains(null)) {
+            throw new NullPointerException();
+        }
+        for (K key : keys) {
+            store.remove(key);
+        }
     }
 
     /**
@@ -232,56 +305,30 @@ public class RICache<K,V> implements Cache<K,V> {
         }
     }
 
-    private static class RIEntry<K,V> implements Entry<K,V> {
-        private final K key;
-        private final V value;
-
-        private RIEntry(K key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public K getKey() {
-            return key;
-        }
-
-        public V getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            RIEntry riEntry = (RIEntry) o;
-
-            if (key != null ? !key.equals(riEntry.key) : riEntry.key != null) return false;
-            if (value != null ? !value.equals(riEntry.value) : riEntry.value != null) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = key != null ? key.hashCode() : 0;
-            result = 31 * result + (value != null ? value.hashCode() : 0);
-            return result;
-        }
-    }
-
     public static class Builder<K,V> {
         private CacheConfiguration configuration;
+        private boolean ignoreNullKeyOnRead = true;
+        private boolean allowNullValue = true;
 
         public RICache<K,V> build() {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K,V>(configuration);
+            return new RICache<K,V>(configuration, ignoreNullKeyOnRead, allowNullValue);
         }
 
         public Builder<K,V> setCacheConfiguration(CacheConfiguration configuration) {
             this.configuration = configuration;
+            return this;
+        }
+
+        public Builder<K,V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
+            this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
+            return this;
+        }
+
+        public Builder<K,V> setAllowNullValue(boolean allowNullValue) {
+            this.allowNullValue = allowNullValue;
             return this;
         }
     }
