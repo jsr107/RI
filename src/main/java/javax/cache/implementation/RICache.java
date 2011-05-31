@@ -1,3 +1,21 @@
+/**
+ *  Copyright 2011 Terracotta, Inc.
+ *  Copyright 2011 Oracle America Incorporated
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+
 package javax.cache.implementation;
 
 import javax.cache.Cache;
@@ -5,20 +23,42 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatisticsMBean;
-import javax.cache.listeners.CacheEntryListener;
-import java.util.*;
+import javax.cache.Status;
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.NotificationScope;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 
 /**
- * RI
+ * The reference implementation for JSR107.
+ * <p/>
+ * This is meant to act as a proof of concept for the API. It is not threadsafe or high performance. It therefore is
+ * not suitable for use in production. Please use a production implementation of the API.
+ * <p/>
+ * This implementation implements all optional parts of JSR107 except for the Transactions chapter. Transactions support
+ * simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
+ *
+ * @param <K> the type of keys maintained by this map
+ * @param <V> the type of mapped values*
+ * @author Greg Luck
+ * @author ycosmado
  */
-public class RICache<K,V> implements Cache<K,V> {
-    private final HashMap<K,V> store = new HashMap<K,V>();
+public final class RICache<K, V> implements Cache<K, V> {
+    private final HashMap<K, V> store = new HashMap<K, V>();
     private final CacheConfiguration configuration;
     private final boolean ignoreNullKeyOnRead;
     private final boolean allowNullValue;
+    private volatile Status status;
+    private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
+
 
     private RICache(CacheConfiguration configuration, boolean ignoreNullKeyOnRead, boolean allowNullValue) {
+        status = Status.UNITIALISED;
         assert configuration != null;
         this.configuration = new UnmodifiableCacheConfiguration(configuration);
         this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
@@ -29,6 +69,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public V get(Object key) throws CacheException {
+        checkStatusStarted();
         if (key == null) {
             if (ignoreNullKeyOnRead) {
                 return null;
@@ -44,8 +85,9 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public Map<K, V> getAll(Collection<? extends K> keys) {
-         // will throw NPE if keys=null
-        HashMap<K,V> map = new HashMap<K,V>(keys.size());
+        checkStatusStarted();
+        // will throw NPE if keys=null
+        HashMap<K, V> map = new HashMap<K, V>(keys.size());
         for (K key : keys) {
             if (key == null) {
                 if (!ignoreNullKeyOnRead) {
@@ -62,6 +104,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public boolean containsKey(Object key) {
+        checkStatusStarted();
         if (key == null) {
             if (ignoreNullKeyOnRead) {
                 return false;
@@ -76,7 +119,8 @@ public class RICache<K,V> implements Cache<K,V> {
     /**
      * {@inheritDoc}
      */
-    public Future load(K key, CacheLoader<K,V> specificLoader, Object loaderArgument) {
+    public Future load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
+        checkStatusStarted();
         throw new UnsupportedOperationException();
     }
 
@@ -84,6 +128,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public Future loadAll(Collection<? extends K> keys, CacheLoader specificLoader, Object loaderArgument) {
+        checkStatusStarted();
         throw new UnsupportedOperationException();
     }
 
@@ -91,6 +136,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public CacheStatisticsMBean getCacheStatistics() {
+        checkStatusStarted();
         //TODO: this satisfies API but maybe we want a real impl?
         return null;
     }
@@ -113,6 +159,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public void put(K key, V value) {
+        checkStatusStarted();
         if (key == null) {
             throw new NullPointerException("key");
         }
@@ -127,6 +174,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public void putAll(Map<? extends K, ? extends V> map) {
+        checkStatusStarted();
         if (map == null) {
             throw new NullPointerException();
         }
@@ -140,7 +188,7 @@ public class RICache<K,V> implements Cache<K,V> {
                 throw new NullPointerException("key");
             }
         }
-        for (Map.Entry<? extends K, ? extends V> entry: map.entrySet()) {
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             if (entry.getKey() != null) {
                 store.put(entry.getKey(), entry.getValue());
             }
@@ -151,6 +199,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public boolean putIfAbsent(K key, V value) {
+        checkStatusStarted();
         if (key == null && !ignoreNullKeyOnRead) {
             throw new NullPointerException("key");
         }
@@ -169,6 +218,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public boolean remove(Object key) {
+        checkStatusStarted();
         if (key == null) {
             if (ignoreNullKeyOnRead) {
                 return false;
@@ -184,6 +234,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public V getAndRemove(Object key) {
+        checkStatusStarted();
         throw new UnsupportedOperationException();
     }
 
@@ -191,6 +242,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public boolean replace(K key, V oldValue, V newValue) {
+        checkStatusStarted();
         if (key == null) {
             throw new NullPointerException("key");
         }
@@ -215,6 +267,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public boolean replace(K key, V value) {
+        checkStatusStarted();
         return getAndReplace(key, value) != null;
     }
 
@@ -222,6 +275,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public V getAndReplace(K key, V value) {
+        checkStatusStarted();
         if (key == null) {
             throw new NullPointerException("key");
         }
@@ -241,6 +295,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public void removeAll(Collection<? extends K> keys) {
+        checkStatusStarted();
         if (keys == null) {
             throw new NullPointerException("keys");
         }
@@ -256,6 +311,7 @@ public class RICache<K,V> implements Cache<K,V> {
      * {@inheritDoc}
      */
     public void removeAll() {
+        checkStatusStarted();
         store.clear();
     }
 
@@ -267,12 +323,63 @@ public class RICache<K,V> implements Cache<K,V> {
     }
 
     /**
+     * @inheritdoc
+     */
+    public boolean registerCacheEntryListener(CacheEntryListener cacheEntryListener, NotificationScope scope) {
+
+        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope);
+        return cacheEntryListeners.add(scopedListener);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public boolean unregisterCacheEntryListener(CacheEntryListener cacheEntryListener) {
+        //Only cacheEntryListener is checked for equality
+        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, null);
+        return cacheEntryListeners.remove(scopedListener);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public Iterator<Entry<K, V>> iterator() {
+        checkStatusStarted();
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @inheritdoc
+     */
+    public void initialise() throws CacheException {
+        status = Status.STARTED;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public void stopAndDispose() throws CacheException {
+        status = Status.STOPPING;
+        store.clear();
+        status = Status.STOPPED;
+    }
+
+    private void checkStatusStarted() {
+        if (!status.equals(Status.STARTED))
+            throw new IllegalStateException("The cache status is not STARTED");
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
+     * An unmodifiable version of CacheConfiguration. This cache does not support dynamoc modification
+     * of configuration.
+     */
     private static class UnmodifiableCacheConfiguration implements CacheConfiguration {
         private final CacheConfiguration config;
 
@@ -280,56 +387,175 @@ public class RICache<K,V> implements Cache<K,V> {
             this.config = config;
         }
 
+        /**
+         *
+         * @return
+         */
         public boolean isReadThrough() {
             return config.isReadThrough();
         }
 
+        /**
+         *
+         * @param readThrough
+         */
         public void setReadThrough(boolean readThrough) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         *
+         * @return
+         */
         public boolean isWriteThrough() {
             return config.isWriteThrough();
         }
 
+        /**
+         *
+         * @param writeThrough
+         */
         public void setWriteThrough(boolean writeThrough) {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         *
+         * @return
+         */
         public boolean isStoreByValue() {
             return config.isStoreByValue();
         }
 
+        /**
+         *
+         * @param storeByValue
+         */
         public void setStoreByValue(boolean storeByValue) {
             throw new UnsupportedOperationException();
         }
     }
 
-    public static class Builder<K,V> {
+    /**
+     * A Builder for RICache
+     * @param <K>
+     * @param <V>
+     */
+    public static class Builder<K, V> {
         private CacheConfiguration configuration;
         private boolean ignoreNullKeyOnRead = true;
         private boolean allowNullValue = true;
 
-        public RICache<K,V> build() {
+        /**
+         * Builds the cache
+         * @return a constructed cache.
+         */
+        public RICache<K, V> build() {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K,V>(configuration, ignoreNullKeyOnRead, allowNullValue);
+            return new RICache<K, V>(configuration, ignoreNullKeyOnRead, allowNullValue);
         }
 
-        public Builder<K,V> setCacheConfiguration(CacheConfiguration configuration) {
+        /**
+         *
+         * @param configuration
+         * @return
+         */
+        public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
 
-        public Builder<K,V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
+        /**
+         *
+         * @param ignoreNullKeyOnRead
+         * @return
+         */
+        public Builder<K, V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
             this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
             return this;
         }
 
-        public Builder<K,V> setAllowNullValue(boolean allowNullValue) {
+        /**
+         *
+         * @param allowNullValue
+         * @return
+         */
+        public Builder<K, V> setAllowNullValue(boolean allowNullValue) {
             this.allowNullValue = allowNullValue;
             return this;
         }
     }
+
+
+    /**
+     * Combine a Listener and its NotificationScope.  Equality and hashcode are based purely on the listener.
+     * This implies that the same listener cannot be added to the set of registered listeners more than
+     * once with different notification scopes.
+     *
+     * @author Greg Luck
+     */
+    private static final class ScopedListener {
+        private final CacheEntryListener listener;
+        private final NotificationScope scope;
+
+        private ScopedListener(CacheEntryListener listener, NotificationScope scope) {
+            this.listener = listener;
+            this.scope = scope;
+        }
+
+        private CacheEntryListener getListener() {
+            return listener;
+        }
+
+        private NotificationScope getScope() {
+            return scope;
+        }
+
+        /**
+         * Hash code based on listener
+         *
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return listener.hashCode();
+        }
+
+        /**
+         * Equals based on listener (NOT based on scope) - can't have same listener with two different scopes
+         *
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            ScopedListener other = (ScopedListener) obj;
+            if (listener == null) {
+                if (other.listener != null) {
+                    return false;
+                }
+            } else if (!listener.equals(other.listener)) {
+                return false;
+            }
+            return true;
+        }
+
+
+        @Override
+        public String toString() {
+            return listener.toString();
+        }
+    }
+
+
 }
