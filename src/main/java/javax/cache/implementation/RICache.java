@@ -77,6 +77,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("key");
             }
         } else {
+            //noinspection SuspiciousMethodCalls
             return store.get(key);
         }
     }
@@ -112,6 +113,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("key");
             }
         } else {
+            //noinspection SuspiciousMethodCalls
             return store.containsKey(key);
         }
     }
@@ -139,20 +141,6 @@ public final class RICache<K, V> implements Cache<K, V> {
         checkStatusStarted();
         //TODO: this satisfies API but maybe we want a real impl?
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void addListener(CacheEntryListener listener) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void removeListener(CacheEntryListener listener) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -226,6 +214,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException();
             }
         } else {
+            //noinspection SuspiciousMethodCalls
             return (store.remove(key) != null);
         }
     }
@@ -323,7 +312,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public boolean registerCacheEntryListener(CacheEntryListener cacheEntryListener, NotificationScope scope) {
 
@@ -332,7 +321,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public boolean unregisterCacheEntryListener(CacheEntryListener cacheEntryListener) {
         //Only cacheEntryListener is checked for equality
@@ -349,14 +338,14 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public void initialise() throws CacheException {
         status = Status.STARTED;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public void stopAndDispose() throws CacheException {
         status = Status.STOPPING;
@@ -370,7 +359,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public Status getStatus() {
         return status;
@@ -379,6 +368,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * An unmodifiable version of CacheConfiguration. This cache does not support dynamoc modification
      * of configuration.
+     * {@inheritDoc}
      * @author Yannis Cosmadopoulos
      */
     private static class UnmodifiableCacheConfiguration implements CacheConfiguration {
@@ -389,48 +379,42 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         /**
-         *
-         * @return
+         * {@inheritDoc}
          */
         public boolean isReadThrough() {
             return config.isReadThrough();
         }
 
         /**
-         *
-         * @param readThrough
+         * {@inheritDoc}
          */
         public void setReadThrough(boolean readThrough) {
             throw new UnsupportedOperationException();
         }
 
         /**
-         *
-         * @return
+         * {@inheritDoc}
          */
         public boolean isWriteThrough() {
             return config.isWriteThrough();
         }
 
         /**
-         *
-         * @param writeThrough
+         * {@inheritDoc}
          */
         public void setWriteThrough(boolean writeThrough) {
             throw new UnsupportedOperationException();
         }
 
         /**
-         *
-         * @return
+         * {@inheritDoc}
          */
         public boolean isStoreByValue() {
             return config.isStoreByValue();
         }
 
         /**
-         *
-         * @param storeByValue
+         * {@inheritDoc}
          */
         public void setStoreByValue(boolean storeByValue) {
             throw new UnsupportedOperationException();
@@ -461,8 +445,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         /**
          *
-         * @param configuration
-         * @return
+         * @param configuration the configuration
+         * @return the builder
          */
         public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
             this.configuration = configuration;
@@ -471,8 +455,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         /**
          *
-         * @param ignoreNullKeyOnRead
-         * @return
+         * @param ignoreNullKeyOnRead the value of the flag
+         * @return the builder
          */
         public Builder<K, V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
             this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
@@ -481,8 +465,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         /**
          *
-         * @param allowNullValue
-         * @return
+         * @param allowNullValue the value of the flag
+         * @return the builder
          */
         public Builder<K, V> setAllowNullValue(boolean allowNullValue) {
             this.allowNullValue = allowNullValue;
