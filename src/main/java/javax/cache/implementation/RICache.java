@@ -51,16 +51,18 @@ import java.util.concurrent.Future;
 public final class RICache<K, V> implements Cache<K, V> {
     private final HashMap<K, V> store = new HashMap<K, V>();
     private final CacheConfiguration configuration;
+    private final CacheLoader cacheLoader;
     private final boolean ignoreNullKeyOnRead;
     private final boolean allowNullValue;
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
 
 
-    private RICache(CacheConfiguration configuration, boolean ignoreNullKeyOnRead, boolean allowNullValue) {
+    private RICache(CacheConfiguration configuration, CacheLoader cacheLoader, boolean ignoreNullKeyOnRead, boolean allowNullValue) {
         status = Status.UNITIALISED;
         assert configuration != null;
         this.configuration = new UnmodifiableCacheConfiguration(configuration);
+        this.cacheLoader = cacheLoader;
         this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
         this.allowNullValue = allowNullValue;
     }
@@ -123,6 +125,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Future load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
+        if (cacheLoader != null) {
+            //
+        }
         throw new UnsupportedOperationException();
     }
 
@@ -422,60 +427,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * A Builder for RICache
-     * @param <K>
-     * @param <V>
-     * @author Yannis Cosmadopoulos
-     */
-    public static class Builder<K, V> {
-        private CacheConfiguration configuration;
-        private boolean ignoreNullKeyOnRead = true;
-        private boolean allowNullValue = true;
-
-        /**
-         * Builds the cache
-         * @return a constructed cache.
-         */
-        public RICache<K, V> build() {
-            if (configuration == null) {
-                configuration = new RICacheConfiguration.Builder().build();
-            }
-            return new RICache<K, V>(configuration, ignoreNullKeyOnRead, allowNullValue);
-        }
-
-        /**
-         *
-         * @param configuration the configuration
-         * @return the builder
-         */
-        public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
-            this.configuration = configuration;
-            return this;
-        }
-
-        /**
-         *
-         * @param ignoreNullKeyOnRead the value of the flag
-         * @return the builder
-         */
-        public Builder<K, V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
-            this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
-            return this;
-        }
-
-        /**
-         *
-         * @param allowNullValue the value of the flag
-         * @return the builder
-         */
-        public Builder<K, V> setAllowNullValue(boolean allowNullValue) {
-            this.allowNullValue = allowNullValue;
-            return this;
-        }
-    }
-
-
-    /**
      * Combine a Listener and its NotificationScope.  Equality and hashcode are based purely on the listener.
      * This implies that the same listener cannot be added to the set of registered listeners more than
      * once with different notification scopes.
@@ -619,6 +570,70 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         public void remove() {
             mapIterator.remove();
+        }
+    }
+
+    /**
+     * A Builder for RICache
+     * @param <K>
+     * @param <V>
+     * @author Yannis Cosmadopoulos
+     */
+    public static class Builder<K, V> {
+        private CacheConfiguration configuration;
+        private CacheLoader cacheLoader;
+        private boolean ignoreNullKeyOnRead = true;
+        private boolean allowNullValue = true;
+
+        /**
+         * Builds the cache
+         * @return a constructed cache.
+         */
+        public RICache<K, V> build() {
+            if (configuration == null) {
+                configuration = new RICacheConfiguration.Builder().build();
+            }
+            return new RICache<K, V>(configuration, cacheLoader, ignoreNullKeyOnRead, allowNullValue);
+        }
+
+        /**
+         *
+         * @param configuration the configuration
+         * @return the builder
+         */
+        public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
+            this.configuration = configuration;
+            return this;
+        }
+
+        /**
+         *
+         * @param cacheLoader the CacheLoader
+         * @return the builder
+         */
+        public Builder<K, V> setCacheLoader(CacheLoader cacheLoader) {
+            this.cacheLoader = cacheLoader;
+            return this;
+        }
+
+        /**
+         *
+         * @param ignoreNullKeyOnRead the value of the flag
+         * @return the builder
+         */
+        public Builder<K, V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
+            this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
+            return this;
+        }
+
+        /**
+         *
+         * @param allowNullValue the value of the flag
+         * @return the builder
+         */
+        public Builder<K, V> setAllowNullValue(boolean allowNullValue) {
+            this.allowNullValue = allowNullValue;
+            return this;
         }
     }
 }
