@@ -207,16 +207,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean remove(Object key) {
         checkStatusStarted();
-        if (key == null) {
-            if (ignoreNullKeyOnRead) {
-                return false;
-            } else {
-                throw new NullPointerException();
-            }
-        } else {
-            //noinspection SuspiciousMethodCalls
-            return (store.remove(key) != null);
-        }
+        return getAndRemove(key) != null;
     }
 
     /**
@@ -224,7 +215,16 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndRemove(Object key) {
         checkStatusStarted();
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            if (ignoreNullKeyOnRead) {
+                return null;
+            } else {
+                throw new NullPointerException();
+            }
+        } else {
+            //noinspection SuspiciousMethodCalls
+            return store.remove(key);
+        }
     }
 
     /**
