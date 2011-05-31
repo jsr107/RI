@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Greg Luck
- * @author ycosmado
+ * @author Yannis Cosmadopoulos
  */
 public final class RICache<K, V> implements Cache<K, V> {
     private final HashMap<K, V> store = new HashMap<K, V>();
@@ -345,7 +345,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Iterator<Entry<K, V>> iterator() {
         checkStatusStarted();
-        throw new UnsupportedOperationException();
+        return new RIEntryIterator<K, V>(store.entrySet().iterator());
     }
 
     /**
@@ -379,6 +379,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * An unmodifiable version of CacheConfiguration. This cache does not support dynamoc modification
      * of configuration.
+     * @author Yannis Cosmadopoulos
      */
     private static class UnmodifiableCacheConfiguration implements CacheConfiguration {
         private final CacheConfiguration config;
@@ -440,6 +441,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * A Builder for RICache
      * @param <K>
      * @param <V>
+     * @author Yannis Cosmadopoulos
      */
     public static class Builder<K, V> {
         private CacheConfiguration configuration;
@@ -557,5 +559,82 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * @author Yannis Cosmadopoulos
+     */
+    private static class RIEntry<K, V> implements Entry<K, V> {
+        private final K key;
+        private final V value;
 
+        public RIEntry(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public K getKey() {
+            return key;
+        }
+
+        public V getValue() {
+            return value;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RIEntry e2 = (RIEntry) o;
+
+            return  (this.getKey() == null ? e2.getKey() == null : this.getKey().equals(e2.getKey())) &&
+                    (this.getValue() == null ? e2.getValue() == null : this.getValue().equals(e2.getValue()));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int hashCode() {
+            return (getKey() == null ? 0 :
+                    getKey().hashCode()) ^ (getValue() == null ? 0 : getValue().hashCode());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * @author Yannis Cosmadopoulos
+     */
+    private static final class RIEntryIterator<K, V> implements Iterator<Entry<K, V>> {
+        private final Iterator<Map.Entry<K, V>> mapIterator;
+
+        private RIEntryIterator(Iterator<Map.Entry<K, V>> mapIterator) {
+            this.mapIterator = mapIterator;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public boolean hasNext() {
+            return mapIterator.hasNext();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public Entry<K, V> next() {
+            Map.Entry<K, V> mapEntry = mapIterator.next();
+            return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue());
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        public void remove() {
+            mapIterator.remove();
+        }
+    }
 }

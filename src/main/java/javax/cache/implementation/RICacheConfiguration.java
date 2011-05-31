@@ -21,7 +21,7 @@ package javax.cache.implementation;
 import javax.cache.CacheConfiguration;
 
 /**
- * @author ycosmado
+ * @author Yannis Cosmadopoulos
  * @since 1.0
  */
 public final class RICacheConfiguration implements CacheConfiguration {
@@ -80,6 +80,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
 
     /**
      * Builds the config
+     * @author Yannis Cosmadopoulos
      */
     public static class Builder {
         private boolean readThrough;
