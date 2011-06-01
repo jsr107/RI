@@ -26,6 +26,7 @@ import javax.cache.CacheStatisticsMBean;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -96,7 +97,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      *        If false NPE is thrown if putters are invoked with null value.
      *        TODO: once design is finalized delete this.
      */
-    private RICache(CacheConfiguration configuration, CacheLoader cacheLoader,
+    private RICache(CacheConfiguration configuration, CacheLoader<K, V> cacheLoader,
                     boolean ignoreNullKeyOnRead, boolean allowNullValue) {
         status = Status.UNITIALISED;
         assert configuration != null;
@@ -164,7 +165,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Future<V> load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
-        CacheLoader<K, V> loader = specificLoader == null ? cacheLoader : specificLoader;
+        CacheLoader<K, V> loader = getCacheLoader(specificLoader);
         if (loader == null) {
             return null;
         }
@@ -178,7 +179,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (store.containsKey(key)) {
             return null;
         }
-        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(loader, key, loaderArgument));
+        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, loader, key, loaderArgument));
         executorService.submit(task);
         return task;
     }
@@ -188,9 +189,25 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Future<Map<K, V>> loadAll(Collection<? extends K> keys, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
-        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(specificLoader, keys, loaderArgument));
+        if (keys == null) {
+            throw new NullPointerException("keys");
+        }
+        CacheLoader<K, V> loader = getCacheLoader(specificLoader);
+        if (loader == null) {
+            return null;
+        }
+        if (keys.contains(null)) {
+            if (!ignoreNullKeyOnRead) {
+                throw new NullPointerException("key");
+            }
+        }
+        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, specificLoader, keys, loaderArgument));
         executorService.submit(task);
         return task;
+    }
+
+    private CacheLoader<K, V> getCacheLoader(CacheLoader<K, V> specificLoader) {
+        return specificLoader == null ? cacheLoader : specificLoader;
     }
 
     /**
@@ -232,7 +249,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
         if (!allowNullValue) {
             if (map.containsValue(null)) {
-                throw new NullPointerException("key");
+                throw new NullPointerException("value");
             }
         }
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
@@ -637,20 +654,25 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     private static class RICacheLoaderLoadCallable<K, V> implements Callable<V> {
+        private final RICache<K, V> cache;
         private final CacheLoader<K, V> cacheLoader;
         private final K key;
         private final Object arg;
 
-        RICacheLoaderLoadCallable(CacheLoader<K, V> cacheLoader, K key, Object arg) {
+        RICacheLoaderLoadCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, K key, Object arg) {
+            this.cache = cache;
             this.cacheLoader = cacheLoader;
             this.key = key;
             this.arg = arg;
         }
 
         public V call() throws Exception {
-            return cacheLoader.load(key, arg);
+            V value = cacheLoader.load(key, arg);
+            cache.store.put(key, value);
+            return value;
         }
     }
+
     /**
      * Callable used for cache loader.
      *
@@ -659,18 +681,30 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     private static class RICacheLoaderLoadAllCallable<K, V> implements Callable<Map<K, V>> {
+        private final RICache<K, V> cache;
         private final CacheLoader<K, V> cacheLoader;
         private final Collection<? extends K> keys;
         private final Object arg;
 
-        RICacheLoaderLoadAllCallable(CacheLoader<K, V> cacheLoader, Collection<? extends K> keys, Object arg) {
+        RICacheLoaderLoadAllCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, Collection<? extends K> keys, Object arg) {
+            this.cache = cache;
             this.cacheLoader = cacheLoader;
             this.keys = keys;
             this.arg = arg;
         }
 
         public Map<K, V> call() throws Exception {
-            return cacheLoader.loadAll(keys, arg);
+            ArrayList<K> keysNotInStore = new ArrayList<K>();
+            for (K key : keys) {
+                if (key == null) {
+                    assert cache.ignoreNullKeyOnRead;
+                } else if (!cache.store.containsKey(key)) {
+                    keysNotInStore.add(key);
+                }
+            }
+            Map<K, V> value = cacheLoader.loadAll(keysNotInStore, arg);
+            cache.putAll(value);
+            return value;
         }
     }
 
@@ -682,7 +716,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public static class Builder<K, V> {
         private CacheConfiguration configuration;
-        private CacheLoader cacheLoader;
+        private CacheLoader<K, V> cacheLoader;
         //TODO: when we finalize on whether null key on get throws exception, delete this
         private boolean ignoreNullKeyOnRead = DEFAULT_IGNORE_NULL_KEY_ON_READ;
         //TODO: when we finalize on whether null values are allowed, delete this
@@ -714,7 +748,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param cacheLoader the CacheLoader
          * @return the builder
          */
-        public Builder<K, V> setCacheLoader(CacheLoader cacheLoader) {
+        public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             this.cacheLoader = cacheLoader;
             return this;
         }
