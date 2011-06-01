@@ -31,8 +31,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * The reference implementation for JSR107.
@@ -43,20 +47,30 @@ import java.util.concurrent.Future;
  * This implementation implements all optional parts of JSR107 except for the Transactions chapter. Transactions support
  * simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
  *
+ * Variable {@link #ignoreNullKeyOnRead} is temporary until we settle on whether getters
+ * should throw NPE on null key. Defaults to {@link Builder#ignoreNullKeyOnRead} = true.
+ * See also {@link Builder#setIgnoreNullKeyOnRead(boolean)}.
+ *
+ * Variable {@link #allowNullValue} is temporary until we settle on whether putters
+ * should throw NPE on null value. Defaults to {@link Builder#allowNullValue} = true.
+ * See also {@link Builder#setAllowNullValue(boolean)} (boolean)}.
+ *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Greg Luck
  * @author Yannis Cosmadopoulos
  */
 public final class RICache<K, V> implements Cache<K, V> {
+    private static final int CACHE_LOADER_THREADS = 4;
+
     private final HashMap<K, V> store = new HashMap<K, V>();
     private final CacheConfiguration configuration;
-    private final CacheLoader cacheLoader;
+    private final CacheLoader<K, V> cacheLoader;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     private final boolean ignoreNullKeyOnRead;
     private final boolean allowNullValue;
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
-
 
     private RICache(CacheConfiguration configuration, CacheLoader cacheLoader, boolean ignoreNullKeyOnRead, boolean allowNullValue) {
         status = Status.UNITIALISED;
@@ -123,20 +137,35 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
-    public Future load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
+    public Future<V> load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
-        if (cacheLoader != null) {
-            //
+        CacheLoader<K, V> loader = specificLoader == null ? cacheLoader : specificLoader;
+        if (loader == null) {
+            return null;
         }
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            if (ignoreNullKeyOnRead) {
+                return null;
+            } else {
+                throw new NullPointerException("key");
+            }
+        }
+        if (store.containsKey(key)) {
+            return null;
+        }
+        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(loader, key, loaderArgument));
+        executorService.submit(task);
+        return task;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Future loadAll(Collection<? extends K> keys, CacheLoader specificLoader, Object loaderArgument) {
+    public Future<Map<K, V>> loadAll(Collection<? extends K> keys, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
-        throw new UnsupportedOperationException();
+        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(specificLoader, keys, loaderArgument));
+        executorService.submit(task);
+        return task;
     }
 
     /**
@@ -345,15 +374,17 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
-    public void initialise() throws CacheException {
+    public void start() throws CacheException {
         status = Status.STARTED;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void stopAndDispose() throws CacheException {
+    public void stop() throws CacheException {
         status = Status.STOPPING;
+        executorService.shutdown();
+        //TODO: maybe wait for executor to stop
         store.clear();
         status = Status.STOPPED;
     }
@@ -574,6 +605,51 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
+     * Callable used for cache loader.
+     *
+     * @param <K> the type of the key
+     * @param <V> the type of the value
+     * @author Yannis Cosmadopoulos
+     */
+    private static class RICacheLoaderLoadCallable<K, V> implements Callable<V> {
+        private final CacheLoader<K, V> cacheLoader;
+        private final K key;
+        private final Object arg;
+
+        RICacheLoaderLoadCallable(CacheLoader<K, V> cacheLoader, K key, Object arg) {
+            this.cacheLoader = cacheLoader;
+            this.key = key;
+            this.arg = arg;
+        }
+
+        public V call() throws Exception {
+            return cacheLoader.load(key, arg);
+        }
+    }
+    /**
+     * Callable used for cache loader.
+     *
+     * @param <K> the type of the key
+     * @param <V> the type of the value
+     * @author Yannis Cosmadopoulos
+     */
+    private static class RICacheLoaderLoadAllCallable<K, V> implements Callable<Map<K, V>> {
+        private final CacheLoader<K, V> cacheLoader;
+        private final Collection<? extends K> keys;
+        private final Object arg;
+
+        RICacheLoaderLoadAllCallable(CacheLoader<K, V> cacheLoader, Collection<? extends K> keys, Object arg) {
+            this.cacheLoader = cacheLoader;
+            this.keys = keys;
+            this.arg = arg;
+        }
+
+        public Map<K, V> call() throws Exception {
+            return cacheLoader.loadAll(keys, arg);
+        }
+    }
+
+    /**
      * A Builder for RICache
      * @param <K>
      * @param <V>
@@ -617,7 +693,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         /**
-         *
+         * Sets whether to ignore null key on getters. If <tt>false</tt>, then getters will
+         * throw a NullPointerException on null key.
+         * Defaults to <tt>true</tt>.
          * @param ignoreNullKeyOnRead the value of the flag
          * @return the builder
          */
@@ -627,7 +705,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         /**
-         *
+         * Sets whether to allow null value. If <tt>false</tt>, then putters will
+         * throw a NullPointerException on null value.
+         * Defaults to <tt>true</tt>.
          * @param allowNullValue the value of the flag
          * @return the builder
          */
