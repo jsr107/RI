@@ -61,18 +61,43 @@ import java.util.concurrent.FutureTask;
  * @author Yannis Cosmadopoulos
  */
 public final class RICache<K, V> implements Cache<K, V> {
-    private static final int CACHE_LOADER_THREADS = 4;
+    /**
+     * This is a temporary constant until we finalize on the semantics of null key on getters.
+     * {@link Builder} will create a cache using this constant unless {@link Builder#ignoreNullKeyOnRead} is used.
+     */
+    public static final boolean DEFAULT_IGNORE_NULL_KEY_ON_READ = true;
+    /**
+     * This is a temporary constant until we finalize on the semantics of null allowed in value.
+     * {@link Builder} will create a cache using this constant unless {@link Builder#allowNullValue} is used.
+     */
+    public static final boolean DEFAULT_ALLOW_NULL_VALUE = true;
+    private static final int CACHE_LOADER_THREADS = 2;
 
     private final HashMap<K, V> store = new HashMap<K, V>();
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+    private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
+    //TODO: when we finalize on whether null key on get throws exception, delete this
     private final boolean ignoreNullKeyOnRead;
+    //TODO: when we finalize on whether null values are allowed, delete this
     private final boolean allowNullValue;
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
 
-    private RICache(CacheConfiguration configuration, CacheLoader cacheLoader, boolean ignoreNullKeyOnRead, boolean allowNullValue) {
+    /**
+     * Constructs a cache.
+     *
+     * @param configuration the configuration
+     * @param cacheLoader the cache loader
+     * @param ignoreNullKeyOnRead if true, null keys on getters are ignored.
+     *        If false an NPE is thrown if getters are invoked with null key.
+     *        TODO: once design is finalized delete this.
+     * @param allowNullValue if true null values are allowed.
+     *        If false NPE is thrown if putters are invoked with null value.
+     *        TODO: once design is finalized delete this.
+     */
+    private RICache(CacheConfiguration configuration, CacheLoader cacheLoader,
+                    boolean ignoreNullKeyOnRead, boolean allowNullValue) {
         status = Status.UNITIALISED;
         assert configuration != null;
         this.configuration = new UnmodifiableCacheConfiguration(configuration);
@@ -650,7 +675,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * A Builder for RICache
+     * A Builder for RICache.
      * @param <K>
      * @param <V>
      * @author Yannis Cosmadopoulos
@@ -658,8 +683,10 @@ public final class RICache<K, V> implements Cache<K, V> {
     public static class Builder<K, V> {
         private CacheConfiguration configuration;
         private CacheLoader cacheLoader;
-        private boolean ignoreNullKeyOnRead = true;
-        private boolean allowNullValue = true;
+        //TODO: when we finalize on whether null key on get throws exception, delete this
+        private boolean ignoreNullKeyOnRead = DEFAULT_IGNORE_NULL_KEY_ON_READ;
+        //TODO: when we finalize on whether null values are allowed, delete this
+        private boolean allowNullValue = DEFAULT_ALLOW_NULL_VALUE;
 
         /**
          * Builds the cache
@@ -695,7 +722,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * Sets whether to ignore null key on getters. If <tt>false</tt>, then getters will
          * throw a NullPointerException on null key.
-         * Defaults to <tt>true</tt>.
+         * Defaults to {@link RICache#DEFAULT_IGNORE_NULL_KEY_ON_READ}.
          * @param ignoreNullKeyOnRead the value of the flag
          * @return the builder
          */
@@ -707,7 +734,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * Sets whether to allow null value. If <tt>false</tt>, then putters will
          * throw a NullPointerException on null value.
-         * Defaults to <tt>true</tt>.
+         * Defaults to {@link RICache#DEFAULT_ALLOW_NULL_VALUE}.
          * @param allowNullValue the value of the flag
          * @return the builder
          */
