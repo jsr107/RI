@@ -201,7 +201,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("key");
             }
         }
-        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, specificLoader, keys, loaderArgument));
+        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, loader, keys, loaderArgument));
         executorService.submit(task);
         return task;
     }
