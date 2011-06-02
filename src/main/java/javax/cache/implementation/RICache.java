@@ -668,7 +668,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         public V call() throws Exception {
             V value = cacheLoader.load(key, arg);
-            cache.store.put(key, value);
+            cache.put(key, value);
             return value;
         }
     }
