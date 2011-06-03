@@ -266,9 +266,7 @@
         </module>
 
         <module name="ArrayTypeStyle"/>
-        <module name="TodoComment">
-            <property name="format" value="WARNING"/>
-            </module>
+        <!--<module name="TodoComment"/>-->
         <module name="TrailingComment"/>
         <module name="UpperEll"/>
     </module>
