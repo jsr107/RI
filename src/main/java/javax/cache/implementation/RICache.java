@@ -170,11 +170,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             return null;
         }
         if (key == null) {
-            if (ignoreNullKeyOnRead) {
-                return null;
-            } else {
-                throw new NullPointerException("key");
-            }
+            throw new NullPointerException("key");
         }
         if (store.containsKey(key)) {
             return null;
@@ -197,9 +193,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             return null;
         }
         if (keys.contains(null)) {
-            if (!ignoreNullKeyOnRead) {
-                throw new NullPointerException("key");
-            }
+            throw new NullPointerException("key");
         }
         FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, loader, keys, loaderArgument));
         executorService.submit(task);
