@@ -87,7 +87,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                     boolean allowNullValue) {
         status = Status.UNITIALISED;
         assert configuration != null;
-        this.configuration = new UnmodifiableCacheConfiguration(configuration);
+        this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         this.allowNullValue = allowNullValue;
     }
@@ -404,62 +404,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Status getStatus() {
         return status;
-    }
-
-    /**
-     * An unmodifiable version of CacheConfiguration. This cache does not support dynamoc modification
-     * of configuration.
-     * {@inheritDoc}
-     * @author Yannis Cosmadopoulos
-     */
-    private static class UnmodifiableCacheConfiguration implements CacheConfiguration {
-        private final CacheConfiguration config;
-
-        UnmodifiableCacheConfiguration(CacheConfiguration config) {
-            this.config = config;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isReadThrough() {
-            return config.isReadThrough();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void setReadThrough(boolean readThrough) {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isWriteThrough() {
-            return config.isWriteThrough();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void setWriteThrough(boolean writeThrough) {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public boolean isStoreByValue() {
-            return config.isStoreByValue();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        public void setStoreByValue(boolean storeByValue) {
-            throw new UnsupportedOperationException();
-        }
     }
 
     /**
