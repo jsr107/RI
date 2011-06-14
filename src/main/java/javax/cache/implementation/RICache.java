@@ -48,10 +48,6 @@ import java.util.concurrent.FutureTask;
  * This implementation implements all optional parts of JSR107 except for the Transactions chapter. Transactions support
  * simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
  *
- * Variable {@link #ignoreNullKeyOnRead} is temporary until we settle on whether getters
- * should throw NPE on null key. Defaults to {@link Builder#ignoreNullKeyOnRead} = true.
- * See also {@link Builder#setIgnoreNullKeyOnRead(boolean)}.
- *
  * Variable {@link #allowNullValue} is temporary until we settle on whether putters
  * should throw NPE on null value. Defaults to {@link Builder#allowNullValue} = true.
  * See also {@link Builder#setAllowNullValue(boolean)} (boolean)}.
@@ -63,11 +59,6 @@ import java.util.concurrent.FutureTask;
  */
 public final class RICache<K, V> implements Cache<K, V> {
     /**
-     * This is a temporary constant until we finalize on the semantics of null key on getters.
-     * {@link Builder} will create a cache using this constant unless {@link Builder#ignoreNullKeyOnRead} is used.
-     */
-    public static final boolean DEFAULT_IGNORE_NULL_KEY_ON_READ = true;
-    /**
      * This is a temporary constant until we finalize on the semantics of null allowed in value.
      * {@link Builder} will create a cache using this constant unless {@link Builder#allowNullValue} is used.
      */
@@ -78,8 +69,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
-    //TODO: when we finalize on whether null key on get throws exception, delete this
-    private final boolean ignoreNullKeyOnRead;
     //TODO: when we finalize on whether null values are allowed, delete this
     private final boolean allowNullValue;
     private volatile Status status;
@@ -90,20 +79,16 @@ public final class RICache<K, V> implements Cache<K, V> {
      *
      * @param configuration the configuration
      * @param cacheLoader the cache loader
-     * @param ignoreNullKeyOnRead if true, null keys on getters are ignored.
-     *        If false an NPE is thrown if getters are invoked with null key.
-     *        TODO: once design is finalized delete this.
      * @param allowNullValue if true null values are allowed.
      *        If false NPE is thrown if putters are invoked with null value.
      *        TODO: once design is finalized delete this.
      */
     private RICache(CacheConfiguration configuration, CacheLoader<K, V> cacheLoader,
-                    boolean ignoreNullKeyOnRead, boolean allowNullValue) {
+                    boolean allowNullValue) {
         status = Status.UNITIALISED;
         assert configuration != null;
         this.configuration = new UnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
-        this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
         this.allowNullValue = allowNullValue;
     }
 
@@ -113,11 +98,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public V get(Object key) throws CacheException {
         checkStatusStarted();
         if (key == null) {
-            if (ignoreNullKeyOnRead) {
-                return null;
-            } else {
-                throw new NullPointerException("key");
-            }
+            throw new NullPointerException("key");
         } else {
             //noinspection SuspiciousMethodCalls
             return store.get(key);
@@ -133,9 +114,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         HashMap<K, V> map = new HashMap<K, V>(keys.size());
         for (K key : keys) {
             if (key == null) {
-                if (!ignoreNullKeyOnRead) {
-                    throw new NullPointerException();
-                }
+                throw new NullPointerException();
             } else {
                 map.put(key, store.get(key));
             }
@@ -149,11 +128,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public boolean containsKey(Object key) {
         checkStatusStarted();
         if (key == null) {
-            if (ignoreNullKeyOnRead) {
-                return false;
-            } else {
-                throw new NullPointerException("key");
-            }
+            throw new NullPointerException("key");
         } else {
             //noinspection SuspiciousMethodCalls
             return store.containsKey(key);
@@ -236,10 +211,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (map == null) {
             throw new NullPointerException();
         }
-        if (!ignoreNullKeyOnRead) {
-            if (map.containsKey(null)) {
-                throw new NullPointerException("key");
-            }
+        if (map.containsKey(null)) {
+            throw new NullPointerException("key");
         }
         if (!allowNullValue) {
             if (map.containsValue(null)) {
@@ -258,13 +231,13 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        if (key == null && !ignoreNullKeyOnRead) {
+        if (key == null) {
             throw new NullPointerException("key");
         }
         if (value == null && !allowNullValue) {
             throw new NullPointerException("value");
         }
-        if (key != null && !store.containsKey(key)) {
+        if (!store.containsKey(key)) {
             store.put(key, value);
             return true;
         } else {
@@ -286,11 +259,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public V getAndRemove(Object key) {
         checkStatusStarted();
         if (key == null) {
-            if (ignoreNullKeyOnRead) {
-                return null;
-            } else {
-                throw new NullPointerException();
-            }
+            throw new NullPointerException();
         } else {
             //noinspection SuspiciousMethodCalls
             return store.remove(key);
@@ -358,7 +327,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (keys == null) {
             throw new NullPointerException("keys");
         }
-        if (!ignoreNullKeyOnRead && keys.contains(null)) {
+        if (keys.contains(null)) {
             throw new NullPointerException();
         }
         for (K key : keys) {
@@ -570,6 +539,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final V value;
 
         public RIEntry(K key, V value) {
+            if (key == null) {
+                throw new NullPointerException("key");
+            }
             this.key = key;
             this.value = value;
         }
@@ -592,7 +564,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
             RIEntry e2 = (RIEntry) o;
 
-            return  (this.getKey() == null ? e2.getKey() == null : this.getKey().equals(e2.getKey())) &&
+            return  this.getKey().equals(e2.getKey()) &&
                     (this.getValue() == null ? e2.getValue() == null : this.getValue().equals(e2.getValue()));
         }
 
@@ -601,8 +573,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public int hashCode() {
-            return (getKey() == null ? 0 :
-                    getKey().hashCode()) ^ (getValue() == null ? 0 : getValue().hashCode());
+            return getKey().hashCode() ^ (getValue() == null ? 0 : getValue().hashCode());
         }
     }
 
@@ -690,9 +661,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         public Map<K, V> call() throws Exception {
             ArrayList<K> keysNotInStore = new ArrayList<K>();
             for (K key : keys) {
-                if (key == null) {
-                    assert cache.ignoreNullKeyOnRead;
-                } else if (!cache.store.containsKey(key)) {
+                if (!cache.store.containsKey(key)) {
                     keysNotInStore.add(key);
                 }
             }
@@ -711,8 +680,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     public static class Builder<K, V> {
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
-        //TODO: when we finalize on whether null key on get throws exception, delete this
-        private boolean ignoreNullKeyOnRead = DEFAULT_IGNORE_NULL_KEY_ON_READ;
         //TODO: when we finalize on whether null values are allowed, delete this
         private boolean allowNullValue = DEFAULT_ALLOW_NULL_VALUE;
 
@@ -724,7 +691,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K, V>(configuration, cacheLoader, ignoreNullKeyOnRead, allowNullValue);
+            return new RICache<K, V>(configuration, cacheLoader, allowNullValue);
         }
 
         /**
@@ -744,18 +711,6 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             this.cacheLoader = cacheLoader;
-            return this;
-        }
-
-        /**
-         * Sets whether to ignore null key on getters. If <tt>false</tt>, then getters will
-         * throw a NullPointerException on null key.
-         * Defaults to {@link RICache#DEFAULT_IGNORE_NULL_KEY_ON_READ}.
-         * @param ignoreNullKeyOnRead the value of the flag
-         * @return the builder
-         */
-        public Builder<K, V> setIgnoreNullKeyOnRead(boolean ignoreNullKeyOnRead) {
-            this.ignoreNullKeyOnRead = ignoreNullKeyOnRead;
             return this;
         }
 
