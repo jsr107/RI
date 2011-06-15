@@ -32,12 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 /**
  * The reference implementation for JSR107.
@@ -48,29 +43,18 @@ import java.util.concurrent.FutureTask;
  * This implementation implements all optional parts of JSR107 except for the Transactions chapter. Transactions support
  * simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
  *
- * Variable {@link #allowNullValue} is temporary until we settle on whether putters
- * should throw NPE on null value. Defaults to {@link Builder#allowNullValue} = true.
- * See also {@link Builder#setAllowNullValue(boolean)} (boolean)}.
- *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Greg Luck
  * @author Yannis Cosmadopoulos
  */
 public final class RICache<K, V> implements Cache<K, V> {
-    /**
-     * This is a temporary constant until we finalize on the semantics of null allowed in value.
-     * {@link Builder} will create a cache using this constant unless {@link Builder#allowNullValue} is used.
-     */
-    public static final boolean DEFAULT_ALLOW_NULL_VALUE = true;
     private static final int CACHE_LOADER_THREADS = 2;
 
-    private final HashMap<K, V> store = new HashMap<K, V>();
+    private final ConcurrentHashMap<K, V> store = new ConcurrentHashMap<K, V>();
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
-    //TODO: when we finalize on whether null values are allowed, delete this
-    private final boolean allowNullValue;
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
 
@@ -79,17 +63,12 @@ public final class RICache<K, V> implements Cache<K, V> {
      *
      * @param configuration the configuration
      * @param cacheLoader the cache loader
-     * @param allowNullValue if true null values are allowed.
-     *        If false NPE is thrown if putters are invoked with null value.
-     *        TODO: once design is finalized delete this.
      */
-    private RICache(CacheConfiguration configuration, CacheLoader<K, V> cacheLoader,
-                    boolean allowNullValue) {
+    private RICache(CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
         status = Status.UNITIALISED;
         assert configuration != null;
         this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
-        this.allowNullValue = allowNullValue;
     }
 
     /**
@@ -97,12 +76,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V get(Object key) throws CacheException {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        } else {
-            //noinspection SuspiciousMethodCalls
-            return store.get(key);
-        }
+        //noinspection SuspiciousMethodCalls
+        return store.get(key);
     }
 
     /**
@@ -110,14 +85,13 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Map<K, V> getAll(Collection<? extends K> keys) {
         checkStatusStarted();
+        if (keys.contains(null)) {
+            throw new NullPointerException("key");
+        }
         // will throw NPE if keys=null
         HashMap<K, V> map = new HashMap<K, V>(keys.size());
         for (K key : keys) {
-            if (key == null) {
-                throw new NullPointerException();
-            } else {
-                map.put(key, store.get(key));
-            }
+            map.put(key, store.get(key));
         }
         return map;
     }
@@ -127,12 +101,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean containsKey(Object key) {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        } else {
-            //noinspection SuspiciousMethodCalls
-            return store.containsKey(key);
-        }
+        //noinspection SuspiciousMethodCalls
+        return store.containsKey(key);
     }
 
     /**
@@ -193,14 +163,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void put(K key, V value) {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (!allowNullValue && value == null) {
-            throw new NullPointerException("value");
-        } else {
-            store.put(key, value);
-        }
+        store.put(key, value);
     }
 
     /**
@@ -208,22 +171,10 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void putAll(Map<? extends K, ? extends V> map) {
         checkStatusStarted();
-        if (map == null) {
-            throw new NullPointerException();
-        }
         if (map.containsKey(null)) {
             throw new NullPointerException("key");
         }
-        if (!allowNullValue) {
-            if (map.containsValue(null)) {
-                throw new NullPointerException("value");
-            }
-        }
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            if (entry.getKey() != null) {
-                store.put(entry.getKey(), entry.getValue());
-            }
-        }
+        store.putAll(map);
     }
 
     /**
@@ -231,18 +182,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (value == null && !allowNullValue) {
-            throw new NullPointerException("value");
-        }
-        if (!store.containsKey(key)) {
-            store.put(key, value);
-            return true;
-        } else {
-            return false;
-        }
+        return store.putIfAbsent(key, value) == null;
     }
 
     /**
@@ -250,7 +190,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean remove(Object key) {
         checkStatusStarted();
-        return getAndRemove(key) != null;
+        //noinspection SuspiciousMethodCalls
+        return store.remove(key) != null;
     }
 
     /**
@@ -258,12 +199,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndRemove(Object key) {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException();
-        } else {
-            //noinspection SuspiciousMethodCalls
-            return store.remove(key);
-        }
+        //noinspection SuspiciousMethodCalls
+        return store.remove(key);
     }
 
     /**
@@ -271,24 +208,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (!allowNullValue && (oldValue == null || newValue == null)) {
-            throw new NullPointerException("value");
-        }
-        if (store.containsKey(key)) {
-            V old = store.get(key);
-            boolean replace = (old == null) ? (oldValue == null) : old.equals(oldValue);
-            if (replace) {
-                store.put(key, newValue);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return store.replace(key, oldValue, newValue);
     }
 
     /**
@@ -296,7 +216,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V value) {
         checkStatusStarted();
-        return getAndReplace(key, value) != null;
+        return store.replace(key, value) != null;
     }
 
     /**
@@ -304,19 +224,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        if (!allowNullValue && value == null) {
-            throw new NullPointerException("value");
-        }
-        if (store.containsKey(key)) {
-            V old = store.get(key);
-            store.put(key, value);
-            return old;
-        } else {
-            return null;
-        }
+        return store.replace(key, value);
     }
 
     /**
@@ -324,12 +232,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void removeAll(Collection<? extends K> keys) {
         checkStatusStarted();
-        if (keys == null) {
-            throw new NullPointerException("keys");
-        }
-        if (keys.contains(null)) {
-            throw new NullPointerException();
-        }
         for (K key : keys) {
             store.remove(key);
         }
@@ -354,7 +256,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     public boolean registerCacheEntryListener(CacheEntryListener cacheEntryListener, NotificationScope scope) {
-
         ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope);
         return cacheEntryListeners.add(scopedListener);
     }
@@ -395,8 +296,9 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private void checkStatusStarted() {
-        if (!status.equals(Status.STARTED))
+        if (!status.equals(Status.STARTED)) {
             throw new IllegalStateException("The cache status is not STARTED");
+        }
     }
 
     /**
@@ -509,7 +411,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             RIEntry e2 = (RIEntry) o;
 
             return  this.getKey().equals(e2.getKey()) &&
-                    (this.getValue() == null ? e2.getValue() == null : this.getValue().equals(e2.getValue()));
+                    this.getValue().equals(e2.getValue());
         }
 
         /**
@@ -517,7 +419,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public int hashCode() {
-            return getKey().hashCode() ^ (getValue() == null ? 0 : getValue().hashCode());
+            return getKey().hashCode() ^ getValue().hashCode();
         }
     }
 
@@ -624,8 +526,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     public static class Builder<K, V> {
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
-        //TODO: when we finalize on whether null values are allowed, delete this
-        private boolean allowNullValue = DEFAULT_ALLOW_NULL_VALUE;
 
         /**
          * Builds the cache
@@ -635,7 +535,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K, V>(configuration, cacheLoader, allowNullValue);
+            return new RICache<K, V>(configuration, cacheLoader);
         }
 
         /**
@@ -655,18 +555,6 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             this.cacheLoader = cacheLoader;
-            return this;
-        }
-
-        /**
-         * Sets whether to allow null value. If <tt>false</tt>, then putters will
-         * throw a NullPointerException on null value.
-         * Defaults to {@link RICache#DEFAULT_ALLOW_NULL_VALUE}.
-         * @param allowNullValue the value of the flag
-         * @return the builder
-         */
-        public Builder<K, V> setAllowNullValue(boolean allowNullValue) {
-            this.allowNullValue = allowNullValue;
             return this;
         }
     }
