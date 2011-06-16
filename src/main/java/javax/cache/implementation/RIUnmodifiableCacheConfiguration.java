@@ -78,4 +78,11 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     public void setStoreByValue(boolean storeByValue) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCacheName() {
+        return config.getCacheName();
+    }
 }

@@ -25,57 +25,68 @@ import javax.cache.CacheConfiguration;
  * @since 1.0
  */
 public final class RICacheConfiguration implements CacheConfiguration {
-
+    private final String cacheName;
     private boolean readThrough;
     private boolean writeThrough;
     private boolean storeByValue;
 
-    private RICacheConfiguration(boolean readThrough, boolean writeThrough, boolean storeByValue) {
+    private RICacheConfiguration(String cacheName, boolean readThrough, boolean writeThrough, boolean storeByValue) {
+        if (cacheName == null) {
+            throw new NullPointerException("cacheName");
+        }
+        this.cacheName = cacheName;
         setReadThrough(readThrough);
         setWriteThrough(writeThrough);
         setStoreByValue(storeByValue);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public boolean isReadThrough() {
         return readThrough;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public void setReadThrough(boolean readThrough) {
         this.readThrough = readThrough;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public boolean isWriteThrough() {
         return writeThrough;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public void setWriteThrough(boolean writeThrough) {
         this.writeThrough = writeThrough;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public boolean isStoreByValue() {
         return storeByValue;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public void setStoreByValue(boolean storeByValue) {
         this.storeByValue = storeByValue;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCacheName() {
+        return cacheName;
     }
 
     /**
@@ -83,14 +94,15 @@ public final class RICacheConfiguration implements CacheConfiguration {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder {
+        private String cacheName;
         private boolean readThrough;
         private boolean writeThrough;
         private boolean storeByValue;
 
         /**
-         *
-         * @param readThrough
-         * @return
+         * Set whether read through is active
+         * @param readThrough whether read through is active
+         * @return this Builder instance
          */
         public Builder setReadThrough(boolean readThrough) {
             this.readThrough = readThrough;
@@ -98,9 +110,10 @@ public final class RICacheConfiguration implements CacheConfiguration {
         }
 
         /**
+         * Set whether write through is active
          *
-         * @param writeThrough
-         * @return
+         * @param writeThrough whether write through is active
+         * @return this Builder instance
          */
         public Builder setWriteThrough(boolean writeThrough) {
             this.writeThrough = writeThrough;
@@ -108,9 +121,10 @@ public final class RICacheConfiguration implements CacheConfiguration {
         }
 
         /**
+         * Set whether store by value is active
          *
-         * @param storeByValue
-         * @return
+         * @param storeByValue whether store by value is active
+         * @return this Builder instance
          */
         public Builder setStoreByValue(boolean storeByValue) {
             this.storeByValue = storeByValue;
@@ -118,11 +132,25 @@ public final class RICacheConfiguration implements CacheConfiguration {
         }
 
         /**
+         * Set the cache name
+         * @param cacheName the cache name
+         * @return this Builder instance
+         */
+        public Builder setCacheName(String cacheName) {
+            if (cacheName == null) {
+                throw new NullPointerException("cacheName");
+            }
+            this.cacheName = cacheName;
+            return this;
+        }
+
+        /**
+         * Create a new RICacheConfiguration instance.
          *
-         * @return
+         * @return a new RICacheConfiguration instance
          */
         public RICacheConfiguration build() {
-            return new RICacheConfiguration(readThrough, writeThrough, storeByValue);
+            return new RICacheConfiguration(cacheName, readThrough, writeThrough, storeByValue);
         }
     }
 }

@@ -80,6 +80,13 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    public String getCacheName() {
+        return configuration.getCacheName();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public V get(Object key) throws CacheException {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
@@ -530,6 +537,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder<K, V> {
+        private String cacheName;
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
 
@@ -539,28 +547,50 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         public RICache<K, V> build() {
             if (configuration == null) {
-                configuration = new RICacheConfiguration.Builder().build();
+                configuration = new RICacheConfiguration.Builder().setCacheName(cacheName).build();
             }
             return new RICache<K, V>(configuration, cacheLoader);
         }
 
         /**
+         * Set the cache configuration.
          *
-         * @param configuration the configuration
+         * @param configuration the cache configuration
          * @return the builder
          */
         public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
+            if (configuration == null) {
+                throw new NullPointerException("configuration");
+            }
             this.configuration = configuration;
             return this;
         }
 
         /**
+         * Set the cache loader.
          *
          * @param cacheLoader the CacheLoader
          * @return the builder
          */
         public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
+            if (cacheLoader == null) {
+                throw new NullPointerException("cacheLoader");
+            }
             this.cacheLoader = cacheLoader;
+            return this;
+        }
+
+        /**
+         * Set the cache name.
+         *
+         * @param cacheName the cache name
+         * @return the builder
+         */
+        public Builder<K, V> setCacheName(String cacheName) {
+            if (cacheName == null) {
+                throw new NullPointerException("cacheName");
+            }
+            this.cacheName = cacheName;
             return this;
         }
     }
