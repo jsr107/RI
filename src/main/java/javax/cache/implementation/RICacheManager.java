@@ -18,11 +18,10 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,31 +40,13 @@ public enum RICacheManager implements CacheManager {
     instance;
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
-    private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
+    private final ConcurrentHashMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
 
     /**
      * {@inheritDoc}
      */
-    public void addCache(String cacheName, Cache<?, ?> cache) throws IllegalStateException, CacheException {
-        caches.put(cacheName, cache);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public <K, V> Cache<K, V> createCache(String cacheName) throws CacheException {
-        Cache<K, V> cache = new RICache.Builder<K, V>().build();
-        caches.put(cacheName, cache);
-        return cache;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public <K, V> Cache<K, V> createCache(String cacheName, CacheConfiguration configuration) throws CacheException {
-        Cache<K, V> cache = new RICache.Builder<K, V>().setCacheConfiguration(configuration).build();
-        caches.put(cacheName, cache);
-        return cache;
+    public void addCache(Cache<?, ?> cache) throws CacheException {
+        caches.put(cache.getCacheName(), cache);
     }
 
     /**
@@ -86,20 +67,13 @@ public enum RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     public <K, V> Cache<K, V> getCache(String cacheName) {
-        throw new UnsupportedOperationException();
+        return caches.get(cacheName);
     }
 
     /**
      * {@inheritDoc}
      */
-    public <K, V> Cache<K, V> getOrCreateCache(String cacheName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean removeCache(String cacheName) throws IllegalStateException {
+    public boolean removeCache(String cacheName) {
         throw new UnsupportedOperationException();
     }
 
