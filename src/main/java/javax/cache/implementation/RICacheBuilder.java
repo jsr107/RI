@@ -39,13 +39,13 @@ public enum RICacheBuilder implements CacheBuilder {
      * {@inheritDoc}
      */
     public <K, V> Cache<K, V> createCache(String cacheName) {
-        return new RICache.Builder<K, V>().build();
+        return new RICache.Builder<K, V>().setCacheName(cacheName).build();
     }
 
     /**
      * {@inheritDoc}
      */
     public <K, V> Cache<K, V> createCache(String cacheName, CacheConfiguration configuration) {
-        return new RICache.Builder<K, V>().setCacheConfiguration(configuration).build();
+        return new RICache.Builder<K, V>().setCacheName(cacheName).setCacheConfiguration(configuration).build();
     }
 }

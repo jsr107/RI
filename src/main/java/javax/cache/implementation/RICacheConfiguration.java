@@ -25,16 +25,11 @@ import javax.cache.CacheConfiguration;
  * @since 1.0
  */
 public final class RICacheConfiguration implements CacheConfiguration {
-    private final String cacheName;
     private boolean readThrough;
     private boolean writeThrough;
     private boolean storeByValue;
 
-    private RICacheConfiguration(String cacheName, boolean readThrough, boolean writeThrough, boolean storeByValue) {
-        if (cacheName == null) {
-            throw new NullPointerException("cacheName");
-        }
-        this.cacheName = cacheName;
+    private RICacheConfiguration(boolean readThrough, boolean writeThrough, boolean storeByValue) {
         setReadThrough(readThrough);
         setWriteThrough(writeThrough);
         setStoreByValue(storeByValue);
@@ -82,11 +77,24 @@ public final class RICacheConfiguration implements CacheConfiguration {
         this.storeByValue = storeByValue;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getCacheName() {
-        return cacheName;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof CacheConfiguration)) return false;
+
+        CacheConfiguration that = (CacheConfiguration) o;
+
+        return readThrough == that.isReadThrough() &&
+                storeByValue == that.isStoreByValue() &&
+                writeThrough == that.isWriteThrough();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (readThrough ? 1 : 0);
+        result = 31 * result + (writeThrough ? 1 : 0);
+        result = 31 * result + (storeByValue ? 1 : 0);
+        return result;
     }
 
     /**
@@ -94,7 +102,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder {
-        private String cacheName;
         private boolean readThrough;
         private boolean writeThrough;
         private boolean storeByValue;
@@ -132,25 +139,12 @@ public final class RICacheConfiguration implements CacheConfiguration {
         }
 
         /**
-         * Set the cache name
-         * @param cacheName the cache name
-         * @return this Builder instance
-         */
-        public Builder setCacheName(String cacheName) {
-            if (cacheName == null) {
-                throw new NullPointerException("cacheName");
-            }
-            this.cacheName = cacheName;
-            return this;
-        }
-
-        /**
          * Create a new RICacheConfiguration instance.
          *
          * @return a new RICacheConfiguration instance
          */
         public RICacheConfiguration build() {
-            return new RICacheConfiguration(cacheName, readThrough, writeThrough, storeByValue);
+            return new RICacheConfiguration(readThrough, writeThrough, storeByValue);
         }
     }
 }

@@ -34,6 +34,9 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
      * @param config the wrapped configuration
      */
     RIUnmodifiableCacheConfiguration(CacheConfiguration config) {
+        if (config == null) {
+            throw new NullPointerException("config");
+        }
         this.config = config;
     }
 
@@ -79,10 +82,15 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getCacheName() {
-        return config.getCacheName();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof CacheConfiguration)) return false;
+        return config.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return config.hashCode();
     }
 }

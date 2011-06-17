@@ -58,6 +58,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private static final int CACHE_LOADER_THREADS = 2;
 
     private final ConcurrentHashMap<K, V> store = new ConcurrentHashMap<K, V>();
+    private final String cacheName;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
@@ -67,12 +68,15 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * Constructs a cache.
      *
+     * @param cacheName the cache name
      * @param configuration the configuration
      * @param cacheLoader the cache loader
      */
-    private RICache(CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
+    private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
         status = Status.UNITIALISED;
         assert configuration != null;
+        assert cacheName != null;
+        this.cacheName = cacheName;
         this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
     }
@@ -81,7 +85,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     public String getCacheName() {
-        return configuration.getCacheName();
+        return cacheName;
     }
 
     /**
@@ -546,10 +550,13 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @return a constructed cache.
          */
         public RICache<K, V> build() {
-            if (configuration == null) {
-                configuration = new RICacheConfiguration.Builder().setCacheName(cacheName).build();
+            if (cacheName == null) {
+                throw new NullPointerException("cacheName");
             }
-            return new RICache<K, V>(configuration, cacheLoader);
+            if (configuration == null) {
+                configuration = new RICacheConfiguration.Builder().build();
+            }
+            return new RICache<K, V>(cacheName, configuration, cacheLoader);
         }
 
         /**
