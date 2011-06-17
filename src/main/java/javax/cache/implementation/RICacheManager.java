@@ -20,7 +20,6 @@ package javax.cache.implementation;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,21 +45,11 @@ public enum RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     public void addCache(Cache<?, ?> cache) throws CacheException {
-        caches.put(cache.getCacheName(), cache);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean cacheExists(String cacheName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public List<String> getCacheNames() {
-        throw new UnsupportedOperationException();
+        cache.start();
+        Cache oldCache = caches.put(cache.getCacheName(), cache);
+        if (oldCache != null) {
+            oldCache.stop();
+        }
     }
 
     /**
@@ -74,7 +63,13 @@ public enum RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     public boolean removeCache(String cacheName) {
-        throw new UnsupportedOperationException();
+        Cache cache = caches.remove(cacheName);
+        if (cache != null) {
+            cache.stop();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
