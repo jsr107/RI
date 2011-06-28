@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>javax.cache.implementation</groupId>
-    <artifactId>ri</artifactId>
+    <artifactId>cache-ri</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>ri</name>
+    <name>JSR107 RI</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -15,21 +15,13 @@
         <skipCheckstyle>false</skipCheckstyle>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>javax.cache</groupId>
-            <artifactId>jsr107-api</artifactId>
+            <artifactId>cache-api</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -54,7 +46,6 @@
                     <maxmemory>512</maxmemory>
                 </configuration>
             </plugin>
-
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -101,9 +92,7 @@
                 </configuration>
             </plugin>
 
-
         </plugins>
-
 
     </build>
 
