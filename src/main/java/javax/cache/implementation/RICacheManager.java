@@ -30,7 +30,6 @@ import java.util.logging.Logger;
  * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
- * @since 1.0
  */
 public enum RICacheManager implements CacheManager {
     /**

@@ -20,7 +20,10 @@ package javax.cache.implementation;
 import javax.cache.CacheConfiguration;
 
 /**
+ * The reference implementation for JSR107.
+ * <p/>
  * Simple immutable implementation of {@link CacheConfiguration}
+ * <p/>
  * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos

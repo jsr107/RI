@@ -25,5 +25,6 @@
  simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
 
  @author Greg Luck
+ @author Yannis Cosmadopoulos
  */
 package javax.cache.implementation;

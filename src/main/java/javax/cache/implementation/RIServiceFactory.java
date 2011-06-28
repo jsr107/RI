@@ -20,10 +20,11 @@ import javax.cache.CacheManager;
 import javax.cache.spi.ServiceFactory;
 
 /**
+ * The reference implementation for JSR107.
+ * <p/>
  * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
- * @since 1.0
  */
 public class RIServiceFactory implements ServiceFactory {
     /**

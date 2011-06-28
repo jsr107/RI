@@ -21,8 +21,11 @@ package javax.cache.implementation;
 import javax.cache.CacheConfiguration;
 
 /**
+ * The reference implementation for JSR107.
+ * <p/>
+ * {@inheritDoc}
+ *
  * @author Yannis Cosmadopoulos
- * @since 1.0
  */
 public final class RICacheConfiguration implements CacheConfiguration {
     private boolean readThrough;

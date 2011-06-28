@@ -27,7 +27,6 @@ import javax.cache.CacheConfiguration;
  * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
- * @since 1.0
  */
 public enum RICacheBuilder implements CacheBuilder {
     /**
