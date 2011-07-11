@@ -31,6 +31,6 @@ public class RIServiceFactory implements ServiceFactory {
      * {@inheritDoc}
      */
     public CacheManager createCacheManager() {
-        return RICacheManager.instance;
+        return new RICacheManager();
     }
 }

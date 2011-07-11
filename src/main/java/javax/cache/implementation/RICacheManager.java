@@ -31,12 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Yannis Cosmadopoulos
  */
-public enum RICacheManager implements CacheManager {
-    /**
-     * the singleton instance
-     */
-    instance;
-
+public class RICacheManager implements CacheManager {
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final ConcurrentHashMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
 
