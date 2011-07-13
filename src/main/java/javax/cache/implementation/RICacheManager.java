@@ -35,15 +35,6 @@ public class RICacheManager implements CacheManager {
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final ConcurrentHashMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
 
-
-    /**
-     * A constructor which may be used to directly create a CacheManager as
-     * an alternative to the singleton approach supported by CacheManagerFactory
-     */
-    public RICacheManager() {
-        //nothing required
-    }
-
     /**
      * {@inheritDoc}
      */
