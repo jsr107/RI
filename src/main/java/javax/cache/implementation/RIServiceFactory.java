@@ -17,7 +17,7 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheManager;
-import javax.cache.spi.ServiceFactory;
+import javax.cache.spi.CacheManagerFactoryProvider;
 
 /**
  * The reference implementation for JSR107.
@@ -26,7 +26,7 @@ import javax.cache.spi.ServiceFactory;
  *
  * @author Yannis Cosmadopoulos
  */
-public class RIServiceFactory implements ServiceFactory {
+public class RIServiceFactory implements CacheManagerFactoryProvider {
     /**
      * {@inheritDoc}
      */
