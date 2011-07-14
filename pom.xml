@@ -8,7 +8,7 @@
     </parent>
     <groupId>javax.cache.implementation</groupId>
     <artifactId>cache-ri</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>JSR107 RI</name>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
