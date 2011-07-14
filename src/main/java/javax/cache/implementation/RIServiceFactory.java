@@ -30,7 +30,10 @@ public class RIServiceFactory implements ServiceFactory {
     /**
      * {@inheritDoc}
      */
-    public CacheManager createCacheManager() {
-        return new RICacheManager();
+    public CacheManager createCacheManager(String name) {
+        if (name == null) {
+            throw new NullPointerException("name");
+        }
+        return new RICacheManager(name);
     }
 }

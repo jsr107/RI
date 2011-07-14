@@ -34,6 +34,29 @@ import java.util.logging.Logger;
 public class RICacheManager implements CacheManager {
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final ConcurrentHashMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
+    private final String name;
+
+    /**
+     * Constructs a new RICacheManager with the specified name.
+     *
+     * @param name the name of this cache manager
+     * @throws NullPointerException if name is null.
+     */
+    RICacheManager(String name) {
+        if (name == null) {
+            throw new NullPointerException("name");
+        }
+        this.name = name;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * The name returned will be that passed in to the constructor {@link #RICacheManager(String)}
+     */
+    public String getName() {
+        return name;
+    }
 
     /**
      * {@inheritDoc}
