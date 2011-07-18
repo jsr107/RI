@@ -244,7 +244,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public V getAndRemove(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
-        Object result = store.remove(key);
+        V result = store.remove(key);
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -253,7 +253,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 statistics.increaseCacheMisses(1);
             }
         }
-        return (V) result;
+        return result;
     }
 
     /**
@@ -288,7 +288,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
-        Object result = store.replace(key, value);
+        V result = store.replace(key, value);
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -297,7 +297,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 statistics.increaseCacheMisses(1);
             }
         }
-        return (V) result;
+        return result;
     }
 
     /**
