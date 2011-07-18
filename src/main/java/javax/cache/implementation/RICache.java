@@ -65,7 +65,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
-    private RICacheStatistics statistics;
+    private final RICacheStatistics statistics;
 
     /**
      * Constructs a cache.
@@ -74,13 +74,14 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param configuration the configuration
      * @param cacheLoader   the cache loader
      */
-    private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
+    private RICache(String cacheName, String cacheManagerName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
         status = Status.UNITIALISED;
         assert configuration != null;
         assert cacheName != null;
         this.cacheName = cacheName;
         this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
+        statistics = new RICacheStatistics(this, cacheManagerName);
     }
 
     /**
@@ -605,6 +606,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public static class Builder<K, V> implements CacheBuilder<K, V> {
         private final String cacheName;
+        private final String cacheManagerName;
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
 
@@ -612,12 +614,17 @@ public final class RICache<K, V> implements Cache<K, V> {
          * Construct a builder.
          *
          * @param cacheName the name of the cache to be built
+         * @param cacheManagerName the name of the cache manager
          */
-        public Builder(String cacheName) {
+        public Builder(String cacheName, String cacheManagerName) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
             }
             this.cacheName = cacheName;
+            if (cacheManagerName == null) {
+                throw new NullPointerException("cacheManagerName");
+            }
+            this.cacheManagerName = cacheManagerName;
         }
 
         /**
@@ -629,7 +636,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K, V>(cacheName, configuration, cacheLoader);
+            return new RICache<K, V>(cacheName, cacheManagerName, configuration, cacheLoader);
         }
 
         /**

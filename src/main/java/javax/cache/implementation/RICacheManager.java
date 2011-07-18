@@ -138,7 +138,7 @@ public class RICacheManager implements CacheManager {
         private final RICache.Builder<K, V> cacheBuilder;
 
         public RICacheBuilder(String cacheName) {
-            cacheBuilder = new RICache.Builder<K, V>(cacheName);
+            cacheBuilder = new RICache.Builder<K, V>(cacheName, name);
         }
 
         public Cache<K, V> build() {
