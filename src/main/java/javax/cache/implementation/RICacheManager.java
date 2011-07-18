@@ -18,7 +18,10 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
+import javax.cache.CacheBuilder;
+import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
+import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -49,7 +52,6 @@ public class RICacheManager implements CacheManager {
         this.name = name;
     }
 
-
     /**
      * {@inheritDoc}
      * <p/>
@@ -62,13 +64,8 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
-    public void addCache(Cache<?, ?> cache) throws CacheException {
-        ((RICache)cache).setCacheManager(this);
-        cache.start();
-        Cache oldCache = caches.put(cache.getCacheName(), cache);
-        if (oldCache != null) {
-            oldCache.stop();
-        }
+    public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName) {
+        return new RICacheBuilder<K, V>(cacheName);
     }
 
     /**
@@ -76,6 +73,17 @@ public class RICacheManager implements CacheManager {
      */
     public <K, V> Cache<K, V> getCache(String cacheName) {
         return caches.get(cacheName);
+    }
+
+    private void addCache(Cache<?, ?> cache) throws CacheException {
+        Cache oldCache = null;
+        synchronized (caches) {
+            oldCache = caches.put(cache.getCacheName(), cache);
+        }
+        cache.start();
+        if (oldCache != null) {
+            oldCache.stop();
+        }
     }
 
     /**
@@ -118,5 +126,36 @@ public class RICacheManager implements CacheManager {
      */
     Logger getLogger() {
         return LOGGER;
+    }
+
+    /**
+     * RI implementation of {@link CacheBuilder}
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     */
+    private class RICacheBuilder<K, V> implements CacheBuilder<K, V> {
+        private final RICache.Builder<K, V> cacheBuilder;
+
+        public RICacheBuilder(String cacheName) {
+            cacheBuilder = new RICache.Builder<K, V>(cacheName);
+        }
+
+        public Cache<K, V> build() {
+            Cache oldCache = null;
+            Cache<K, V> cache = cacheBuilder.build();
+            addCache(cache);
+            return cache;
+        }
+
+        public CacheBuilder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
+            cacheBuilder.setCacheConfiguration(configuration);
+            return this;
+        }
+
+        public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
+            cacheBuilder.setCacheLoader(cacheLoader);
+            return this;
+        }
     }
 }

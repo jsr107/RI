@@ -19,10 +19,10 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
+import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
-import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
@@ -65,7 +65,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
-    private volatile CacheManager cacheManager;
     private RICacheStatistics statistics;
 
     /**
@@ -89,13 +88,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public String getCacheName() {
         return cacheName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public CacheManager getCacheManager() {
-        return cacheManager;
     }
 
     /**
@@ -389,21 +381,6 @@ public final class RICache<K, V> implements Cache<K, V> {
         return status;
     }
 
-    /**
-     * Sets the CacheManager. This may only be done once.
-     * @param cacheManager the CacheManager this cache has been added to.
-     * @throws CacheException if done more than once
-     */
-    void setCacheManager(CacheManager cacheManager) {
-        if (this.cacheManager != null) {
-            throw new CacheException("A cache can only be associated with a CacheManager once");
-        }
-        this.cacheManager = cacheManager;
-        //needs the CacheManager
-        statistics = new RICacheStatistics(this, cacheManager.getName());
-    }
-
-
     private boolean statisticsEnabled() {
         return configuration.isStatisticsEnabled();
     }
@@ -626,10 +603,22 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param <V>
      * @author Yannis Cosmadopoulos
      */
-    public static class Builder<K, V> {
-        private String cacheName;
+    public static class Builder<K, V> implements CacheBuilder<K, V> {
+        private final String cacheName;
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
+
+        /**
+         * Construct a builder.
+         *
+         * @param cacheName the name of the cache to be built
+         */
+        public Builder(String cacheName) {
+            if (cacheName == null) {
+                throw new NullPointerException("cacheName");
+            }
+            this.cacheName = cacheName;
+        }
 
         /**
          * Builds the cache
@@ -637,9 +626,6 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @return a constructed cache.
          */
         public RICache<K, V> build() {
-            if (cacheName == null) {
-                throw new NullPointerException("cacheName");
-            }
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
@@ -671,20 +657,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("cacheLoader");
             }
             this.cacheLoader = cacheLoader;
-            return this;
-        }
-
-        /**
-         * Set the cache name.
-         *
-         * @param cacheName the cache name
-         * @return the builder
-         */
-        public Builder<K, V> setCacheName(String cacheName) {
-            if (cacheName == null) {
-                throw new NullPointerException("cacheName");
-            }
-            this.cacheName = cacheName;
             return this;
         }
     }
