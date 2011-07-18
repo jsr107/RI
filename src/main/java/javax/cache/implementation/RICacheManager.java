@@ -23,7 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 public class RICacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
-    private final ConcurrentHashMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
+    private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
     private final String name;
 
     /**
@@ -72,11 +72,13 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     public <K, V> Cache<K, V> getCache(String cacheName) {
-        return caches.get(cacheName);
+        synchronized (caches) {
+            return caches.get(cacheName);
+        }
     }
 
     private void addCache(Cache<?, ?> cache) throws CacheException {
-        Cache oldCache = null;
+        Cache oldCache;
         synchronized (caches) {
             oldCache = caches.put(cache.getCacheName(), cache);
         }
@@ -90,13 +92,15 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     public boolean removeCache(String cacheName) {
-        Cache cache = caches.remove(cacheName);
-        if (cache != null) {
-            cache.stop();
-            return true;
-        } else {
-            return false;
+        Cache oldCache;
+        synchronized (caches) {
+            oldCache = caches.remove(cacheName);
         }
+        if (oldCache != null) {
+            oldCache.stop();
+        }
+
+        return oldCache != null;
     }
 
     /**
@@ -142,7 +146,6 @@ public class RICacheManager implements CacheManager {
         }
 
         public Cache<K, V> build() {
-            Cache oldCache = null;
             Cache<K, V> cache = cacheBuilder.build();
             addCache(cache);
             return cache;
