@@ -19,7 +19,6 @@ package javax.cache.implementation;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
-import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -49,6 +48,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      * Constructs a cache statistics object
      *
      * @param cache the associated cache
+     * @param cacheManagerName the name of the cache manager
      */
     public RICacheStatistics(Cache cache, String cacheManagerName) {
         this.cache = cache;
