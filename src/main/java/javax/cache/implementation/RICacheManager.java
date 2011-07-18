@@ -32,6 +32,7 @@ import java.util.logging.Logger;
  * @author Yannis Cosmadopoulos
  */
 public class RICacheManager implements CacheManager {
+
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final ConcurrentHashMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
     private final String name;
@@ -42,12 +43,13 @@ public class RICacheManager implements CacheManager {
      * @param name the name of this cache manager
      * @throws NullPointerException if name is null.
      */
-    RICacheManager(String name) {
+    public RICacheManager(String name) {
         if (name == null) {
-            throw new NullPointerException("name");
+            throw new NullPointerException("No name specified");
         }
         this.name = name;
     }
+
 
     /**
      * {@inheritDoc}
@@ -62,6 +64,7 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     public void addCache(Cache<?, ?> cache) throws CacheException {
+        ((RICache)cache).setCacheManager(this);
         cache.start();
         Cache oldCache = caches.put(cache.getCacheName(), cache);
         if (oldCache != null) {

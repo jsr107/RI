@@ -19,18 +19,22 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The reference implementation for JSR107.
  * <p/>
- * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
+ * @author Greg Luck
  */
 public final class RICacheConfiguration implements CacheConfiguration {
-    private boolean readThrough;
-    private boolean writeThrough;
-    private boolean storeByValue;
+
+    private AtomicBoolean readThrough = new AtomicBoolean(false);
+    private AtomicBoolean writeThrough = new AtomicBoolean(false);
+    private AtomicBoolean storeByValue = new AtomicBoolean(true);
+    private AtomicBoolean statisticsEnabled = new AtomicBoolean(true);
+
 
     private RICacheConfiguration(boolean readThrough, boolean writeThrough, boolean storeByValue) {
         setReadThrough(readThrough);
@@ -42,44 +46,61 @@ public final class RICacheConfiguration implements CacheConfiguration {
      * {@inheritDoc}
      */
     public boolean isReadThrough() {
-        return readThrough;
+        return readThrough.get();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setReadThrough(boolean readThrough) {
-        this.readThrough = readThrough;
+        this.readThrough.set(readThrough);
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isWriteThrough() {
-        return writeThrough;
+        return writeThrough.get();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setWriteThrough(boolean writeThrough) {
-        this.writeThrough = writeThrough;
+        this.writeThrough.set(writeThrough);
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isStoreByValue() {
-        return storeByValue;
+        return storeByValue.get();
     }
 
     /**
      * {@inheritDoc}
      */
     public void setStoreByValue(boolean storeByValue) {
-        this.storeByValue = storeByValue;
+        this.storeByValue.set(storeByValue);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isStatisticsEnabled() {
+        return statisticsEnabled.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setStatisticsEnabled(boolean enableStatistics) {
+        this.statisticsEnabled.set(enableStatistics);
+    }
+
+    /**
+     * todo update when this stabilises
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,16 +108,16 @@ public final class RICacheConfiguration implements CacheConfiguration {
 
         CacheConfiguration that = (CacheConfiguration) o;
 
-        return readThrough == that.isReadThrough() &&
-                storeByValue == that.isStoreByValue() &&
-                writeThrough == that.isWriteThrough();
+        return readThrough.get() == that.isReadThrough() &&
+                storeByValue.get() == that.isStoreByValue() &&
+                writeThrough.get() == that.isWriteThrough();
     }
 
     @Override
     public int hashCode() {
-        int result = (readThrough ? 1 : 0);
-        result = 31 * result + (writeThrough ? 1 : 0);
-        result = 31 * result + (storeByValue ? 1 : 0);
+        int result = (readThrough.get() ? 1 : 0);
+        result = 31 * result + (writeThrough.get() ? 1 : 0);
+        result = 31 * result + (storeByValue.get() ? 1 : 0);
         return result;
     }
 

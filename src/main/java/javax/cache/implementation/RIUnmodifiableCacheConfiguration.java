@@ -85,6 +85,22 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @return true if statistics collection is enabled
+     */
+    public boolean isStatisticsEnabled() {
+        return config.isStatisticsEnabled();
+    }
+
+    /**
+     * Sets whether statistics gathering is set on this cache.
+     *
+     * @param enableStatistics true fo enable statistics, false to disable
+     */
+    public void setStatisticsEnabled(boolean enableStatistics) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -22,6 +22,7 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
+import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
@@ -64,13 +65,15 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
+    private volatile CacheManager cacheManager;
+    private RICacheStatistics statistics;
 
     /**
      * Constructs a cache.
      *
-     * @param cacheName the cache name
+     * @param cacheName     the cache name
      * @param configuration the configuration
-     * @param cacheLoader the cache loader
+     * @param cacheLoader   the cache loader
      */
     private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
         status = Status.UNITIALISED;
@@ -86,6 +89,13 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public String getCacheName() {
         return cacheName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
 
     /**
@@ -171,8 +181,11 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public CacheStatisticsMBean getCacheStatistics() {
         checkStatusStarted();
-        //TODO: this satisfies API but maybe we want a real impl?
-        return null;
+        if (statisticsEnabled()) {
+            return statistics;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -181,6 +194,9 @@ public final class RICache<K, V> implements Cache<K, V> {
     public void put(K key, V value) {
         checkStatusStarted();
         store.put(key, value);
+        if (statisticsEnabled()) {
+            statistics.increaseCachePuts(1);
+        }
     }
 
     /**
@@ -192,6 +208,9 @@ public final class RICache<K, V> implements Cache<K, V> {
             throw new NullPointerException("key");
         }
         store.putAll(map);
+        if (statisticsEnabled()) {
+            statistics.increaseCachePuts(map.size());
+        }
     }
 
     /**
@@ -199,7 +218,11 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        return store.putIfAbsent(key, value) == null;
+        boolean result = store.putIfAbsent(key, value) == null;
+        if (result && statisticsEnabled()) {
+            statistics.increaseCachePuts(1);
+        }
+        return result;
     }
 
     /**
@@ -208,7 +231,11 @@ public final class RICache<K, V> implements Cache<K, V> {
     public boolean remove(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
-        return store.remove(key) != null;
+        boolean result = store.remove(key) != null;
+        if (result && statisticsEnabled()) {
+            statistics.increaseCacheRemovals(1);
+        }
+        return result;
     }
 
     /**
@@ -217,7 +244,16 @@ public final class RICache<K, V> implements Cache<K, V> {
     public V getAndRemove(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
-        return store.remove(key);
+        Object result = store.remove(key);
+        if (statisticsEnabled()) {
+            if (result != null) {
+                statistics.increaseCacheHits(1);
+                statistics.increaseCacheRemovals(1);
+            } else {
+                statistics.increaseCacheMisses(1);
+            }
+        }
+        return (V) result;
     }
 
     /**
@@ -225,7 +261,14 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
-        return store.replace(key, oldValue, newValue);
+        if (store.replace(key, oldValue, newValue)) {
+            if (statisticsEnabled()) {
+                statistics.increaseCachePuts(1);
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -233,7 +276,11 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V value) {
         checkStatusStarted();
-        return store.replace(key, value) != null;
+        boolean result = store.replace(key, value) != null;
+        if (statisticsEnabled()) {
+            statistics.increaseCachePuts(1);
+        }
+        return result;
     }
 
     /**
@@ -241,7 +288,16 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
-        return store.replace(key, value);
+        Object result = store.replace(key, value);
+        if (statisticsEnabled()) {
+            if (result != null) {
+                statistics.increaseCacheHits(1);
+                statistics.increaseCachePuts(1);
+            } else {
+                statistics.increaseCacheMisses(1);
+            }
+        }
+        return (V) result;
     }
 
     /**
@@ -252,6 +308,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         for (K key : keys) {
             store.remove(key);
         }
+        if (statisticsEnabled()) {
+            statistics.increaseCacheRemovals(keys.size());
+        }
     }
 
     /**
@@ -259,7 +318,12 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void removeAll() {
         checkStatusStarted();
+        int size = store.size();
+        //possible race here but it is only stats
         store.clear();
+        if (statisticsEnabled()) {
+            statistics.increaseCacheRemovals(size);
+        }
     }
 
     /**
@@ -323,6 +387,25 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Status getStatus() {
         return status;
+    }
+
+    /**
+     * Sets the CacheManager. This may only be done once.
+     * @param cacheManager the CacheManager this cache has been added to.
+     * @throws CacheException if done more than once
+     */
+    void setCacheManager(CacheManager cacheManager) {
+        if (this.cacheManager != null) {
+            throw new CacheException("A cache can only be associated with a CacheManager once");
+        }
+        this.cacheManager = cacheManager;
+        //needs the CacheManager
+        statistics = new RICacheStatistics(this);
+    }
+
+
+    private boolean statisticsEnabled() {
+        return configuration.isStatisticsEnabled();
     }
 
     /**
@@ -395,6 +478,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     /**
      * {@inheritDoc}
+     *
      * @author Yannis Cosmadopoulos
      */
     private static class RIEntry<K, V> implements Entry<K, V> {
@@ -427,7 +511,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
             RIEntry e2 = (RIEntry) o;
 
-            return  this.getKey().equals(e2.getKey()) &&
+            return this.getKey().equals(e2.getKey()) &&
                     this.getValue().equals(e2.getValue());
         }
 
@@ -442,6 +526,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     /**
      * {@inheritDoc}
+     *
      * @author Yannis Cosmadopoulos
      */
     private static final class RIEntryIterator<K, V> implements Iterator<Entry<K, V>> {
@@ -536,6 +621,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     /**
      * A Builder for RICache.
+     *
      * @param <K>
      * @param <V>
      * @author Yannis Cosmadopoulos
@@ -547,6 +633,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         /**
          * Builds the cache
+         *
          * @return a constructed cache.
          */
         public RICache<K, V> build() {
@@ -600,5 +687,14 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.cacheName = cacheName;
             return this;
         }
+    }
+
+    /**
+     * Returns the size of the cache.
+     *
+     * @return the size in entries of the cache
+     */
+    long getSize() {
+        return store.size();
     }
 }

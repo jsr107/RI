@@ -24,15 +24,14 @@ import javax.cache.CacheConfiguration;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * {@inheritDoc}
- *
  * @author Yannis Cosmadopoulos
  */
 public enum RICacheBuilder implements CacheBuilder {
+
     /**
      * the singleton instance
      */
-    instance;
+    INSTANCE;
 
     /**
      * {@inheritDoc}

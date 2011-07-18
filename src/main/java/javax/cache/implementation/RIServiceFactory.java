@@ -32,7 +32,7 @@ public class RIServiceFactory implements CacheManagerFactoryProvider {
      */
     public CacheManager createCacheManager(String name) {
         if (name == null) {
-            throw new NullPointerException("name");
+            throw new NullPointerException("CacheManager name not specified");
         }
         return new RICacheManager(name);
     }
