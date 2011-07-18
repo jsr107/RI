@@ -50,9 +50,9 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @param cache the associated cache
      */
-    public RICacheStatistics(Cache cache, CacheManager cacheManager) {
+    public RICacheStatistics(Cache cache, String cacheManagerName) {
         this.cache = cache;
-        objectName = createObjectName(cacheManager.getName(), cache.getCacheName());
+        objectName = createObjectName(cacheManagerName, cache.getCacheName());
     }
 
     /**

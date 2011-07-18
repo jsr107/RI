@@ -24,7 +24,6 @@ import javax.cache.CacheConfiguration;
  * <p/>
  * Simple immutable implementation of {@link CacheConfiguration}
  * <p/>
- * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
  */
