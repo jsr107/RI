@@ -19,6 +19,7 @@ package javax.cache.implementation;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
+import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -29,7 +30,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * {@inheritDoc}
  */
 public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
 
@@ -46,14 +46,13 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
 
 
     /**
-     * Constructs an object from an ehcache statistics object
+     * Constructs a cache statistics object
      *
      * @param cache the associated cache
      */
-    public RICacheStatistics(Cache cache) {
+    public RICacheStatistics(Cache cache, CacheManager cacheManager) {
         this.cache = cache;
-        objectName = createObjectName(cache.getCacheManager().getName(),
-                cache.getCacheName());
+        objectName = createObjectName(cacheManager.getName(), cache.getCacheName());
     }
 
     /**

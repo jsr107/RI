@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
  */

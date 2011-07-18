@@ -400,7 +400,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
         this.cacheManager = cacheManager;
         //needs the CacheManager
-        statistics = new RICacheStatistics(this);
+        statistics = new RICacheStatistics(this, cacheManager);
     }
 
 

@@ -22,11 +22,10 @@ import javax.cache.spi.CacheManagerFactoryProvider;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * {@inheritDoc}
  *
  * @author Yannis Cosmadopoulos
  */
-public class RIServiceFactory implements CacheManagerFactoryProvider {
+public class RICacheManagerFactoryProvider implements CacheManagerFactoryProvider {
     /**
      * {@inheritDoc}
      */
