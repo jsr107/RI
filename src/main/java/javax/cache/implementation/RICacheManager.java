@@ -77,7 +77,7 @@ public class RICacheManager implements CacheManager {
         }
     }
 
-    private void addCache(Cache<?, ?> cache) throws CacheException {
+    private void addCacheInternal(Cache<?, ?> cache) throws CacheException {
         Cache oldCache;
         synchronized (caches) {
             oldCache = caches.put(cache.getCacheName(), cache);
@@ -93,6 +93,9 @@ public class RICacheManager implements CacheManager {
      */
     public boolean removeCache(String cacheName) {
         Cache oldCache;
+        if (cacheName == null) {
+            throw new NullPointerException("name");
+        }
         synchronized (caches) {
             oldCache = caches.remove(cacheName);
         }
@@ -147,7 +150,7 @@ public class RICacheManager implements CacheManager {
 
         public Cache<K, V> build() {
             Cache<K, V> cache = cacheBuilder.build();
-            addCache(cache);
+            addCacheInternal(cache);
             return cache;
         }
 
