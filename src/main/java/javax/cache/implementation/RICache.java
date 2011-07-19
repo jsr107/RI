@@ -822,7 +822,23 @@ public final class RICache<K, V> implements Cache<K, V> {
     private V getInternal(Object key) {
         //noinspection SuspiciousMethodCalls
         Holder<V>  holder = store.get(key);
-        return holder == null ? null : holder.get();
+        if (holder == null) {
+            if (cacheLoader != null) {
+                return getFromLoader((K) key);
+            } else {
+                return null;
+            }
+        } else {
+            return holder.get();
+        }
+    }
+
+    private V getFromLoader(K key) {
+        V value = cacheLoader.load(key, null);
+        if (value != null) {
+            putInternal(key, value);
+        }
+        return value;
     }
 
     private Holder<V> putInternal(K key, V value) {
