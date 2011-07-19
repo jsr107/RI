@@ -28,7 +28,13 @@ import javax.cache.CacheStatisticsMBean;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +65,7 @@ import java.util.concurrent.FutureTask;
 public final class RICache<K, V> implements Cache<K, V> {
     private static final int CACHE_LOADER_THREADS = 2;
 
-    private final ConcurrentHashMap<K, V> store = new ConcurrentHashMap<K, V>();
+    private final ConcurrentHashMap<K, Holder<V>> store = new ConcurrentHashMap<K, Holder<V>>();
     private final String cacheName;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
@@ -119,7 +125,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public V get(Object key) throws CacheException {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
-        return store.get(key);
+        return getInternal(key);
     }
 
     /**
@@ -133,7 +139,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         // will throw NPE if keys=null
         HashMap<K, V> map = new HashMap<K, V>(keys.size());
         for (K key : keys) {
-            map.put(key, store.get(key));
+            map.put(key, getInternal(key));
         }
         return map;
     }
@@ -208,7 +214,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void put(K key, V value) {
         checkStatusStarted();
-        store.put(key, value);
+        putInternal(key, value);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -222,7 +228,11 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (map.containsKey(null)) {
             throw new NullPointerException("key");
         }
-        store.putAll(map);
+        HashMap<K, Holder<V>> toStore = new HashMap<K, Holder<V>>(map.size());
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+            toStore.put(entry.getKey(), createHolder(entry.getValue()));
+        }
+        store.putAll(toStore);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(map.size());
         }
@@ -233,7 +243,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        boolean result = store.putIfAbsent(key, value) == null;
+        boolean result = store.putIfAbsent(key, createHolder(value)) == null;
         if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -245,8 +255,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean remove(Object key) {
         checkStatusStarted();
-        //noinspection SuspiciousMethodCalls
-        boolean result = store.remove(key) != null;
+        boolean result = removeInternal(key) != null;
         if (result && statisticsEnabled()) {
             statistics.increaseCacheRemovals(1);
         }
@@ -258,8 +267,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndRemove(Object key) {
         checkStatusStarted();
-        //noinspection SuspiciousMethodCalls
-        V result = store.remove(key);
+        Holder<V> result = removeInternal(key);
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -268,7 +276,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 statistics.increaseCacheMisses(1);
             }
         }
-        return result;
+        return result == null ? null : result.get();
     }
 
     /**
@@ -276,7 +284,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
-        if (store.replace(key, oldValue, newValue)) {
+        if (replaceInternal(key, oldValue, newValue)) {
             if (statisticsEnabled()) {
                 statistics.increaseCachePuts(1);
             }
@@ -291,7 +299,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V value) {
         checkStatusStarted();
-        boolean result = store.replace(key, value) != null;
+        boolean result = replaceInternal(key, value) != null;
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -303,7 +311,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
-        V result = store.replace(key, value);
+        Holder<V> result = replaceInternal(key, value);
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -312,7 +320,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 statistics.increaseCacheMisses(1);
             }
         }
-        return result;
+        return result == null ? null : result.get();
     }
 
     /**
@@ -544,9 +552,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     private static final class RIEntryIterator<K, V> implements Iterator<Entry<K, V>> {
-        private final Iterator<Map.Entry<K, V>> mapIterator;
+        private final Iterator<Map.Entry<K, Holder<V>>> mapIterator;
 
-        private RIEntryIterator(Iterator<Map.Entry<K, V>> mapIterator) {
+        private RIEntryIterator(Iterator<Map.Entry<K, Holder<V>>> mapIterator) {
             this.mapIterator = mapIterator;
         }
 
@@ -561,8 +569,8 @@ public final class RICache<K, V> implements Cache<K, V> {
          * {@inheritDoc}
          */
         public Entry<K, V> next() {
-            Map.Entry<K, V> mapEntry = mapIterator.next();
-            return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue());
+            Map.Entry<K, Holder<V>> mapEntry = mapIterator.next();
+            return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue().get());
         }
 
         /**
@@ -719,6 +727,128 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.cacheLoader = cacheLoader;
             return this;
         }
+    }
+
+    /**
+     * Holds a value by reference.
+     *
+     * @param <V> the value type
+     */
+    private static class ByReferenceHolder<V> implements Holder<V> {
+        private final V value;
+
+        public ByReferenceHolder(V value) {
+            this.value = value;
+        }
+
+        public V get() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ByReferenceHolder that = (ByReferenceHolder) o;
+
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
+    }
+
+    /**
+     * Holds a value by value.
+     *
+     * @param <V> the value type
+     */
+    private static class ByValueHolder<V> implements Holder<V> {
+        private final byte[] bytes;
+
+        public ByValueHolder(V value) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                ObjectOutputStream oos = new ObjectOutputStream(bos);
+                oos.writeObject(value);
+                bos.flush();
+                bytes = bos.toByteArray();
+            } catch (IOException e) {
+                throw new CacheException(e);
+            }
+        }
+
+        public V get() {
+            ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
+            ObjectInputStream ois;
+            try {
+                ois = new ObjectInputStream(bos);
+                return (V) ois.readObject();
+            } catch (IOException e) {
+                throw new CacheException(e);
+            } catch (ClassNotFoundException e) {
+                throw new CacheException(e);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ByValueHolder that = (ByValueHolder) o;
+
+            return Arrays.equals(bytes, that.bytes);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(bytes);
+        }
+    }
+
+    /**
+     * Holds a value.
+     *
+     * @param <V> the value type
+     */
+    private interface Holder<V> {
+        V get();
+    }
+
+    private V getInternal(Object key) {
+        //noinspection SuspiciousMethodCalls
+        Holder<V>  holder = store.get(key);
+        return holder == null ? null : holder.get();
+    }
+
+    private Holder<V> putInternal(K key, V value) {
+        return store.put(key, createHolder(value));
+    }
+
+    private Holder<V> removeInternal(Object key) {
+        //noinspection SuspiciousMethodCalls
+        return store.remove(key);
+    }
+
+    private boolean replaceInternal(K key, V oldValue, V newValue) {
+        return store.replace(key, createHolder(oldValue), createHolder(newValue));
+    }
+
+    private Holder<V> replaceInternal(K key, V value) {
+        return store.replace(key, createHolder(value));
+    }
+
+    private Holder<V> createHolder(V value) {
+        if (value == null) {
+            throw new NullPointerException("value");
+        }
+        return configuration.isStoreByValue() ?
+                new ByValueHolder<V>(value) :
+                new ByReferenceHolder<V>(value);
     }
 
     /**
