@@ -23,6 +23,7 @@ import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
+import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
@@ -65,23 +66,37 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
-    private final RICacheStatistics statistics;
+    private volatile CacheManager cacheManager;
+    private volatile RICacheStatistics statistics;
 
     /**
      * Constructs a cache.
      *
      * @param cacheName     the cache name
+     * @param cacheManagerName the cache manager name
      * @param configuration the configuration
      * @param cacheLoader   the cache loader
      */
     private RICache(String cacheName, String cacheManagerName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
+        this(cacheName, configuration, cacheLoader);
+        statistics = new RICacheStatistics(this, cacheManagerName);
+    }
+
+    /**
+     * Constructs a cache.
+     *
+     * <em>TODO (yannis): Not clear why this is required. What is the meaning of a Cache without a CacheManager?</em>
+     * @param cacheName     the cache name
+     * @param configuration the configuration
+     * @param cacheLoader   the cache loader
+     */
+    private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
         status = Status.UNITIALISED;
         assert configuration != null;
         assert cacheName != null;
         this.cacheName = cacheName;
         this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
-        statistics = new RICacheStatistics(this, cacheManagerName);
     }
 
     /**
@@ -89,6 +104,13 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public String getCacheName() {
         return cacheName;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public CacheManager getCacheManager() {
+        return cacheManager;
     }
 
     /**
@@ -382,6 +404,20 @@ public final class RICache<K, V> implements Cache<K, V> {
         return status;
     }
 
+    /**
+     * Sets the CacheManager. This may only be done once.
+     * @param cacheManager the CacheManager this cache has been added to.
+     * @throws CacheException if done more than once
+     */
+    void setCacheManager(CacheManager cacheManager) {
+        if (this.cacheManager != null) {
+            throw new CacheException("A cache can only be associated with a CacheManager once");
+        }
+        this.cacheManager = cacheManager;
+        //needs the CacheManager
+        statistics = new RICacheStatistics(this, cacheManager.getName());
+    }
+
     private boolean statisticsEnabled() {
         return configuration.isStatisticsEnabled();
     }
@@ -628,6 +664,20 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         /**
+         * Construct a builder.
+         *
+         * <em>TODO (yannis): Not clear why this is required. What is the meaning of a Cache without a CacheManager?</em>
+         * @param cacheName the name of the cache to be built
+         */
+        public Builder(String cacheName) {
+            if (cacheName == null) {
+                throw new NullPointerException("cacheName");
+            }
+            this.cacheName = cacheName;
+            this.cacheManagerName = null;
+        }
+
+        /**
          * Builds the cache
          *
          * @return a constructed cache.
@@ -636,7 +686,10 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K, V>(cacheName, cacheManagerName, configuration, cacheLoader);
+            return cacheManagerName == null ?
+                    new RICache<K, V>(cacheName, configuration, cacheLoader) :
+                    new RICache<K, V>(cacheName, cacheManagerName, configuration, cacheLoader);
+
         }
 
         /**

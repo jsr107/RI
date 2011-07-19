@@ -71,6 +71,14 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    public void addCache(Cache<?, ?> cache) throws CacheException {
+        ((RICache)cache).setCacheManager(this);
+        addCacheInternal(cache);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public <K, V> Cache<K, V> getCache(String cacheName) {
         synchronized (caches) {
             return caches.get(cacheName);
