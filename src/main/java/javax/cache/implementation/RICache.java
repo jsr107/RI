@@ -824,7 +824,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         Holder<V>  holder = store.get(key);
         if (holder == null) {
             if (cacheLoader != null) {
-                return getFromLoader((K) key);
+                return getFromLoader(key);
             } else {
                 return null;
             }
@@ -833,12 +833,14 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
     }
 
-    private V getFromLoader(K key) {
-        V value = cacheLoader.load(key, null);
-        if (value != null) {
-            putInternal(key, value);
+    private V getFromLoader(Object key) {
+        Cache.Entry<K, V> entry = cacheLoader.loadEntry(key, null);
+        if (entry != null) {
+            putInternal(entry.getKey(), entry.getValue());
+            return entry.getValue();
+        } else {
+            return null;
         }
-        return value;
     }
 
     private Holder<V> putInternal(K key, V value) {
