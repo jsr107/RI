@@ -83,7 +83,6 @@ public class RIByValueSerializer<V> implements Serializer<V> {
 
             return hashCode == riBinary.hashCode &&
                     (Arrays.equals(bytes, riBinary.bytes) || get().equals(riBinary.get()));
-
         }
 
         @Override

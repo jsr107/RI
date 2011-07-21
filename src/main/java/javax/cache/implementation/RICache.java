@@ -60,7 +60,8 @@ import java.util.concurrent.FutureTask;
 public final class RICache<K, V> implements Cache<K, V> {
     private static final int CACHE_LOADER_THREADS = 2;
 
-    private final ConcurrentHashMap<K, Serializer.Binary<V>> store = new ConcurrentHashMap<K, Serializer.Binary<V>>();
+    private final ConcurrentHashMap<Serializer.Binary<K>, Serializer.Binary<V>> store =
+            new ConcurrentHashMap<Serializer.Binary<K>, Serializer.Binary<V>>();
     private final String cacheName;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
@@ -70,6 +71,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private volatile CacheManager cacheManager;
     private volatile RICacheStatistics statistics;
     private final Serializer<V> valueSerializer;
+    private final Serializer<K> keySerializer;
 
     /**
      * Constructs a cache.
@@ -102,6 +104,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.valueSerializer = configuration.isStoreByValue() ?
                 new RIByValueSerializer<V>() :
                 new RIByReferenceSerializer<V>();
+        this.keySerializer = configuration.isStoreByValue() ?
+                new RIByValueSerializer<K>() :
+                new RIByReferenceSerializer<K>();
     }
 
     /**
@@ -149,7 +154,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public boolean containsKey(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
-        return store.containsKey(key);
+        return store.containsKey(createSearchObject(key));
     }
 
     /**
@@ -164,7 +169,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (key == null) {
             throw new NullPointerException("key");
         }
-        if (store.containsKey(key)) {
+        if (containsKey(key)) {
             return null;
         }
         FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, loader, key, loaderArgument));
@@ -227,9 +232,11 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (map.containsKey(null)) {
             throw new NullPointerException("key");
         }
-        HashMap<K, Serializer.Binary<V>> toStore = new HashMap<K, Serializer.Binary<V>>(map.size());
+        HashMap<Serializer.Binary<K>, Serializer.Binary<V>> toStore =
+                new HashMap<Serializer.Binary<K>, Serializer.Binary<V>>(map.size());
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            toStore.put(entry.getKey(), createValueHolder(entry.getValue()));
+            toStore.put(createKeyHolder(entry.getKey()),
+                    createValueHolder(entry.getValue()));
         }
         store.putAll(toStore);
         if (statisticsEnabled()) {
@@ -242,7 +249,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        boolean result = store.putIfAbsent(key, createValueHolder(value)) == null;
+        boolean result = store.putIfAbsent(createKeyHolder(key), createValueHolder(value)) == null;
         if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -328,7 +335,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public void removeAll(Collection<? extends K> keys) {
         checkStatusStarted();
         for (K key : keys) {
-            store.remove(key);
+            removeInternal(key);
         }
         if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(keys.size());
@@ -551,9 +558,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     private static final class RIEntryIterator<K, V> implements Iterator<Entry<K, V>> {
-        private final Iterator<Map.Entry<K, Serializer.Binary<V>>> mapIterator;
+        private final Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> mapIterator;
 
-        private RIEntryIterator(Iterator<Map.Entry<K, Serializer.Binary<V>>> mapIterator) {
+        private RIEntryIterator(Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> mapIterator) {
             this.mapIterator = mapIterator;
         }
 
@@ -568,8 +575,8 @@ public final class RICache<K, V> implements Cache<K, V> {
          * {@inheritDoc}
          */
         public Entry<K, V> next() {
-            Map.Entry<K, Serializer.Binary<V>> mapEntry = mapIterator.next();
-            return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue().get());
+            Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> mapEntry = mapIterator.next();
+            return new RIEntry<K, V>(mapEntry.getKey().get(), mapEntry.getValue().get());
         }
 
         /**
@@ -630,7 +637,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         public Map<K, V> call() throws Exception {
             ArrayList<K> keysNotInStore = new ArrayList<K>();
             for (K key : keys) {
-                if (!cache.store.containsKey(key)) {
+                if (!cache.containsKey(key)) {
                     keysNotInStore.add(key);
                 }
             }
@@ -730,7 +737,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     private V getInternal(Object key) {
         //noinspection SuspiciousMethodCalls
-        Serializer.Binary<V>  holder = store.get(key);
+        Serializer.Binary<V>  holder = store.get(createSearchObject(key));
         if (holder == null) {
             if (cacheLoader != null) {
                 return getFromLoader(key);
@@ -753,20 +760,20 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private Serializer.Binary<V> putInternal(K key, V value) {
-        return store.put(key, createValueHolder(value));
+        return store.put(createKeyHolder(key), createValueHolder(value));
     }
 
     private Serializer.Binary<V> removeInternal(Object key) {
         //noinspection SuspiciousMethodCalls
-        return store.remove(key);
+        return store.remove(createSearchObject(key));
     }
 
     private boolean replaceInternal(K key, V oldValue, V newValue) {
-        return store.replace(key, createValueHolder(oldValue), createValueHolder(newValue));
+        return store.replace(createKeyHolder(key), createValueHolder(oldValue), createValueHolder(newValue));
     }
 
     private Serializer.Binary<V> replaceInternal(K key, V value) {
-        return store.replace(key, createValueHolder(value));
+        return store.replace(createKeyHolder(key), createValueHolder(value));
     }
 
     private Serializer.Binary<V> createValueHolder(V value) {
@@ -774,6 +781,32 @@ public final class RICache<K, V> implements Cache<K, V> {
             throw new NullPointerException("value");
         }
         return valueSerializer.createBinary(value);
+    }
+
+    private Serializer.Binary<K> createKeyHolder(K key) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+        return keySerializer.createBinary(key);
+    }
+
+    private Object createSearchObject(final Object o) {
+        return new Object() {
+            @Override
+            public boolean equals(Object o1) {
+                if (this == o1) return true;
+                if (o1 == null || !(o1 instanceof Serializer.Binary)) return false;
+
+                Serializer.Binary that = (Serializer.Binary) o1;
+
+                return o.hashCode() == that.hashCode() && o.equals(that.get());
+            }
+
+            @Override
+            public int hashCode() {
+                return o.hashCode();
+            }
+        };
     }
 
     /**
