@@ -123,9 +123,7 @@ public class RISerializer<V> implements Serializer<V> {
 
             RIBinary riBinary = (RIBinary) o;
 
-            if (!Arrays.equals(bytes, riBinary.bytes)) return false;
-
-            return true;
+            return Arrays.equals(bytes, riBinary.bytes);
         }
 
         @Override
