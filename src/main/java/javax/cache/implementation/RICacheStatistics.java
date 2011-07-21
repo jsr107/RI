@@ -23,6 +23,7 @@ import javax.cache.CacheStatisticsMBean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -107,6 +108,17 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     }
 
     /**
+     * The date from which statistics have been accumulated. Because statistics can be cleared, this is not necessarily
+     * since the cache was started.
+     *
+     * @return the date statistics started being accumulated
+     */
+    public Date statsAccumulatingFrom() {
+        return null;
+        //Todo change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
      * {@inheritDoc}
      */
     public long getEntryCount() {
@@ -184,6 +196,36 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      */
     public long getCacheEvictions() {
         return cacheEvictions.longValue();
+    }
+
+    /**
+     * The mean time to execute gets.
+     *
+     * @return the time in milliseconds
+     */
+    public long getAverageGetMillis() {
+        return 0;
+        //Todo change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
+     * The mean time to execute puts.
+     *
+     * @return the time in milliseconds
+     */
+    public long getAveragePutMillis() {
+        return 0;
+        //Todo change body of implemented methods use File | Settings | File Templates.
+    }
+
+    /**
+     * The mean time to execute removes.
+     *
+     * @return the time in milliseconds
+     */
+    public long getAverageRemoveMillis() {
+        //Todo change body of implemented methods use File | Settings | File Templates.
+        return 0;
     }
 
     //package local incrementers
