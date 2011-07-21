@@ -18,6 +18,7 @@
 
 package javax.cache.implementation;
 
+import javax.cache.Binary;
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
@@ -25,16 +26,11 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
+import javax.cache.Serializer;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,6 +70,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
     private volatile CacheManager cacheManager;
     private volatile RICacheStatistics statistics;
+    private final RISerializer<V> valueSerializer;
 
     /**
      * Constructs a cache.
@@ -103,6 +100,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.cacheName = cacheName;
         this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
+        this.valueSerializer = (configuration.isStoreByValue() ? new RISerializer<V>() : null);
     }
 
     /**
@@ -230,7 +228,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
         HashMap<K, Holder<V>> toStore = new HashMap<K, Holder<V>>(map.size());
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            toStore.put(entry.getKey(), createHolder(entry.getValue()));
+            toStore.put(entry.getKey(), createValueHolder(entry.getValue()));
         }
         store.putAll(toStore);
         if (statisticsEnabled()) {
@@ -243,7 +241,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        boolean result = store.putIfAbsent(key, createHolder(value)) == null;
+        boolean result = store.putIfAbsent(key, createValueHolder(value)) == null;
         if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -732,16 +730,16 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * Holds a value by reference.
      *
-     * @param <V> the value type
+     * @param <O> the value type
      */
-    private static class ByReferenceHolder<V> implements Holder<V> {
-        private final V value;
+    private static class ByReferenceHolder<O> implements Holder<O> {
+        private final O value;
 
-        public ByReferenceHolder(V value) {
+        public ByReferenceHolder(O value) {
             this.value = value;
         }
 
-        public V get() {
+        public O get() {
             return value;
         }
 
@@ -762,36 +760,21 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Holds a value by value.
+     * Holds an object by value.
      *
-     * @param <V> the value type
+     * @param <O> the object type
      */
-    private static class ByValueHolder<V> implements Holder<V> {
-        private final byte[] bytes;
+    private static class ByValueHolder<O> implements Holder<O> {
+        private final Binary binary;
+        private final Serializer<O> serializer;
 
-        public ByValueHolder(V value) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            try {
-                ObjectOutputStream oos = new ObjectOutputStream(bos);
-                oos.writeObject(value);
-                bos.flush();
-                bytes = bos.toByteArray();
-            } catch (IOException e) {
-                throw new CacheException(e);
-            }
+        public ByValueHolder(Serializer<O> serializer, O value) {
+            this.serializer = serializer;
+            binary = serializer.toBinary(value);
         }
 
-        public V get() {
-            ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois;
-            try {
-                ois = new ObjectInputStream(bos);
-                return (V) ois.readObject();
-            } catch (IOException e) {
-                throw new CacheException(e);
-            } catch (ClassNotFoundException e) {
-                throw new CacheException(e);
-            }
+        public O get() {
+            return serializer.fromBinary(binary);
         }
 
         @Override
@@ -801,22 +784,22 @@ public final class RICache<K, V> implements Cache<K, V> {
 
             ByValueHolder that = (ByValueHolder) o;
 
-            return Arrays.equals(bytes, that.bytes);
+            return binary.equals(that.binary);
         }
 
         @Override
         public int hashCode() {
-            return Arrays.hashCode(bytes);
+            return binary.hashCode();
         }
     }
 
     /**
      * Holds a value.
      *
-     * @param <V> the value type
+     * @param <O> the value type
      */
-    private interface Holder<V> {
-        V get();
+    private interface Holder<O> {
+        O get();
     }
 
     private V getInternal(Object key) {
@@ -844,7 +827,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private Holder<V> putInternal(K key, V value) {
-        return store.put(key, createHolder(value));
+        return store.put(key, createValueHolder(value));
     }
 
     private Holder<V> removeInternal(Object key) {
@@ -853,19 +836,19 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private boolean replaceInternal(K key, V oldValue, V newValue) {
-        return store.replace(key, createHolder(oldValue), createHolder(newValue));
+        return store.replace(key, createValueHolder(oldValue), createValueHolder(newValue));
     }
 
     private Holder<V> replaceInternal(K key, V value) {
-        return store.replace(key, createHolder(value));
+        return store.replace(key, createValueHolder(value));
     }
 
-    private Holder<V> createHolder(V value) {
+    private Holder<V> createValueHolder(V value) {
         if (value == null) {
             throw new NullPointerException("value");
         }
-        return configuration.isStoreByValue() ?
-                new ByValueHolder<V>(value) :
+        return valueSerializer != null ?
+                new ByValueHolder<V>(valueSerializer, value) :
                 new ByReferenceHolder<V>(value);
     }
 
