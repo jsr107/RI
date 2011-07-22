@@ -608,9 +608,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         public V call() throws Exception {
-            V value = cacheLoader.load(key, arg);
-            cache.put(key, value);
-            return value;
+            Entry<K, V> entry = cacheLoader.load(key, arg);
+            cache.put(entry.getKey(), entry.getValue());
+            return entry.getValue();
         }
     }
 
@@ -750,7 +750,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private V getFromLoader(Object key) {
-        Cache.Entry<K, V> entry = cacheLoader.loadEntry(key, null);
+        Cache.Entry<K, V> entry = cacheLoader.load(key, null);
         if (entry != null) {
             putInternal(entry.getKey(), entry.getValue());
             return entry.getValue();
