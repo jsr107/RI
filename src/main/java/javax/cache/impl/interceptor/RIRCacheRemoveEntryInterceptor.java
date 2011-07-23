@@ -20,8 +20,8 @@ package javax.cache.impl.interceptor;
 import javax.cache.Cache;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheRemoveEntry;
 import javax.cache.interceptor.CacheResolver;
-import javax.cache.interceptor.CacheResult;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -33,8 +33,8 @@ import javax.interceptor.InvocationContext;
  * @author Rick Hightower
  * 
  */
-@CacheResult @Interceptor
-public class RICacheResultInterceptor {
+@CacheRemoveEntry @Interceptor
+public class RIRCacheRemoveEntryInterceptor {
     
     
     @Inject
@@ -52,25 +52,20 @@ public class RICacheResultInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
-        CacheResult cacheResult = joinPoint.getMethod().getAnnotation(
-                CacheResult.class);
+        CacheRemoveEntry annotation = joinPoint.getMethod().getAnnotation(
+                CacheRemoveEntry.class);
 
-        CacheResolver resolver  = getCacheResolver(cacheResult);
+        CacheResolver resolver  = getCacheResolver(annotation);
 
-        Cache<Object, Object> cache = resolver.resolveCache(cacheResult.cacheName(), joinPoint.getMethod());
+        Cache<Object, Object> cache = resolver.resolveCache(annotation.cacheName(), joinPoint.getMethod());
         
         
-        CacheKeyGenerator keyGenerator = getKeyGenerator(cacheResult);
+        CacheKeyGenerator keyGenerator = getKeyGenerator(annotation);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
 
-        if (!cache.containsKey(key)) {
-            Object value = joinPoint.proceed();
-            if (value != null) {
-                cache.put(key, value);
-            }
-        }
+        cache.remove(key);
 
-        return cache.get(key);
+        return joinPoint.proceed();
     }
 
     /**
@@ -78,7 +73,7 @@ public class RICacheResultInterceptor {
      * @param cacheResult
      * @return
      */
-    private CacheKeyGenerator getKeyGenerator(CacheResult cacheResult) {
+    private CacheKeyGenerator getKeyGenerator(CacheRemoveEntry cacheResult) {
         //TODO wrap the qualifiers from cacheResult.cacheKeyGeneratorQualifiers() and pass to getBeanByType
         return beanManagerUtil.getBeanByType(cacheResult.cacheKeyGenerator());
     }
@@ -88,7 +83,7 @@ public class RICacheResultInterceptor {
      * @param cacheResult
      * @return
      */
-    private CacheResolver getCacheResolver(CacheResult cacheResult) {
+    private CacheResolver getCacheResolver(CacheRemoveEntry cacheResult) {
         //TODO wrap the qualifiers from cacheResult.cacheResolverQualifiers() and pass to getBeanByType
         return beanManagerUtil.getBeanByType(cacheResult.cacheResovler());
     }
