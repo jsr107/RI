@@ -34,7 +34,7 @@ import javax.interceptor.InvocationContext;
  * 
  */
 @CacheRemoveEntry @Interceptor
-public class RIRCacheRemoveEntryInterceptor {
+public class RICacheRemoveEntryInterceptor {
     
     
     @Inject
