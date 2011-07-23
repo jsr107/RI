@@ -20,12 +20,10 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import javax.cache.Cache;
-import javax.cache.CacheManagerFactory;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CacheResolver;
 import javax.cache.interceptor.CacheResult;
-import javax.cache.interceptor.DefaultCacheResolver;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -91,7 +89,7 @@ public class RICacheResultInterceptor {
 
         CacheResolver resolver  = getCacheResolver(cacheResult);
 
-        Cache<Object, Object> cache = resolver.resolveCacheManger(cacheResult.cacheName(), joinPoint.getMethod());
+        Cache<Object, Object> cache = resolver.resolveCache(cacheResult.cacheName(), joinPoint.getMethod());
         
         
         CacheKeyGenerator keyGenerator = getKeyGenerator(cacheResult);
@@ -124,8 +122,7 @@ public class RICacheResultInterceptor {
      */
     private CacheResolver getCacheResolver(CacheResult cacheResult) {
         //TODO wrap the qualifiers from cacheResult.cacheResolverQualifiers() and pass to getBeanByType
-        CacheResolver resolver = getBeanByType(cacheResult.cacheResovler());
-        return resolver == null ? new DefaultCacheResolver(CacheManagerFactory.INSTANCE.getCacheManager()) : resolver;
+        return getBeanByType(cacheResult.cacheResovler());
     }
 
 }
