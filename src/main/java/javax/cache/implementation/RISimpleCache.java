@@ -29,53 +29,84 @@ import java.util.Map;
  * @author Yannis Cosmadopoulos
  */
 interface RISimpleCache<K, V> {
+
     /**
+     * @param key the key
+     * @return the value
+     * @see javax.cache.Cache#get(Object)
+     */
+    V get(Object key);
+
+    /**
+     * @param key the key
+     * @return true if exists
      * @see javax.cache.Cache#containsKey(Object)
      */
     boolean containsKey(Object key);
 
     /**
+     * @param key the key
+     * @param value the valu
      * @see javax.cache.Cache#put(Object, Object)
      */
     void put(K key, V value);
 
     /**
+     * @param map the map of key/values
      * @see javax.cache.Cache#putAll(java.util.Map)
      */
     void putAll(Map<? extends K, ? extends V> map);
 
     /**
+     * @param key the key
+     * @param value the value
+     * @return true if replace happened
      * @see javax.cache.Cache#putIfAbsent(Object, Object)
      */
     boolean putIfAbsent(K key, V value);
 
     /**
+     * @param key the key
      * @see javax.cache.Cache#remove(Object)
+     * @return true if removed
      */
     boolean remove(Object key);
 
     /**
+     * @param key the key
+     * @return the previous value
      * @see javax.cache.Cache#remove(Object)
      */
     V getAndRemove(Object key);
 
     /**
+     * @param key the key
+     * @param oldValue old value
+     * @param newValue new value
+     * @return whether replace happened
      * @see javax.cache.Cache#replace(Object, Object, Object)
      */
     boolean replace(K key, V oldValue, V newValue);
 
     /**
+     * @param key the key
+     * @param value the value
+     * @return whether replaced
      * @see javax.cache.Cache#replace(Object, Object)
      */
     boolean replace(K key, V value);
 
     /**
+     * @param key the key
+     * @param value the new value
+     * @return the old value
      * @see javax.cache.Cache#replace(Object, Object)
      */
     V getAndReplace(K key, V value);
 
     /**
-     * @see javax.cache.Cache
+     * @see java.util.Map#size()
+     * @return the size
      */
     int size();
 
@@ -85,12 +116,8 @@ interface RISimpleCache<K, V> {
     void removeAll();
 
     /**
+     * @return the iterator
      * @see javax.cache.Cache#iterator()
      */
     Iterator<Map.Entry<K, V>> iterator();
-
-    /**
-     * @see javax.cache.Cache#get(Object)
-     */
-    V get(Object key);
 }
