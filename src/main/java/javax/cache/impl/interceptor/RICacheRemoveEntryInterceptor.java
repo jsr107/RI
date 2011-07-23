@@ -63,9 +63,18 @@ public class RICacheRemoveEntryInterceptor {
         CacheKeyGenerator keyGenerator = getKeyGenerator(annotation);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
 
-        cache.remove(key);
+        
+        if (!annotation.afterInvocation()) {
+            cache.remove(key);
+         }
 
-        return joinPoint.proceed();
+        Object ret = joinPoint.proceed();
+
+        if (annotation.afterInvocation()) {
+            cache.remove(key);
+         }
+        
+        return ret;
     }
 
     /**

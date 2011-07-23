@@ -62,15 +62,23 @@ public class RICacheResultInterceptor {
         
         CacheKeyGenerator keyGenerator = getKeyGenerator(cacheResult);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
+        
+        
+        Object ret = null;
 
-        if (!cache.containsKey(key)) {
-            Object value = joinPoint.proceed();
-            if (value != null) {
-                cache.put(key, value);
-            }
+        if (!cacheResult.skipGet()) {
+           ret = cache.get(key);
         }
 
-        return cache.get(key);
+        if (ret == null) {
+             ret = joinPoint.proceed();
+             if (ret != null) {
+                 cache.put(key, ret);
+             }
+        }
+
+        return ret;
+
     }
 
     /**

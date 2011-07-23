@@ -57,10 +57,19 @@ public class RICacheRemoveAllInterceptor {
 
         Cache<Object, Object> cache = resolver.resolveCache(annotation.cacheName(), joinPoint.getMethod());
         
-        
-        cache.removeAll();
+        if (!annotation.afterInvocation()) {
+            cache.removeAll();
+         }
 
-        return joinPoint.proceed();
+        Object ret = joinPoint.proceed();
+
+        if (annotation.afterInvocation()) {
+            cache.removeAll();
+         }
+        
+        return ret;
+        
+        
     }
 
  
