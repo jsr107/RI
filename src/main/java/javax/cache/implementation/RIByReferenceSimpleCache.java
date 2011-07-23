@@ -38,6 +38,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean containsKey(Object key) {
         return store.containsKey(key);
     }
@@ -45,6 +46,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void put(K key, V value) {
         store.put(key, value);
     }
@@ -52,6 +54,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void putAll(Map<? extends K, ? extends V> map) {
         store.putAll(map);
     }
@@ -59,6 +62,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean putIfAbsent(K key, V value) {
         return store.putIfAbsent(key, value) == null;
     }
@@ -66,6 +70,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean remove(Object key) {
         return store.remove(key) != null;
     }
@@ -73,6 +78,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V getAndRemove(Object key) {
         return store.remove(key);
     }
@@ -80,6 +86,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean replace(K key, V oldValue, V newValue) {
         return store.replace(key, oldValue, newValue);
     }
@@ -87,6 +94,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean replace(K key, V value) {
         return store.replace(key, value) != null;
     }
@@ -94,6 +102,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V getAndReplace(K key, V value) {
         return store.replace(key, value);
     }
@@ -101,6 +110,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int size() {
         return store.size();
     }
@@ -108,6 +118,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeAll() {
         store.clear();
     }
@@ -115,6 +126,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Iterator<Map.Entry<K, V>> iterator() {
         return store.entrySet().iterator();
     }
@@ -122,6 +134,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V get(Object key) {
         return store.get(key);
     }

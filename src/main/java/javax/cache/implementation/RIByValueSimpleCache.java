@@ -50,6 +50,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean putIfAbsent(K key, V value) {
         return store.putIfAbsent(createKeyHolder(key), createValueHolder(value));
     }
@@ -57,6 +58,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean replace(K key, V oldValue, V newValue) {
         return store.replace(createKeyHolder(key), createValueHolder(oldValue), createValueHolder(newValue));
     }
@@ -64,6 +66,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean replace(K key, V value) {
         return store.replace(createKeyHolder(key), createValueHolder(value));
     }
@@ -71,6 +74,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V getAndReplace(K key, V value) {
         Serializer.Binary<V> binary = store.getAndReplace(createKeyHolder(key), createValueHolder(value));
         return binary == null ? null : binary.get();
@@ -79,6 +83,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int size() {
         return store.size();
     }
@@ -86,6 +91,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean containsKey(Object key) {
         return store.containsKey(createSearchObject(key));
     }
@@ -93,6 +99,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V get(Object key) {
         Serializer.Binary<V> binary = store.get(createSearchObject(key));
         return binary == null ? null : binary.get();
@@ -101,6 +108,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void put(K key, V value) {
         store.put(createKeyHolder(key), createValueHolder(value));
     }
@@ -108,6 +116,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean remove(Object key) {
         return store.remove(createSearchObject(key));
     }
@@ -115,6 +124,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V getAndRemove(Object key) {
         Serializer.Binary<V> binary = store.getAndRemove(createSearchObject(key));
         return binary == null ? null : binary.get();
@@ -123,6 +133,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void putAll(Map<? extends K, ? extends V> map) {
         HashMap<Serializer.Binary<K>, Serializer.Binary<V>> toStore =
             new HashMap<Serializer.Binary<K>, Serializer.Binary<V>>(map.size());
@@ -136,6 +147,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeAll() {
         store.removeAll();
     }
@@ -143,6 +155,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Iterator<Map.Entry<K, V>> iterator() {
         return new WrappedIterator<K, V>(store.iterator());
     }
@@ -160,15 +173,18 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
             this.iterator = iterator;
         }
 
+        @Override
         public boolean hasNext() {
             return iterator.hasNext();
         }
 
+        @Override
         public Map.Entry<K, V> next() {
             Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> next = iterator.next();
             return new WrappedEntry<K, V>(next);
         }
 
+        @Override
         public void remove() {
             iterator.remove();
         }
@@ -186,14 +202,17 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
                 this.entry = entry;
             }
 
+            @Override
             public K getKey() {
                 return entry.getKey().get();
             }
 
+            @Override
             public V getValue() {
                 return entry.getValue().get();
             }
 
+            @Override
             public V setValue(V v) {
                 throw new UnsupportedOperationException();
             }

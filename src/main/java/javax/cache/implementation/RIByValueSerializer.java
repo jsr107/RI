@@ -38,6 +38,7 @@ public class RIByValueSerializer<V> implements Serializer<V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Binary<V> createBinary(V value) {
         if (value == null) {
             throw new NullPointerException();
@@ -64,6 +65,7 @@ public class RIByValueSerializer<V> implements Serializer<V> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public V get() {
             try {
                 return fromBytes(bytes);

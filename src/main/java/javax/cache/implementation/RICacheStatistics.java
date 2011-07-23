@@ -84,6 +84,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getName() {
         return cache.getCacheName();
     }
@@ -91,6 +92,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getStatus() {
         return cache.getStatus().toString();
     }
@@ -98,6 +100,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void clearStatistics() {
         cachePuts.set(0);
         cacheMisses.set(0);
@@ -113,6 +116,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the date statistics started being accumulated
      */
+    @Override
     public Date statsAccumulatingFrom() {
         return null;
         //Todo change body of implemented methods use File | Settings | File Templates.
@@ -128,6 +132,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * @return the number of hits
      */
+    @Override
     public long getCacheHits() {
         return cacheHits.longValue();
     }
@@ -137,6 +142,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the percentage of successful hits, as a decimal
      */
+    @Override
     public float getCacheHitPercentage() {
         return getCacheHits() / getCacheGets();
     }
@@ -144,6 +150,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * @return the number of misses
      */
+    @Override
     public long getCacheMisses() {
         return cacheMisses.longValue();
     }
@@ -153,6 +160,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the percentage of accesses that failed to find anything
      */
+    @Override
     public float getCacheMissPercentage() {
         return getCacheMisses() / getCacheGets();
     }
@@ -164,6 +172,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the number of hits
      */
+    @Override
     public long getCacheGets() {
         return getCacheHits() + getCacheMisses();
     }
@@ -175,6 +184,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the number of hits
      */
+    @Override
     public long getCachePuts() {
         return cachePuts.longValue();
     }
@@ -187,6 +197,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the number of hits
      */
+    @Override
     public long getCacheRemovals() {
         return cacheRemovals.longValue();
     }
@@ -194,6 +205,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * @return the number of evictions from the cache
      */
+    @Override
     public long getCacheEvictions() {
         return cacheEvictions.longValue();
     }
@@ -203,6 +215,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the time in milliseconds
      */
+    @Override
     public long getAverageGetMillis() {
         return 0;
         //Todo change body of implemented methods use File | Settings | File Templates.
@@ -213,6 +226,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the time in milliseconds
      */
+    @Override
     public long getAveragePutMillis() {
         return 0;
         //Todo change body of implemented methods use File | Settings | File Templates.
@@ -223,6 +237,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      *
      * @return the time in milliseconds
      */
+    @Override
     public long getAverageRemoveMillis() {
         //Todo change body of implemented methods use File | Settings | File Templates.
         return 0;

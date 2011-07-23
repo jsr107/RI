@@ -45,6 +45,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isReadThrough() {
         return config.isReadThrough();
     }
@@ -52,6 +53,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setReadThrough(boolean readThrough) {
         throw new UnsupportedOperationException();
     }
@@ -59,6 +61,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isWriteThrough() {
         return config.isWriteThrough();
     }
@@ -66,6 +69,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setWriteThrough(boolean writeThrough) {
         throw new UnsupportedOperationException();
     }
@@ -73,6 +77,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isStoreByValue() {
         return config.isStoreByValue();
     }
@@ -80,6 +85,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setStoreByValue(boolean storeByValue) {
         throw new UnsupportedOperationException();
     }
@@ -87,6 +93,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
     /**
      * @return true if statistics collection is enabled
      */
+    @Override
     public boolean isStatisticsEnabled() {
         return config.isStatisticsEnabled();
     }
@@ -96,6 +103,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
      *
      * @param enableStatistics true fo enable statistics, false to disable
      */
+    @Override
     public void setStatisticsEnabled(boolean enableStatistics) {
         throw new UnsupportedOperationException();
     }

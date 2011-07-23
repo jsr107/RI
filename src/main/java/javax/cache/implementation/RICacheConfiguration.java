@@ -47,6 +47,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isReadThrough() {
         return readThrough.get();
     }
@@ -54,6 +55,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setReadThrough(boolean readThrough) {
         this.readThrough.set(readThrough);
     }
@@ -61,6 +63,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isWriteThrough() {
         return writeThrough.get();
     }
@@ -68,6 +71,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setWriteThrough(boolean writeThrough) {
         this.writeThrough.set(writeThrough);
     }
@@ -75,6 +79,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isStoreByValue() {
         return storeByValue.get();
     }
@@ -82,6 +87,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setStoreByValue(boolean storeByValue) {
         this.storeByValue.set(storeByValue);
     }
@@ -89,6 +95,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isStatisticsEnabled() {
         return statisticsEnabled.get();
     }
@@ -96,6 +103,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setStatisticsEnabled(boolean enableStatistics) {
         this.statisticsEnabled.set(enableStatistics);
     }

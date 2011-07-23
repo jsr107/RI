@@ -29,6 +29,7 @@ public class RICacheManagerFactoryProvider implements CacheManagerFactoryProvide
     /**
      * {@inheritDoc}
      */
+    @Override
     public CacheManager createCacheManager(String name) {
         if (name == null) {
             throw new NullPointerException("CacheManager name not specified");

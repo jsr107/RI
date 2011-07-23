@@ -57,6 +57,7 @@ public class RICacheManager implements CacheManager {
      * <p/>
      * The name returned will be that passed in to the constructor {@link #RICacheManager(String)}
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -64,6 +65,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    @Override
     public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName) {
         return new RICacheBuilder<K, V>(cacheName);
     }
@@ -71,6 +73,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addCache(Cache<?, ?> cache) throws CacheException {
         ((RICache)cache).setCacheManager(this);
         addCacheInternal(cache);
@@ -79,6 +82,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    @Override
     public <K, V> Cache<K, V> getCache(String cacheName) {
         synchronized (caches) {
             return caches.get(cacheName);
@@ -99,6 +103,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean removeCache(String cacheName) {
         Cache oldCache;
         if (cacheName == null) {
@@ -117,6 +122,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getUserTransaction() {
         throw new UnsupportedOperationException();
     }
@@ -124,6 +130,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void shutdown() {
         for (Cache cache : caches.values()) {
             try {
@@ -156,17 +163,20 @@ public class RICacheManager implements CacheManager {
             cacheBuilder = new RICache.Builder<K, V>(cacheName, name);
         }
 
+        @Override
         public Cache<K, V> build() {
             Cache<K, V> cache = cacheBuilder.build();
             addCacheInternal(cache);
             return cache;
         }
 
+        @Override
         public CacheBuilder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
             cacheBuilder.setCacheConfiguration(configuration);
             return this;
         }
 
+        @Override
         public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             cacheBuilder.setCacheLoader(cacheLoader);
             return this;

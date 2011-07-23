@@ -103,6 +103,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getCacheName() {
         return cacheName;
     }
@@ -110,6 +111,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * @inheritDoc
      */
+    @Override
     public CacheManager getCacheManager() {
         return cacheManager;
     }
@@ -126,6 +128,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<K, V> getAll(Collection<? extends K> keys) {
         checkStatusStarted();
         if (keys.contains(null)) {
@@ -142,6 +145,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean containsKey(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
@@ -151,6 +155,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Future<V> load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
         CacheLoader<K, V> loader = getCacheLoader(specificLoader);
@@ -171,6 +176,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Future<Map<K, V>> loadAll(Collection<? extends K> keys, CacheLoader<K, V> specificLoader, Object loaderArgument) {
         checkStatusStarted();
         if (keys == null) {
@@ -195,6 +201,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public CacheStatisticsMBean getCacheStatistics() {
         checkStatusStarted();
         if (statisticsEnabled()) {
@@ -207,6 +214,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void put(K key, V value) {
         checkStatusStarted();
         store.put(key, value);
@@ -218,6 +226,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void putAll(Map<? extends K, ? extends V> map) {
         checkStatusStarted();
         if (map.containsKey(null)) {
@@ -232,6 +241,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
         boolean result = store.putIfAbsent(key, value);
@@ -244,6 +254,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean remove(Object key) {
         checkStatusStarted();
         boolean result = store.remove(key);
@@ -256,6 +267,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V getAndRemove(Object key) {
         checkStatusStarted();
         V result = store.getAndRemove(key);
@@ -273,6 +285,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
         if (store.replace(key, oldValue, newValue)) {
@@ -288,6 +301,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean replace(K key, V value) {
         checkStatusStarted();
         boolean result = store.replace(key, value);
@@ -300,6 +314,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
         V result = store.getAndReplace(key, value);
@@ -317,6 +332,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeAll(Collection<? extends K> keys) {
         checkStatusStarted();
         for (K key : keys) {
@@ -330,6 +346,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeAll() {
         checkStatusStarted();
         int size = (statisticsEnabled()) ? store.size() : 0;
@@ -343,6 +360,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public CacheConfiguration getConfiguration() {
         return configuration;
     }
@@ -350,6 +368,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean registerCacheEntryListener(CacheEntryListener cacheEntryListener, NotificationScope scope) {
         ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope);
         return cacheEntryListeners.add(scopedListener);
@@ -358,6 +377,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean unregisterCacheEntryListener(CacheEntryListener cacheEntryListener) {
         //Only cacheEntryListener is checked for equality
         ScopedListener scopedListener = new ScopedListener(cacheEntryListener, null);
@@ -367,6 +387,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Iterator<Entry<K, V>> iterator() {
         checkStatusStarted();
         return new RIEntryIterator<K, V>(store.iterator());
@@ -375,6 +396,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws CacheException {
         status = Status.STARTED;
     }
@@ -382,6 +404,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws CacheException {
         status = Status.STOPPING;
         executorService.shutdown();
@@ -399,6 +422,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Status getStatus() {
         return status;
     }
@@ -482,7 +506,6 @@ public final class RICache<K, V> implements Cache<K, V> {
             return true;
         }
 
-
         @Override
         public String toString() {
             return listener.toString();
@@ -506,10 +529,12 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.value = value;
         }
 
+        @Override
         public K getKey() {
             return key;
         }
 
+        @Override
         public V getValue() {
             return value;
         }
@@ -552,6 +577,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean hasNext() {
             return mapIterator.hasNext();
         }
@@ -559,6 +585,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public Entry<K, V> next() {
             Map.Entry<K, V> mapEntry = mapIterator.next();
             return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue());
@@ -567,6 +594,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void remove() {
             mapIterator.remove();
         }
@@ -592,6 +620,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.arg = arg;
         }
 
+        @Override
         public V call() throws Exception {
             Entry<K, V> entry = cacheLoader.load(key, arg);
             cache.put(entry.getKey(), entry.getValue());
@@ -619,6 +648,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.arg = arg;
         }
 
+        @Override
         public Map<K, V> call() throws Exception {
             ArrayList<K> keysNotInStore = new ArrayList<K>();
             for (K key : keys) {
@@ -681,6 +711,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          *
          * @return a constructed cache.
          */
+        @Override
         public RICache<K, V> build() {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
@@ -697,6 +728,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param configuration the cache configuration
          * @return the builder
          */
+        @Override
         public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
             if (configuration == null) {
                 throw new NullPointerException("configuration");
@@ -711,6 +743,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param cacheLoader the CacheLoader
          * @return the builder
          */
+        @Override
         public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             if (cacheLoader == null) {
                 throw new NullPointerException("cacheLoader");
