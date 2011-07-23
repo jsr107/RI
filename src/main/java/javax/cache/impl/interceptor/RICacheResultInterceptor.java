@@ -16,6 +16,7 @@
  */
 package javax.cache.impl.interceptor;
 
+import java.lang.reflect.Method;
 
 import javax.cache.Cache;
 import javax.cache.interceptor.CacheKey;
@@ -57,7 +58,12 @@ public class RICacheResultInterceptor {
 
         CacheResolver resolver  = getCacheResolver(cacheResult);
 
-        Cache<Object, Object> cache = resolver.resolveCache(cacheResult.cacheName(), joinPoint.getMethod());
+        
+        String cacheName = cacheResult.cacheName();
+        cacheName = cacheName.trim().equals("") ? getDefaultMethodCacheName(joinPoint) : cacheName;
+                
+        
+        Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         
         CacheKeyGenerator keyGenerator = getKeyGenerator(cacheResult);
@@ -101,4 +107,31 @@ public class RICacheResultInterceptor {
         return beanManagerUtil.getBeanByType(cacheResult.cacheResovler());
     }
 
+    
+    /**
+     *
+     * @param
+     * @return
+     */
+    public static String getDefaultMethodCacheName(InvocationContext joinPoint) {
+        
+        Method method = joinPoint.getMethod();
+        Class<?>[] parameterTypes = method.getParameterTypes();
+
+       StringBuilder cacheName = new StringBuilder(80)
+             .append(method.getDeclaringClass().getName())
+             .append(".")
+             .append(method.getName())
+             .append("(");
+
+       for (Class<?> paramType : parameterTypes) {
+          cacheName.append(paramType.getName()).append(",");
+       }
+       if (parameterTypes.length > 0) {
+           cacheName.setCharAt(cacheName.length() - 1, ')');
+           return cacheName.toString();
+       } else {
+           return cacheName.append(')').toString();
+       }
+    }
 }
