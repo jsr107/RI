@@ -15,7 +15,6 @@
  *  limitations under the License.
  */
 
-
 package javax.cache.implementation;
 
 import javax.cache.Cache;
@@ -25,7 +24,6 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
-import javax.cache.Serializer;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
@@ -36,7 +34,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,8 +57,7 @@ import java.util.concurrent.FutureTask;
 public final class RICache<K, V> implements Cache<K, V> {
     private static final int CACHE_LOADER_THREADS = 2;
 
-    private final ConcurrentHashMap<Serializer.Binary<K>, Serializer.Binary<V>> store =
-            new ConcurrentHashMap<Serializer.Binary<K>, Serializer.Binary<V>>();
+    private final RISimpleCache<K, V> store;
     private final String cacheName;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
@@ -70,8 +66,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
     private volatile CacheManager cacheManager;
     private volatile RICacheStatistics statistics;
-    private final Serializer<V> valueSerializer;
-    private final Serializer<K> keySerializer;
 
     /**
      * Constructs a cache.
@@ -89,7 +83,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * Constructs a cache.
      *
-     * <em>TODO (yannis): Not clear why this is required. What is the meaning of a Cache without a CacheManager?</em>
+     * <em>TODO (yannis): Not removeAll why this is required. What is the meaning of a Cache without a CacheManager?</em>
      * @param cacheName     the cache name
      * @param configuration the configuration
      * @param cacheLoader   the cache loader
@@ -101,12 +95,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.cacheName = cacheName;
         this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
-        this.valueSerializer = configuration.isStoreByValue() ?
-                new RIByValueSerializer<V>() :
-                new RIByReferenceSerializer<V>();
-        this.keySerializer = configuration.isStoreByValue() ?
-                new RIByValueSerializer<K>() :
-                new RIByReferenceSerializer<K>();
+        store = configuration.isStoreByValue() ?
+            new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(), new RIByValueSerializer<V>()) :
+            new RIByReferenceSimpleCache<K, V>();
     }
 
     /**
@@ -154,7 +145,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public boolean containsKey(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
-        return store.containsKey(createSearchObject(key));
+        return store.containsKey(key);
     }
 
     /**
@@ -218,7 +209,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void put(K key, V value) {
         checkStatusStarted();
-        putInternal(key, value);
+        store.put(key, value);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -232,13 +223,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (map.containsKey(null)) {
             throw new NullPointerException("key");
         }
-        HashMap<Serializer.Binary<K>, Serializer.Binary<V>> toStore =
-                new HashMap<Serializer.Binary<K>, Serializer.Binary<V>>(map.size());
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            toStore.put(createKeyHolder(entry.getKey()),
-                    createValueHolder(entry.getValue()));
-        }
-        store.putAll(toStore);
+        store.putAll(map);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(map.size());
         }
@@ -249,7 +234,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
-        boolean result = store.putIfAbsent(createKeyHolder(key), createValueHolder(value)) == null;
+        boolean result = store.putIfAbsent(key, value);
         if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -261,7 +246,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean remove(Object key) {
         checkStatusStarted();
-        boolean result = removeInternal(key) != null;
+        boolean result = store.remove(key);
         if (result && statisticsEnabled()) {
             statistics.increaseCacheRemovals(1);
         }
@@ -273,7 +258,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndRemove(Object key) {
         checkStatusStarted();
-        Serializer.Binary<V> result = removeInternal(key);
+        V result = store.getAndRemove(key);
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -282,7 +267,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 statistics.increaseCacheMisses(1);
             }
         }
-        return result == null ? null : result.get();
+        return result;
     }
 
     /**
@@ -290,7 +275,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
-        if (replaceInternal(key, oldValue, newValue)) {
+        if (store.replace(key, oldValue, newValue)) {
             if (statisticsEnabled()) {
                 statistics.increaseCachePuts(1);
             }
@@ -305,7 +290,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public boolean replace(K key, V value) {
         checkStatusStarted();
-        boolean result = replaceInternal(key, value) != null;
+        boolean result = store.replace(key, value);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
@@ -317,7 +302,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
-        Serializer.Binary<V> result = replaceInternal(key, value);
+        V result = store.getAndReplace(key, value);
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -326,7 +311,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 statistics.increaseCacheMisses(1);
             }
         }
-        return result == null ? null : result.get();
+        return result;
     }
 
     /**
@@ -335,7 +320,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     public void removeAll(Collection<? extends K> keys) {
         checkStatusStarted();
         for (K key : keys) {
-            removeInternal(key);
+            store.remove(key);
         }
         if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(keys.size());
@@ -347,9 +332,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void removeAll() {
         checkStatusStarted();
-        int size = store.size();
+        int size = (statisticsEnabled()) ? store.size() : 0;
         //possible race here but it is only stats
-        store.clear();
+        store.removeAll();
         if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(size);
         }
@@ -384,7 +369,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public Iterator<Entry<K, V>> iterator() {
         checkStatusStarted();
-        return new RIEntryIterator<K, V>(store.entrySet().iterator());
+        return new RIEntryIterator<K, V>(store.iterator());
     }
 
     /**
@@ -401,7 +386,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         status = Status.STOPPING;
         executorService.shutdown();
         //TODO: maybe wait for executor to stop
-        store.clear();
+        store.removeAll();
         status = Status.STOPPED;
     }
 
@@ -558,9 +543,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     private static final class RIEntryIterator<K, V> implements Iterator<Entry<K, V>> {
-        private final Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> mapIterator;
+        private final Iterator<Map.Entry<K, V>> mapIterator;
 
-        private RIEntryIterator(Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> mapIterator) {
+        private RIEntryIterator(Iterator<Map.Entry<K, V>> mapIterator) {
             this.mapIterator = mapIterator;
         }
 
@@ -575,8 +560,8 @@ public final class RICache<K, V> implements Cache<K, V> {
          * {@inheritDoc}
          */
         public Entry<K, V> next() {
-            Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> mapEntry = mapIterator.next();
-            return new RIEntry<K, V>(mapEntry.getKey().get(), mapEntry.getValue().get());
+            Map.Entry<K, V> mapEntry = mapIterator.next();
+            return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue());
         }
 
         /**
@@ -680,7 +665,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * Construct a builder.
          *
-         * <em>TODO (yannis): Not clear why this is required. What is the meaning of a Cache without a CacheManager?</em>
+         * <em>TODO (yannis): Not removeAll why this is required. What is the meaning of a Cache without a CacheManager?</em>
          * @param cacheName the name of the cache to be built
          */
         public Builder(String cacheName) {
@@ -737,76 +722,26 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     private V getInternal(Object key) {
         //noinspection SuspiciousMethodCalls
-        Serializer.Binary<V>  holder = store.get(createSearchObject(key));
-        if (holder == null) {
+        V  value = store.get(key);
+        if (value == null) {
             if (cacheLoader != null) {
                 return getFromLoader(key);
             } else {
                 return null;
             }
         } else {
-            return holder.get();
+            return value;
         }
     }
 
     private V getFromLoader(Object key) {
         Cache.Entry<K, V> entry = cacheLoader.load(key, null);
         if (entry != null) {
-            putInternal(entry.getKey(), entry.getValue());
+            store.put(entry.getKey(), entry.getValue());
             return entry.getValue();
         } else {
             return null;
         }
-    }
-
-    private Serializer.Binary<V> putInternal(K key, V value) {
-        return store.put(createKeyHolder(key), createValueHolder(value));
-    }
-
-    private Serializer.Binary<V> removeInternal(Object key) {
-        //noinspection SuspiciousMethodCalls
-        return store.remove(createSearchObject(key));
-    }
-
-    private boolean replaceInternal(K key, V oldValue, V newValue) {
-        return store.replace(createKeyHolder(key), createValueHolder(oldValue), createValueHolder(newValue));
-    }
-
-    private Serializer.Binary<V> replaceInternal(K key, V value) {
-        return store.replace(createKeyHolder(key), createValueHolder(value));
-    }
-
-    private Serializer.Binary<V> createValueHolder(V value) {
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-        return valueSerializer.createBinary(value);
-    }
-
-    private Serializer.Binary<K> createKeyHolder(K key) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        return keySerializer.createBinary(key);
-    }
-
-    private Object createSearchObject(final Object o) {
-        return new Object() {
-            @Override
-            public boolean equals(Object o1) {
-                if (this == o1) return true;
-                if (o1 == null || !(o1 instanceof Serializer.Binary)) return false;
-
-                Serializer.Binary that = (Serializer.Binary) o1;
-
-                return o.hashCode() == that.hashCode() && o.equals(that.get());
-            }
-
-            @Override
-            public int hashCode() {
-                return o.hashCode();
-            }
-        };
     }
 
     /**
