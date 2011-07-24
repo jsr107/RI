@@ -18,6 +18,7 @@ package javax.cache.impl.interceptor;
 
 
 import javax.cache.Cache;
+import javax.cache.interceptor.CacheConfig;
 import javax.cache.interceptor.CacheRemoveAll;
 import javax.cache.interceptor.CacheResolver;
 import javax.inject.Inject;
@@ -33,10 +34,13 @@ import javax.interceptor.InvocationContext;
  */
 @CacheRemoveAll @Interceptor
 public class RICacheRemoveAllInterceptor {
-    
-    
+
+    /**
+     * 
+     */
     @Inject
-    private BeanManagerUtil beanManagerUtil;
+    private RICacheLookupUtil lookup;
+
 
 
     /**
@@ -50,12 +54,20 @@ public class RICacheRemoveAllInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
+        
+        CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
+
+        
         CacheRemoveAll annotation = joinPoint.getMethod().getAnnotation(
                 CacheRemoveAll.class);
 
-        CacheResolver resolver  = getCacheResolver(annotation);
+        
+        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResovler(), config);
+        
 
-        Cache<Object, Object> cache = resolver.resolveCache(annotation.cacheName(), joinPoint.getMethod());
+        String cacheName = lookup.findCacheName(config, annotation.cacheName());
+
+        Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         if (!annotation.afterInvocation()) {
             cache.removeAll();
@@ -70,17 +82,6 @@ public class RICacheRemoveAllInterceptor {
         return ret;
         
         
-    }
-
- 
-    /**
-     * 
-     * @param cacheResult
-     * @return
-     */
-    private CacheResolver getCacheResolver(CacheRemoveAll cacheResult) {
-        //TODO wrap the qualifiers from cacheResult.cacheResolverQualifiers() and pass to getBeanByType
-        return beanManagerUtil.getBeanByType(cacheResult.cacheResovler());
     }
 
 }

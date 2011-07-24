@@ -16,9 +16,9 @@
  */
 package javax.cache.impl.interceptor;
 
-import java.lang.reflect.Method;
 
 import javax.cache.Cache;
+import javax.cache.interceptor.CacheConfig;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CacheResolver;
@@ -37,11 +37,13 @@ import javax.interceptor.InvocationContext;
 @CacheResult @Interceptor
 public class RICacheResultInterceptor {
     
-    
+    /**
+     * 
+     */
     @Inject
-    private BeanManagerUtil beanManagerUtil;
-
-
+    private RICacheLookupUtil lookup;
+    
+ 
     /**
      * Cache Result around method.
      * 
@@ -53,20 +55,23 @@ public class RICacheResultInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
+        
+        CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
+        
         CacheResult cacheResult = joinPoint.getMethod().getAnnotation(
                 CacheResult.class);
 
-        CacheResolver resolver  = getCacheResolver(cacheResult);
+        CacheResolver resolver  = lookup.getCacheResolver(cacheResult.cacheResovler(), config);
 
         
-        String cacheName = cacheResult.cacheName();
-        cacheName = cacheName.trim().equals("") ? getDefaultMethodCacheName(joinPoint) : cacheName;
+        String cacheName = lookup.findCacheName(config, cacheResult.cacheName());
+        cacheName = cacheName.trim().equals("") ? lookup.getDefaultMethodCacheName(joinPoint) : cacheName;
                 
         
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         
-        CacheKeyGenerator keyGenerator = getKeyGenerator(cacheResult);
+        CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(cacheResult.cacheKeyGenerator(), config);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
         
         
@@ -87,51 +92,6 @@ public class RICacheResultInterceptor {
 
     }
 
-    /**
-     * 
-     * @param cacheResult
-     * @return
-     */
-    private CacheKeyGenerator getKeyGenerator(CacheResult cacheResult) {
-        //TODO wrap the qualifiers from cacheResult.cacheKeyGeneratorQualifiers() and pass to getBeanByType
-        return beanManagerUtil.getBeanByType(cacheResult.cacheKeyGenerator());
-    }
 
-    /**
-     * 
-     * @param cacheResult
-     * @return
-     */
-    private CacheResolver getCacheResolver(CacheResult cacheResult) {
-        //TODO wrap the qualifiers from cacheResult.cacheResolverQualifiers() and pass to getBeanByType
-        return beanManagerUtil.getBeanByType(cacheResult.cacheResovler());
-    }
 
-    
-    /**
-     *
-     * @param
-     * @return
-     */
-    public static String getDefaultMethodCacheName(InvocationContext joinPoint) {
-        
-        Method method = joinPoint.getMethod();
-        Class<?>[] parameterTypes = method.getParameterTypes();
-
-       StringBuilder cacheName = new StringBuilder(80)
-             .append(method.getDeclaringClass().getName())
-             .append(".")
-             .append(method.getName())
-             .append("(");
-
-       for (Class<?> paramType : parameterTypes) {
-          cacheName.append(paramType.getName()).append(",");
-       }
-       if (parameterTypes.length > 0) {
-           cacheName.setCharAt(cacheName.length() - 1, ')');
-           return cacheName.toString();
-       } else {
-           return cacheName.append(')').toString();
-       }
-    }
 }

@@ -18,6 +18,7 @@ package javax.cache.impl.interceptor;
 
 
 import javax.cache.Cache;
+import javax.cache.interceptor.CacheConfig;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CacheRemoveEntry;
@@ -36,9 +37,11 @@ import javax.interceptor.InvocationContext;
 @CacheRemoveEntry @Interceptor
 public class RICacheRemoveEntryInterceptor {
     
-    
+    /**
+     * 
+     */
     @Inject
-    private BeanManagerUtil beanManagerUtil;
+    private RICacheLookupUtil lookup;
 
 
     /**
@@ -52,15 +55,22 @@ public class RICacheRemoveEntryInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
+        
+        CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
+
+
         CacheRemoveEntry annotation = joinPoint.getMethod().getAnnotation(
                 CacheRemoveEntry.class);
 
-        CacheResolver resolver  = getCacheResolver(annotation);
+        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResovler(), config);
 
-        Cache<Object, Object> cache = resolver.resolveCache(annotation.cacheName(), joinPoint.getMethod());
+        
+        String cacheName = lookup.findCacheName(config, annotation.cacheName());
+
+        Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         
-        CacheKeyGenerator keyGenerator = getKeyGenerator(annotation);
+        CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(annotation.cacheKeyGenerator(), config);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
 
         
@@ -75,26 +85,6 @@ public class RICacheRemoveEntryInterceptor {
          }
         
         return ret;
-    }
-
-    /**
-     * 
-     * @param cacheResult
-     * @return
-     */
-    private CacheKeyGenerator getKeyGenerator(CacheRemoveEntry cacheResult) {
-        //TODO wrap the qualifiers from cacheResult.cacheKeyGeneratorQualifiers() and pass to getBeanByType
-        return beanManagerUtil.getBeanByType(cacheResult.cacheKeyGenerator());
-    }
-
-    /**
-     * 
-     * @param cacheResult
-     * @return
-     */
-    private CacheResolver getCacheResolver(CacheRemoveEntry cacheResult) {
-        //TODO wrap the qualifiers from cacheResult.cacheResolverQualifiers() and pass to getBeanByType
-        return beanManagerUtil.getBeanByType(cacheResult.cacheResovler());
     }
 
 }
