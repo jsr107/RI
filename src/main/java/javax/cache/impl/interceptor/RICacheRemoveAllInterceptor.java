@@ -54,19 +54,15 @@ public class RICacheRemoveAllInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
-        
-        CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
 
-        
+        /* Lookup configuration annotations. */
+        CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
         CacheRemoveAll annotation = joinPoint.getMethod().getAnnotation(
                 CacheRemoveAll.class);
 
-        
+        /* Lookup cache. */
         CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResovler(), config);
-        
-
         String cacheName = lookup.findCacheName(config, annotation.cacheName());
-
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         if (!annotation.afterInvocation()) {

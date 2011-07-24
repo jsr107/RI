@@ -56,21 +56,17 @@ public class RICacheResultInterceptor {
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
         
+        /* Get annotations for configuration. */
         CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
-        
-        CacheResult cacheResult = joinPoint.getMethod().getAnnotation(
-                CacheResult.class);
+        CacheResult cacheResult = joinPoint.getMethod().getAnnotation(CacheResult.class);
 
+        /* Lookup cache. */
         CacheResolver resolver  = lookup.getCacheResolver(cacheResult.cacheResovler(), config);
-
-        
         String cacheName = lookup.findCacheName(config, cacheResult.cacheName());
         cacheName = cacheName.trim().equals("") ? lookup.getDefaultMethodCacheName(joinPoint) : cacheName;
-                
-        
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
-        
+        /* Generate key. */
         CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(cacheResult.cacheKeyGenerator(), config);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
         

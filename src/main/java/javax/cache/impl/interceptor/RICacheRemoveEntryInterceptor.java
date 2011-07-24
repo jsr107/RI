@@ -56,20 +56,16 @@ public class RICacheRemoveEntryInterceptor {
     @AroundInvoke
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
         
+        /* Get annotation configuration. */
         CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
+        CacheRemoveEntry annotation = joinPoint.getMethod().getAnnotation(CacheRemoveEntry.class);
 
-
-        CacheRemoveEntry annotation = joinPoint.getMethod().getAnnotation(
-                CacheRemoveEntry.class);
-
+        /* Lookup cache. */
         CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResovler(), config);
-
-        
         String cacheName = lookup.findCacheName(config, annotation.cacheName());
-
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
-        
+        /* Generate key. */
         CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(annotation.cacheKeyGenerator(), config);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
 
