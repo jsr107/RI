@@ -113,6 +113,12 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
         store.put(createKeyHolder(key), createValueHolder(value));
     }
 
+    @Override
+    public V getAndPut(K key, V value) {
+        Serializer.Binary<V> binary = store.getAndPut(createKeyHolder(key), createValueHolder(value));
+        return binary == null ? null : binary.get();
+    }
+
     /**
      * {@inheritDoc}
      */

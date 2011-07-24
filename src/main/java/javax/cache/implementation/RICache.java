@@ -223,6 +223,16 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
     }
 
+    @Override
+    public V getAndPut(K key, V value) throws CacheException {
+        checkStatusStarted();
+        V result = store.getAndPut(key, value);
+        if (statisticsEnabled()) {
+            statistics.increaseCachePuts(1);
+        }
+        return result;
+    }
+
     /**
      * {@inheritDoc}
      */

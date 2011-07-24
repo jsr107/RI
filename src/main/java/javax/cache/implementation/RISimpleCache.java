@@ -52,6 +52,14 @@ interface RISimpleCache<K, V> {
     void put(K key, V value);
 
     /**
+     * @param key the key
+     * @param value the value
+     * @return the old value
+     * @see javax.cache.Cache#getAndPut(Object, Object)
+     */
+    V getAndPut(K key, V value);
+
+    /**
      * @param map the map of key/values
      * @see javax.cache.Cache#putAll(java.util.Map)
      */
