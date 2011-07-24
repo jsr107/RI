@@ -35,7 +35,7 @@ public class RICacheLookupUtil {
      * 
      */
     @Inject
-    private BeanManagerUtil beanManagerUtil;
+    private RIBeanManagerUtil beanManagerUtil;
 
     /**
      * 

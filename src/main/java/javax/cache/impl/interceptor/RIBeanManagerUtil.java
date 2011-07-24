@@ -29,7 +29,7 @@ import javax.inject.Inject;
  * @author Rick Hightower
  *
  */
-public class BeanManagerUtil {
+public class RIBeanManagerUtil {
     
     
     /**
