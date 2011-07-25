@@ -39,7 +39,6 @@ public class RICacheLookupUtil {
 
     /**
      * 
-     * @param cacheResult
      * @return
      */
     public CacheKeyGenerator getKeyGenerator(Class<? extends CacheKeyGenerator> clazz, CacheConfig config) {
@@ -56,7 +55,6 @@ public class RICacheLookupUtil {
 
     /**
      * 
-     * @param cacheResult
      * @return
      */
     public CacheResolver getCacheResolver(Class<? extends CacheResolver> clazz, CacheConfig config) {
@@ -64,7 +62,7 @@ public class RICacheLookupUtil {
             return beanManagerUtil.getBeanByType(clazz);
         } else {
             if (clazz == CacheResolver.class) {
-                return beanManagerUtil.getBeanByType(config.cacheResovler());
+                return beanManagerUtil.getBeanByType(config.cacheResolver());
             } else {
                 return beanManagerUtil.getBeanByType(clazz);                
             }
