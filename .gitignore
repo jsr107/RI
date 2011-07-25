@@ -1,6 +1,7 @@
 ri.iml
 ri.ipr
 ri.iws
+cache-ri.iml
 .idea
 target
 /.settings
