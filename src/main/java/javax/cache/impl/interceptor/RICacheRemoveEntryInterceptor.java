@@ -61,7 +61,7 @@ public class RICacheRemoveEntryInterceptor {
         CacheRemoveEntry annotation = joinPoint.getMethod().getAnnotation(CacheRemoveEntry.class);
 
         /* Lookup cache. */
-        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResovler(), config);
+        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResolver(), config);
         String cacheName = lookup.findCacheName(config, annotation.cacheName());
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         

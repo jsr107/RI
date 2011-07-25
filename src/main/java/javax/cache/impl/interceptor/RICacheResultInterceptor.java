@@ -61,7 +61,7 @@ public class RICacheResultInterceptor {
         CacheResult cacheResult = joinPoint.getMethod().getAnnotation(CacheResult.class);
 
         /* Lookup cache. */
-        CacheResolver resolver  = lookup.getCacheResolver(cacheResult.cacheResovler(), config);
+        CacheResolver resolver  = lookup.getCacheResolver(cacheResult.cacheResolver(), config);
         String cacheName = lookup.findCacheName(config, cacheResult.cacheName());
         cacheName = cacheName.trim().equals("") ? lookup.getDefaultMethodCacheName(joinPoint) : cacheName;
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
