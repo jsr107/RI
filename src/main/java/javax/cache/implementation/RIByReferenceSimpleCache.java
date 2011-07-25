@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * This is meant to act as a proof of concept for the API.
+ * A simple adapter implemented in terms of a {@link ConcurrentHashMap}.
  *
  * <p/>
  *

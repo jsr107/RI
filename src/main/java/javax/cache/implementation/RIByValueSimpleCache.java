@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * This is meant to act as a proof of concept for the API.
+ *
  * <p/>
  *
  * @param <K> the type of keys maintained by this map
@@ -211,7 +211,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     private static final class WrappedIterator<K, V> implements Iterator<Map.Entry<K, V>> {
         private final Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> iterator;
 
-        public WrappedIterator(Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> iterator) {
+        private WrappedIterator(Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> iterator) {
             this.iterator = iterator;
         }
 
@@ -237,10 +237,10 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
          * @param <K> key type
          * @param <V> value type
          */
-        private static class WrappedEntry<K, V> implements Map.Entry<K, V> {
+        private static final class WrappedEntry<K, V> implements Map.Entry<K, V> {
             private final Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> entry;
 
-            public WrappedEntry(Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> entry) {
+            private WrappedEntry(Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> entry) {
                 this.entry = entry;
             }
 

@@ -23,9 +23,12 @@ import java.util.Map;
 /**
  * The reference implementation for JSR107.
  * <p/>
+ * This is an adaptation of {@link java.util.concurrent.ConcurrentMap} to meet the needs
+ * of a potentially distributed cache. It is a strict subset of the {@link javax.cache.Cache}
+ * interface.
  *
- * @param <K> the type of keys maintained by this map
- * @param <V> the type of mapped values*
+ * @param <K> the type of keys maintained by this cache
+ * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
  */
 interface RISimpleCache<K, V> {
@@ -75,8 +78,8 @@ interface RISimpleCache<K, V> {
 
     /**
      * @param key the key
-     * @see javax.cache.Cache#remove(Object)
      * @return true if removed
+     * @see javax.cache.Cache#remove(Object)
      */
     boolean remove(Object key);
 
