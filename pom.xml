@@ -37,8 +37,6 @@
     <build>
         <plugins>
 
-
-
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -58,6 +56,14 @@
                     <minmemory>128m</minmemory>
                     <maxmemory>512</maxmemory>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
