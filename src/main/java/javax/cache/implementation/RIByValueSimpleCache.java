@@ -25,8 +25,7 @@ import java.util.Map;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * This is meant to act as a proof of concept for the API. It is not threadsafe or high performance. It therefore is
- * not suitable for use in production. Please use a production implementation of the API.
+ * This is meant to act as a proof of concept for the API.
  * <p/>
  *
  * @param <K> the type of keys maintained by this map
@@ -41,6 +40,8 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
 
     /**
      * Constructor
+     * @param keySerializer the key serializer
+     * @param valueSerializer the value serializer
      */
     public RIByValueSimpleCache(Serializer<K> keySerializer, Serializer<V> valueSerializer) {
         this.keySerializer = keySerializer;
@@ -76,8 +77,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public V getAndReplace(K key, V value) {
-        Serializer.Binary<V> binary = store.getAndReplace(createKeyHolder(key), createValueHolder(value));
-        return binary == null ? null : binary.get();
+        return returnValue(store.getAndReplace(createKeyHolder(key), createValueHolder(value)));
     }
 
     /**
@@ -101,8 +101,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public V get(Object key) {
-        Serializer.Binary<V> binary = store.get(createSearchObject(key));
-        return binary == null ? null : binary.get();
+        return returnValue(store.get(createSearchObject(key)));
     }
 
     /**
@@ -115,8 +114,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
 
     @Override
     public V getAndPut(K key, V value) {
-        Serializer.Binary<V> binary = store.getAndPut(createKeyHolder(key), createValueHolder(value));
-        return binary == null ? null : binary.get();
+        return returnValue(store.getAndPut(createKeyHolder(key), createValueHolder(value)));
     }
 
     /**
@@ -132,8 +130,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public V getAndRemove(Object key) {
-        Serializer.Binary<V> binary = store.getAndRemove(createSearchObject(key));
-        return binary == null ? null : binary.get();
+        return returnValue(store.getAndRemove(createSearchObject(key)));
     }
 
     /**
@@ -164,6 +161,45 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     @Override
     public Iterator<Map.Entry<K, V>> iterator() {
         return new WrappedIterator<K, V>(store.iterator());
+    }
+
+    // utilities --------------------------------------------
+
+    private V returnValue(Serializer.Binary<V> binary) {
+        return binary == null ? null : binary.get();
+    }
+
+    private Serializer.Binary<V> createValueHolder(V value) {
+        if (value == null) {
+            throw new NullPointerException("value");
+        }
+        return valueSerializer.createBinary(value);
+    }
+
+    private Serializer.Binary<K> createKeyHolder(K key) {
+        if (key == null) {
+            throw new NullPointerException("key");
+        }
+        return keySerializer.createBinary(key);
+    }
+
+    private Object createSearchObject(final Object o) {
+        return new Object() {
+            @Override
+            public boolean equals(Object o1) {
+                if (this == o1) return true;
+                if (o1 == null || !(o1 instanceof Serializer.Binary)) return false;
+
+                Serializer.Binary that = (Serializer.Binary) o1;
+
+                return o.hashCode() == that.hashCode() && o.equals(that.get());
+            }
+
+            @Override
+            public int hashCode() {
+                return o.hashCode();
+            }
+        };
     }
 
     /**
@@ -223,40 +259,5 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
                 throw new UnsupportedOperationException();
             }
         }
-    }
-
-    // utilities --------------------------------------------
-
-    private Serializer.Binary<V> createValueHolder(V value) {
-        if (value == null) {
-            throw new NullPointerException("value");
-        }
-        return valueSerializer.createBinary(value);
-    }
-
-    private Serializer.Binary<K> createKeyHolder(K key) {
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        return keySerializer.createBinary(key);
-    }
-
-    private Object createSearchObject(final Object o) {
-        return new Object() {
-            @Override
-            public boolean equals(Object o1) {
-                if (this == o1) return true;
-                if (o1 == null || !(o1 instanceof Serializer.Binary)) return false;
-
-                Serializer.Binary that = (Serializer.Binary) o1;
-
-                return o.hashCode() == that.hashCode() && o.equals(that.get());
-            }
-
-            @Override
-            public int hashCode() {
-                return o.hashCode();
-            }
-        };
     }
 }

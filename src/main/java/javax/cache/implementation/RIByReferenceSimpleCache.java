@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The reference implementation for JSR107.
  * <p/>
- * This is meant to act as a proof of concept for the API. It is not threadsafe or high performance. It therefore is
- * not suitable for use in production. Please use a production implementation of the API.
+ * This is meant to act as a proof of concept for the API.
+ *
  * <p/>
  *
  * @param <K> the type of keys maintained by this map
@@ -40,6 +40,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
+        //noinspection SuspiciousMethodCalls
         return store.containsKey(key);
     }
 
@@ -77,6 +78,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public boolean remove(Object key) {
+        //noinspection SuspiciousMethodCalls
         return store.remove(key) != null;
     }
 
@@ -85,6 +87,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public V getAndRemove(Object key) {
+        //noinspection SuspiciousMethodCalls
         return store.remove(key);
     }
 
@@ -141,6 +144,7 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public V get(Object key) {
+        //noinspection SuspiciousMethodCalls
         return store.get(key);
     }
 }
