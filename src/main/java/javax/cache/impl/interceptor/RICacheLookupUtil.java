@@ -18,7 +18,7 @@ package javax.cache.impl.interceptor;
 
 import java.lang.reflect.Method;
 
-import javax.cache.interceptor.CacheConfig;
+import javax.cache.interceptor.CachingDefaults;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CacheResolver;
 import javax.inject.Inject;
@@ -41,7 +41,7 @@ public class RICacheLookupUtil {
      * 
      * @return
      */
-    public CacheKeyGenerator getKeyGenerator(Class<? extends CacheKeyGenerator> clazz, CacheConfig config) {
+    public CacheKeyGenerator getKeyGenerator(Class<? extends CacheKeyGenerator> clazz, CachingDefaults config) {
         if (config == null) {
             return beanManagerUtil.getBeanByType(clazz);
         } else {
@@ -57,7 +57,7 @@ public class RICacheLookupUtil {
      * 
      * @return
      */
-    public CacheResolver getCacheResolver(Class<? extends CacheResolver> clazz, CacheConfig config) {
+    public CacheResolver getCacheResolver(Class<? extends CacheResolver> clazz, CachingDefaults config) {
         if (config == null) {
             return beanManagerUtil.getBeanByType(clazz);
         } else {
@@ -104,7 +104,7 @@ public class RICacheLookupUtil {
      * @param cacheName
      * @return
      */
-    public String findCacheName(CacheConfig config, String cacheName) {
+    public String findCacheName(CachingDefaults config, String cacheName) {
         return cacheName.trim().equals("") && config != null ? config.cacheName() : cacheName;
     }
 

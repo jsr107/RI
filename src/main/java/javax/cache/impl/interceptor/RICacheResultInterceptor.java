@@ -18,7 +18,7 @@ package javax.cache.impl.interceptor;
 
 
 import javax.cache.Cache;
-import javax.cache.interceptor.CacheConfig;
+import javax.cache.interceptor.CachingDefaults;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CacheResolver;
@@ -57,7 +57,7 @@ public class RICacheResultInterceptor {
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
         
         /* Get annotations for configuration. */
-        CacheConfig config = joinPoint.getTarget().getClass().getAnnotation(CacheConfig.class);
+        CachingDefaults config = joinPoint.getTarget().getClass().getAnnotation(CachingDefaults.class);
         CacheResult cacheResult = joinPoint.getMethod().getAnnotation(CacheResult.class);
 
         /* Lookup cache. */
