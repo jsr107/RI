@@ -17,6 +17,8 @@
 package javax.cache.impl.interceptor;
 
 
+import java.lang.reflect.Method;
+
 import javax.cache.Cache;
 import javax.cache.interceptor.CachingDefaults;
 import javax.cache.interceptor.CacheRemoveAll;
@@ -59,11 +61,13 @@ public class RICacheRemoveAllInterceptor {
         CachingDefaults config = joinPoint.getTarget().getClass().getAnnotation(CachingDefaults.class);
         CacheRemoveAll annotation = joinPoint.getMethod().getAnnotation(
                 CacheRemoveAll.class);
-
+        
+        Method method = joinPoint.getMethod();
+        
         /* Lookup cache. */
-        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResolver(), config);
-        String cacheName = lookup.findCacheName(config, annotation.cacheName());
-        Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
+        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResolver(), config, method);
+        String cacheName = lookup.findCacheName(config, annotation.cacheName(), method, false);
+        Cache<Object, Object> cache = resolver.resolveCache(cacheName, method);
         
         if (!annotation.afterInvocation()) {
             cache.removeAll();

@@ -17,6 +17,8 @@
 package javax.cache.impl.interceptor;
 
 
+import java.lang.reflect.Method;
+
 import javax.cache.Cache;
 import javax.cache.interceptor.CachingDefaults;
 import javax.cache.interceptor.CacheKey;
@@ -58,15 +60,16 @@ public class RICacheRemoveEntryInterceptor {
         
         /* Get annotation configuration. */
         CachingDefaults config = joinPoint.getTarget().getClass().getAnnotation(CachingDefaults.class);
+        Method method = joinPoint.getMethod();
         CacheRemoveEntry annotation = joinPoint.getMethod().getAnnotation(CacheRemoveEntry.class);
 
         /* Lookup cache. */
-        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResolver(), config);
-        String cacheName = lookup.findCacheName(config, annotation.cacheName());
+        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResolver(), config, method);
+        String cacheName = lookup.findCacheName(config, annotation.cacheName(), method, false);
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         /* Generate key. */
-        CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(annotation.cacheKeyGenerator(), config);
+        CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(annotation.cacheKeyGenerator(), config, method);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
 
         

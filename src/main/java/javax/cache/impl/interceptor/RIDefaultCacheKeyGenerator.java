@@ -27,7 +27,7 @@ import javax.interceptor.InvocationContext;
 
 /**
  * Creates a {@link RIDefaultCacheKey} for the {@link InvocationContext}.
- *
+ * 
  * @author Eric Dalquist
  * @author Rick Hightower
  * @since 1.7
@@ -35,35 +35,77 @@ import javax.interceptor.InvocationContext;
 public class RIDefaultCacheKeyGenerator implements CacheKeyGenerator {
 
     /**
-     *
+     * 
+     */
+    private List<KeyDetail> keyParams;
+    /**
+     * 
+     */
+    private boolean foundKeyParams;
+    
+    /**
+     * 
+     */
+    RIDefaultCacheKeyGenerator() {
+        
+    }
+
+    /**
+     * 
+     * @author Rick Hightower
+     * 
+     */
+    private static final class KeyDetail {
+        private int index;
+
+        private KeyDetail(int index) {
+            this.index = index;
+        }
+    }
+
+
+    /**
+     * 
      * @see javax.cache.interceptor.CacheKeyGenerator#generateCacheKey(javax.interceptor.InvocationContext)
      */
     public CacheKey generateCacheKey(InvocationContext invocationContext) {
         final Object[] parameters = invocationContext.getParameters();
-        Annotation[][] parameterAnnotations = invocationContext.getMethod().getParameterAnnotations();
-        List<Object> keyParams = null;
-        boolean foundKeyParams = false;
-        
-        int index = 0;
-        for (Annotation[] paramAnnotations : parameterAnnotations) {
-            for (Annotation ann : paramAnnotations) {
-                if (ann.annotationType() == CacheKeyParam.class) {
-                    foundKeyParams = true;
-                    /* Lazy initialize the keyParams. */
-                    if (keyParams == null) {
-                        keyParams = new ArrayList<Object>();
-                    }
-                    keyParams.add(parameters[index]);
-                }
-            }
-            index++;
-        }
-        
+
+        List<KeyDetail> keyParameters = keyParams(invocationContext);
+
+
         if (!foundKeyParams) {
-            return new RIDefaultCacheKey(parameters);            
+            return new RIDefaultCacheKey(parameters);
         } else {
-            return new RIDefaultCacheKey(keyParams.toArray(new Object[keyParams.size()]));                        
+            List<Object> params = new ArrayList<Object>();
+            for (KeyDetail detail : keyParameters) {
+                params.add(parameters[detail.index]);
+            }
+            return new RIDefaultCacheKey(params.toArray(new Object[keyParameters
+                    .size()]));
         }
+    }
+
+
+    private List<KeyDetail> keyParams(InvocationContext invocationContext) {
+        if (keyParams == null) {
+            Annotation[][] parameterAnnotations = invocationContext.getMethod()
+            .getParameterAnnotations();
+
+            keyParams = new ArrayList<RIDefaultCacheKeyGenerator.KeyDetail>();
+            int index = 0;
+            for (Annotation[] paramAnnotations : parameterAnnotations) {
+                cacheKeySearch: for (Annotation ann : paramAnnotations) {
+                    if (ann.annotationType() == CacheKeyParam.class) {
+                        foundKeyParams = true;
+                        keyParams.add(new KeyDetail(index));
+                        break cacheKeySearch;
+                    }
+                }
+                index++;
+            }
+        }
+        return this.keyParams;
     }
 
 }

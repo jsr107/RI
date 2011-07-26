@@ -17,6 +17,8 @@
 package javax.cache.impl.interceptor;
 
 
+import java.lang.reflect.Method;
+
 import javax.cache.Cache;
 import javax.cache.interceptor.CachingDefaults;
 import javax.cache.interceptor.CacheKey;
@@ -57,17 +59,18 @@ public class RICacheResultInterceptor {
     public Object cacheResult(InvocationContext joinPoint) throws Exception {
         
         /* Get annotations for configuration. */
-        CachingDefaults config = joinPoint.getTarget().getClass().getAnnotation(CachingDefaults.class);
+        CachingDefaults config = lookup.cachingDefaults(joinPoint);
         CacheResult cacheResult = joinPoint.getMethod().getAnnotation(CacheResult.class);
+        
+        Method method = joinPoint.getMethod();
 
         /* Lookup cache. */
-        CacheResolver resolver  = lookup.getCacheResolver(cacheResult.cacheResolver(), config);
-        String cacheName = lookup.findCacheName(config, cacheResult.cacheName());
-        cacheName = cacheName.trim().equals("") ? lookup.getDefaultMethodCacheName(joinPoint) : cacheName;
+        CacheResolver resolver  = lookup.getCacheResolver(cacheResult.cacheResolver(), config, method);
+        String cacheName = lookup.findCacheName(config, cacheResult.cacheName(), method, true);
         Cache<Object, Object> cache = resolver.resolveCache(cacheName, joinPoint.getMethod());
         
         /* Generate key. */
-        CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(cacheResult.cacheKeyGenerator(), config);
+        CacheKeyGenerator keyGenerator = lookup.getKeyGenerator(cacheResult.cacheKeyGenerator(), config, method);
         CacheKey key = keyGenerator.generateCacheKey(joinPoint);
         
         
@@ -87,6 +90,8 @@ public class RICacheResultInterceptor {
         return ret;
 
     }
+
+
 
 
 
