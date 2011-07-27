@@ -16,6 +16,8 @@
  */
 package javax.cache.implementation;
 
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.spi.CacheManagerFactoryProvider;
 
@@ -35,5 +37,25 @@ public class RICacheManagerFactoryProvider implements CacheManagerFactoryProvide
             throw new NullPointerException("CacheManager name not specified");
         }
         return new RICacheManager(name);
+    }
+
+    /**
+     * Will return an RI implementation.
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> Cache<K, V> createCache(String name) {
+        return new RICache.Builder<K, V>(name).build();
+    }
+
+    /**
+     * Will return an RI implementation.
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public CacheConfiguration createCacheConfiguration() {
+        return new RICacheConfiguration.Builder().build();
     }
 }
