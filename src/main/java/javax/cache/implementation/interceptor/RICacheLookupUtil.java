@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package javax.cache.impl.interceptor;
+package javax.cache.implementation.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

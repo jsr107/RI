@@ -26,4 +26,4 @@
 
  @author Rick Hightower
   */
-package javax.cache.impl.interceptor;
+package javax.cache.implementation.interceptor;

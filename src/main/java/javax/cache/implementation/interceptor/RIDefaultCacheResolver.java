@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package javax.cache.impl.interceptor;
+package javax.cache.implementation.interceptor;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;

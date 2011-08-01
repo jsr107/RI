@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package javax.cache.impl.interceptor;
+package javax.cache.implementation.interceptor;
 
 import java.util.Arrays;
 
