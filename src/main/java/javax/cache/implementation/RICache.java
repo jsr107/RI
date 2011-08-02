@@ -89,7 +89,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param cacheLoader   the cache loader
      */
     private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
-        status = Status.UNITIALISED;
+        status = Status.UNINITIALISED;
         assert configuration != null;
         assert cacheName != null;
         this.cacheName = cacheName;

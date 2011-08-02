@@ -1,7 +1,6 @@
-ri.iml
-ri.ipr
-ri.iws
-cache-ri.iml
+*.iml
+*.ipr
+*.iws
 .idea
 target
 /.settings
