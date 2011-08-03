@@ -19,6 +19,7 @@ package javax.cache.implementation;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
+import javax.cache.OptionalFeature;
 import javax.cache.spi.CacheManagerFactoryProvider;
 
 /**
@@ -57,5 +58,19 @@ public class RICacheManagerFactoryProvider implements CacheManagerFactoryProvide
     @Override
     public CacheConfiguration createCacheConfiguration() {
         return new RICacheConfiguration.Builder().build();
+    }
+
+    @Override
+    public boolean isSupported(OptionalFeature optionalFeature) {
+        switch (optionalFeature) {
+            case ANNOTATIONS:
+                return true;
+            case JTA:
+                return false;
+            case STORE_BY_REFERENCE:
+                return true;
+            default:
+                return false;
+        }
     }
 }
