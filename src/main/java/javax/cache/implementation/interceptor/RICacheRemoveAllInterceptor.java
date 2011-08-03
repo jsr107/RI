@@ -50,7 +50,7 @@ public class RICacheRemoveAllInterceptor {
      * 
      * @param joinPoint
      *            joinPoint
-     * @return
+     * @return the result
      * @throws Exception
      *             bad thing happened
      */

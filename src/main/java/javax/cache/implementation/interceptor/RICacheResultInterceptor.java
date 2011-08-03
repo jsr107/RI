@@ -51,7 +51,7 @@ public class RICacheResultInterceptor {
      * 
      * @param joinPoint
      *            joinPoint
-     * @return
+     * @return the result
      * @throws Exception
      *             bad thing happened
      */

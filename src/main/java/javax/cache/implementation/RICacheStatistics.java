@@ -123,7 +123,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     }
 
     /**
-     * {@inheritDoc}
+     * @return the entry count
      */
     public long getEntryCount() {
         return ((RICache) cache).getSize();

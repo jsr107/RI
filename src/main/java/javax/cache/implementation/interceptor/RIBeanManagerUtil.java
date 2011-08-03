@@ -43,7 +43,7 @@ public class RIBeanManagerUtil {
      * @param <T>
      * @param type
      * @param qualifiers
-     * @return
+     * @return the bean
      */
     public <T> T getBeanByType(Class<T> type, Annotation... qualifiers) {
         if (type == null) {

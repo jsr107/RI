@@ -64,7 +64,7 @@ public class RICacheLookupUtil {
     /**
      * 
      * @param joinPoint
-     * @return
+     * @return the defaults
      */
     public CachingDefaults cachingDefaults(InvocationContext joinPoint) {
         if (config == null) {
@@ -76,7 +76,7 @@ public class RICacheLookupUtil {
 
     /**
      * 
-     * @return
+     * @return the key generator
      */
     public CacheKeyGenerator getKeyGenerator(
             Class<? extends CacheKeyGenerator> clazz, CachingDefaults config,
@@ -110,7 +110,7 @@ public class RICacheLookupUtil {
 
     /**
      * 
-     * @return
+     * @return the resolver
      */
     public CacheResolver getCacheResolver(Class<? extends CacheResolver> clazz,
             CachingDefaults config, Method mehtod) {
@@ -132,8 +132,8 @@ public class RICacheLookupUtil {
 
     /**
      * 
-     * @param
-     * @return
+     * @param method the method
+     * @return the name
      */
     public String getDefaultMethodCacheName(Method method) {
 
@@ -158,7 +158,7 @@ public class RICacheLookupUtil {
      * 
      * @param config
      * @param cacheName
-     * @return
+     * @return the name
      */
     public String findCacheName(CachingDefaults config, String cacheName, Method method, boolean generate) {
         MethodDetails methodDetail = methodDetail(method);
