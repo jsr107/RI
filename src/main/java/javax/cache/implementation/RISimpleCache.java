@@ -17,7 +17,6 @@
 
 package javax.cache.implementation;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -31,7 +30,7 @@ import java.util.Map;
  * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
  */
-interface RISimpleCache<K, V> {
+interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
 
     /**
      * @param key the key
@@ -86,7 +85,7 @@ interface RISimpleCache<K, V> {
     /**
      * @param key the key
      * @return the previous value
-     * @see javax.cache.Cache#remove(Object)
+     * @see javax.cache.Cache#getAndRemove(Object)
      */
     V getAndRemove(Object key);
 
@@ -125,10 +124,4 @@ interface RISimpleCache<K, V> {
      * @see javax.cache.Cache#removeAll()
      */
     void removeAll();
-
-    /**
-     * @return the iterator
-     * @see javax.cache.Cache#iterator()
-     */
-    Iterator<Map.Entry<K, V>> iterator();
 }
