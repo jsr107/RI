@@ -108,6 +108,28 @@ class RIWrappedCacheConfiguration implements CacheConfiguration {
         config.setStatisticsEnabled(enableStatistics);
     }
 
+    /**
+     * Checks whether transactions are enabled for this cache.
+     * <p/>
+     * Default value is false.
+     *
+     * @return true if statistics collection is enabled
+     */
+    @Override
+    public boolean isTransactionEnabled() {
+        return config.isTransactionEnabled();
+    }
+
+    /**
+     * Sets whether transactions are enabled for this cache
+     *
+     * @param enableTransactions true fo enable transactions, false to disable
+     */
+    @Override
+    public void setTransactionEnabled(boolean enableTransactions) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

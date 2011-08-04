@@ -29,19 +29,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Greg Luck
  */
 public final class RICacheConfiguration implements CacheConfiguration {
+
     private final AtomicBoolean readThrough;
     private final AtomicBoolean writeThrough;
     private final AtomicBoolean storeByValue;
     private final AtomicBoolean statisticsEnabled;
+    private final AtomicBoolean transactionsEnabled;
+
 
     private RICacheConfiguration(boolean readThrough,
                                  boolean writeThrough,
                                  boolean storeByValue,
-                                 boolean statisticsEnabled) {
+                                 boolean statisticsEnabled,
+                                 boolean transactionsEnabled) {
         this.readThrough = new AtomicBoolean(readThrough);
         this.writeThrough = new AtomicBoolean(writeThrough);
         this.storeByValue = new AtomicBoolean(storeByValue);
         this.statisticsEnabled = new AtomicBoolean(statisticsEnabled);
+        this.transactionsEnabled = new AtomicBoolean(transactionsEnabled);
     }
 
     /**
@@ -109,6 +114,22 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isTransactionEnabled() {
+        return transactionsEnabled.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setTransactionEnabled(boolean transactionEnabled) {
+        this.transactionsEnabled.set(transactionEnabled);
+    }
+
+    /**
      * todo update when this stabilises
      */
     @Override
@@ -140,11 +161,13 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private static final boolean DEFAULT_WRITE_THROUGH = false;
         private static final boolean DEFAULT_STORE_BY_VALUE = true;
         private static final boolean DEFAULT_STATISTICS_ENABLED = false;
+        private static final boolean DEFAULT_TRANSACTIONS_ENABLED = false;
 
         private boolean readThrough = DEFAULT_READ_THROUGH;
         private boolean writeThrough = DEFAULT_WRITE_THROUGH;
         private boolean storeByValue = DEFAULT_STORE_BY_VALUE;
         private boolean statisticsEnabled = DEFAULT_STATISTICS_ENABLED;
+        private boolean transactionsEnabled = DEFAULT_TRANSACTIONS_ENABLED;
 
         /**
          * Set whether read through is active
@@ -184,7 +207,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * @return a new RICacheConfiguration instance
          */
         public RICacheConfiguration build() {
-            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled);
+            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled, transactionsEnabled);
         }
     }
 }
