@@ -368,7 +368,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * todo implement mutable rules for stats
      * {@inheritDoc}
      */
     @Override

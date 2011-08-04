@@ -35,6 +35,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
 
     private transient Cache cache;
 
+    //TODO greg: use this, finish off
     private final ObjectName objectName;
 
     private final AtomicLong cacheRemovals = new AtomicLong();
@@ -59,15 +60,13 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     /**
      * Creates an object name using the scheme "javax.cache:type=CacheStatistics,CacheManager=<cacheManagerName>,name=<cacheName>"
      */
-    static ObjectName createObjectName(String cacheManagerName, String cacheName) {
-        ObjectName objectName;
+    private ObjectName createObjectName(String cacheManagerName, String cacheName) {
         try {
-            objectName = new ObjectName("javax.cache:type=CacheStatistics,CacheManager="
+            return new ObjectName("javax.cache:type=CacheStatistics,CacheManager="
                     + cacheManagerName + ",name=" + mbeanSafe(cacheName));
         } catch (MalformedObjectNameException e) {
             throw new CacheException(e);
         }
-        return objectName;
     }
 
     /**
