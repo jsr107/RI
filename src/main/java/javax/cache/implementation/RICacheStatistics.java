@@ -53,7 +53,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      */
     public RICacheStatistics(Cache cache, String cacheManagerName) {
         this.cache = cache;
-        objectName = createObjectName(cacheManagerName, cache.getCacheName());
+        objectName = createObjectName(cacheManagerName, cache.getName());
     }
 
     /**
@@ -86,7 +86,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      */
     @Override
     public String getName() {
-        return cache.getCacheName();
+        return cache.getName();
     }
 
     /**

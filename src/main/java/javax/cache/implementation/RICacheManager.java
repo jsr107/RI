@@ -92,7 +92,7 @@ public class RICacheManager implements CacheManager {
     private void addCacheInternal(Cache<?, ?> cache) throws CacheException {
         Cache oldCache;
         synchronized (caches) {
-            oldCache = caches.put(cache.getCacheName(), cache);
+            oldCache = caches.put(cache.getName(), cache);
         }
         cache.start();
         if (oldCache != null) {

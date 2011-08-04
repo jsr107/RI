@@ -24,7 +24,7 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMBean;
-import javax.cache.Status;
+import javax.cache.CacheStatus;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
-    private volatile Status status;
+    private volatile CacheStatus status;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
     private volatile CacheManager cacheManager;
     private volatile RICacheStatistics statistics;
@@ -89,7 +89,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param cacheLoader   the cache loader
      */
     private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
-        status = Status.UNINITIALISED;
+        status = CacheStatus.UNINITIALISED;
         assert configuration != null;
         assert cacheName != null;
         this.cacheName = cacheName;
@@ -104,7 +104,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public String getCacheName() {
+    public String getName() {
         return cacheName;
     }
 
@@ -202,7 +202,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheStatisticsMBean getCacheStatistics() {
+    public CacheStatisticsMBean getStatistics() {
         checkStatusStarted();
         if (statisticsEnabled()) {
             return statistics;
@@ -409,7 +409,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void start() throws CacheException {
-        status = Status.STARTED;
+        status = CacheStatus.STARTED;
     }
 
     /**
@@ -417,15 +417,15 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void stop() throws CacheException {
-        status = Status.STOPPING;
+        status = CacheStatus.STOPPING;
         executorService.shutdown();
         //TODO: maybe wait for executor to stop
         store.removeAll();
-        status = Status.STOPPED;
+        status = CacheStatus.STOPPED;
     }
 
     private void checkStatusStarted() {
-        if (!status.equals(Status.STARTED)) {
+        if (!status.equals(CacheStatus.STARTED)) {
             throw new IllegalStateException("The cache status is not STARTED");
         }
     }
@@ -434,7 +434,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Status getStatus() {
+    public CacheStatus getStatus() {
         return status;
     }
 
