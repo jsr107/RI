@@ -379,7 +379,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean registerCacheEntryListener(CacheEntryListener cacheEntryListener, NotificationScope scope) {
+    public boolean registerCacheEntryListener(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope) {
         ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope);
         return cacheEntryListeners.add(scopedListener);
     }
