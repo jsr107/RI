@@ -27,7 +27,7 @@ import javax.cache.CacheConfiguration;
  *
  * @author Yannis Cosmadopoulos
  */
-class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
+class RIWrappedCacheConfiguration implements CacheConfiguration {
     private final CacheConfiguration config;
 
     /**
@@ -35,7 +35,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
      *
      * @param config the wrapped configuration
      */
-    RIUnmodifiableCacheConfiguration(CacheConfiguration config) {
+    RIWrappedCacheConfiguration(CacheConfiguration config) {
         if (config == null) {
             throw new NullPointerException("config");
         }
@@ -105,7 +105,7 @@ class RIUnmodifiableCacheConfiguration implements CacheConfiguration {
      */
     @Override
     public void setStatisticsEnabled(boolean enableStatistics) {
-        throw new UnsupportedOperationException();
+        config.setStatisticsEnabled(enableStatistics);
     }
 
     @Override

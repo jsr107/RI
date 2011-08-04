@@ -93,7 +93,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         assert configuration != null;
         assert cacheName != null;
         this.cacheName = cacheName;
-        this.configuration = new RIUnmodifiableCacheConfiguration(configuration);
+        this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         store = configuration.isStoreByValue() ?
             new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(), new RIByValueSerializer<V>()) :
