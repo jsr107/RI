@@ -25,7 +25,6 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;

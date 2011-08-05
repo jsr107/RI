@@ -748,12 +748,17 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
     }
 
-    private static class ListenerRegistration<K, V> {
+    /**
+     * A struct :)
+     * @param <K>
+     * @param <V>
+     */
+    private static final class ListenerRegistration<K, V> {
         private final CacheEntryListener<K, V> cacheEntryListener;
         private final NotificationScope scope;
         private final boolean synchronous;
 
-        public ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
+        private ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
             this.cacheEntryListener = cacheEntryListener;
             this.scope = scope;
             this.synchronous = synchronous;
