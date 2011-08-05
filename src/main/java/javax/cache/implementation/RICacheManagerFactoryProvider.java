@@ -40,26 +40,6 @@ public class RICacheManagerFactoryProvider implements CacheManagerFactoryProvide
         return new RICacheManager(name);
     }
 
-    /**
-     * Will return an RI implementation.
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public <K, V> Cache<K, V> createCache(String name) {
-        return new RICache.Builder<K, V>(name).build();
-    }
-
-    /**
-     * Will return an RI implementation.
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public CacheConfiguration createCacheConfiguration() {
-        return new RICacheConfiguration.Builder().build();
-    }
-
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
         switch (optionalFeature) {

@@ -75,29 +75,22 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param configuration the configuration
      * @param cacheLoader   the cache loader
      */
-    private RICache(String cacheName, String cacheManagerName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
-        this(cacheName, configuration, cacheLoader);
-        statistics = new RICacheStatistics(this, cacheManagerName);
-    }
-
-    /**
-     * Constructs a cache.
-     *
-     * <em>TODO (yannis): Not removeAll why this is required. What is the meaning of a Cache without a CacheManager?</em>
-     * @param cacheName     the cache name
-     * @param configuration the configuration
-     * @param cacheLoader   the cache loader
-     */
-    private RICache(String cacheName, CacheConfiguration configuration, CacheLoader<K, V> cacheLoader) {
+    private RICache(String cacheName, String cacheManagerName, CacheConfiguration configuration,
+                    CacheLoader<K, V> cacheLoader, CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         status = CacheStatus.UNINITIALISED;
         assert configuration != null;
         assert cacheName != null;
+        assert cacheManagerName != null;
         this.cacheName = cacheName;
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         store = configuration.isStoreByValue() ?
             new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(), new RIByValueSerializer<V>()) :
             new RIByReferenceSimpleCache<K, V>();
+        statistics = new RICacheStatistics(this, cacheManagerName);
+        for (ListenerRegistration<K, V> listener : listeners) {
+            registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
+        }
     }
 
     /**
@@ -379,8 +372,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean registerCacheEntryListener(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope) {
-        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope);
+    public boolean registerCacheEntryListener(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
+        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope, synchronous);
         return cacheEntryListeners.add(scopedListener);
     }
 
@@ -390,7 +383,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public boolean unregisterCacheEntryListener(CacheEntryListener cacheEntryListener) {
         //Only cacheEntryListener is checked for equality
-        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, null);
+        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, null, true);
         return cacheEntryListeners.remove(scopedListener);
     }
 
@@ -465,10 +458,12 @@ public final class RICache<K, V> implements Cache<K, V> {
     private static final class ScopedListener {
         private final CacheEntryListener listener;
         private final NotificationScope scope;
+        private final boolean synchronous;
 
-        private ScopedListener(CacheEntryListener listener, NotificationScope scope) {
+        private ScopedListener(CacheEntryListener listener, NotificationScope scope, boolean synchronous) {
             this.listener = listener;
             this.scope = scope;
+            this.synchronous = synchronous;
         }
 
         private CacheEntryListener getListener() {
@@ -684,6 +679,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final String cacheManagerName;
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
+        private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
         /**
          * Construct a builder.
@@ -703,20 +699,6 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         /**
-         * Construct a builder.
-         *
-         * <em>TODO (yannis): Not removeAll why this is required. What is the meaning of a Cache without a CacheManager?</em>
-         * @param cacheName the name of the cache to be built
-         */
-        public Builder(String cacheName) {
-            if (cacheName == null) {
-                throw new NullPointerException("cacheName");
-            }
-            this.cacheName = cacheName;
-            this.cacheManagerName = null;
-        }
-
-        /**
          * Builds the cache
          *
          * @return a constructed cache.
@@ -726,10 +708,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return cacheManagerName == null ?
-                    new RICache<K, V>(cacheName, configuration, cacheLoader) :
-                    new RICache<K, V>(cacheName, cacheManagerName, configuration, cacheLoader);
-
+            return new RICache<K, V>(cacheName, cacheManagerName, configuration, cacheLoader, listeners);
         }
 
         /**
@@ -760,6 +739,24 @@ public final class RICache<K, V> implements Cache<K, V> {
             }
             this.cacheLoader = cacheLoader;
             return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
+            listeners.add(new ListenerRegistration<K, V>(listener, scope, synchronous));
+            return this;
+        }
+    }
+
+    private static class ListenerRegistration<K, V> {
+        private final CacheEntryListener<K, V> cacheEntryListener;
+        private final NotificationScope scope;
+        private final boolean synchronous;
+
+        public ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
+            this.cacheEntryListener = cacheEntryListener;
+            this.scope = scope;
+            this.synchronous = synchronous;
         }
     }
 

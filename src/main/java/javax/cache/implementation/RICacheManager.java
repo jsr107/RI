@@ -23,6 +23,9 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.NotificationScope;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,12 +74,13 @@ public class RICacheManager implements CacheManager {
     }
 
     /**
+     * Will return an RI implementation.
+     *
      * {@inheritDoc}
      */
     @Override
-    public void addCache(Cache<?, ?> cache) throws CacheException {
-        ((RICache)cache).setCacheManager(this);
-        addCacheInternal(cache);
+    public CacheConfiguration createCacheConfiguration() {
+        return new RICacheConfiguration.Builder().build();
     }
 
     /**
@@ -179,6 +183,12 @@ public class RICacheManager implements CacheManager {
         @Override
         public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             cacheBuilder.setCacheLoader(cacheLoader);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
+            cacheBuilder.registerCacheEntryListener(listener, scope, synchronous);
             return this;
         }
     }
