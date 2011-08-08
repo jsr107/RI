@@ -17,12 +17,8 @@
 package javax.cache.implementation.interceptor;
 
 
-import java.lang.reflect.Method;
-
 import javax.cache.Cache;
-import javax.cache.interceptor.CachingDefaults;
 import javax.cache.interceptor.CacheRemoveAll;
-import javax.cache.interceptor.CacheResolver;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -32,56 +28,50 @@ import javax.interceptor.InvocationContext;
 /**
  * 
  * @author Rick Hightower
- * 
+ * @author Eric Dalquist
  */
 @CacheRemoveAll @Interceptor
 public class RICacheRemoveAllInterceptor {
-
-    /**
-     * 
-     */
     @Inject
     private RICacheLookupUtil lookup;
 
 
 
     /**
-     * Cache Result around method.
-     * 
-     * @param joinPoint
-     *            joinPoint
-     * @return the result
-     * @throws Exception
-     *             bad thing happened
+     * @param invocationContext The intercepted invocation
+     * @return The result from {@link InvocationContext#proceed()}
+     * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
      */
     @AroundInvoke
-    public Object cacheResult(InvocationContext joinPoint) throws Exception {
-
-        /* Lookup configuration annotations. */
-        CachingDefaults config = joinPoint.getTarget().getClass().getAnnotation(CachingDefaults.class);
-        CacheRemoveAll annotation = joinPoint.getMethod().getAnnotation(
-                CacheRemoveAll.class);
+    public Object cacheResult(InvocationContext invocationContext) throws Exception {
+        final MethodDetails methodDetails = this.lookup.getMethodDetails(invocationContext);
         
-        Method method = joinPoint.getMethod();
+        if (methodDetails.getInterceptorType() != InterceptorType.CACHE_REMOVE_ALL) {
+            throw new IllegalStateException("AroundInvoke method for " + InterceptorType.CACHE_REMOVE_ALL + 
+                    " called but MethodDetails.InterceptorType is " + methodDetails.getInterceptorType());
+        }
         
-        /* Lookup cache. */
-        CacheResolver resolver  = lookup.getCacheResolver(annotation.cacheResolver(), config, method);
-        String cacheName = lookup.findCacheName(config, annotation.cacheName(), method, false);
-        Cache<Object, Object> cache = resolver.resolveCache(cacheName, method);
+        final CacheRemoveAllMethodDetails cacheRemoveAllMethodDetails = (CacheRemoveAllMethodDetails)methodDetails;
         
-        if (!annotation.afterInvocation()) {
+        final Cache<Object, Object> cache = cacheRemoveAllMethodDetails.getCache();
+        
+        final CacheRemoveAll cacheRemoveAllAnnotation = cacheRemoveAllMethodDetails.getCacheRemoveAllAnnotation();
+        final boolean afterInvocation = cacheRemoveAllAnnotation.afterInvocation();
+        
+        //If pre-invocation - remove all entries
+        if (!afterInvocation) {
             cache.removeAll();
-         }
-
-        Object ret = joinPoint.proceed();
-
-        if (annotation.afterInvocation()) {
+        }
+        
+        //Call the annotated method
+        final Object result = invocationContext.proceed();
+        
+        //If post-invocation - remove all entries
+        if (afterInvocation) {
             cache.removeAll();
-         }
+        }
         
-        return ret;
-        
-        
+        return result;
     }
 
 }

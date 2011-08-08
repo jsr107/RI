@@ -16,6 +16,7 @@
  */
 package javax.cache.implementation.interceptor;
 
+import javax.cache.interceptor.CachePut;
 import javax.cache.interceptor.CacheRemoveAll;
 import javax.cache.interceptor.CacheRemoveEntry;
 import javax.cache.interceptor.CacheResult;
@@ -36,6 +37,7 @@ public class InterceptorExtension implements Extension {
     */
    void registerInterceptorBindings(@Observes BeforeBeanDiscovery event) {
       event.addInterceptorBinding(CacheResult.class);
+      event.addInterceptorBinding(CachePut.class);
       event.addInterceptorBinding(CacheRemoveEntry.class);
       event.addInterceptorBinding(CacheRemoveAll.class);
    }

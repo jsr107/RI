@@ -26,6 +26,9 @@ import javax.cache.interceptor.CacheKey;
  * {@link javax.interceptor.InvocationContext#getParameters()} and uses {@link Arrays#deepHashCode(Object[])} to
  * implement {@link #hashCode()} and {@link Arrays#deepEquals(Object[], Object[])} to implement
  * {@link #equals(Object)}
+ * <p/>
+ * IMPORTANT: This implementation assumes that the entire object graph passed in as the parameters Object[]
+ * is immutable. The value returned by {@link #hashCode()} is calculated in the constructor.
  *
  * @author Eric Dalquist
  * @since 1.7
@@ -61,8 +64,6 @@ public class RIDefaultCacheKey implements CacheKey {
         if (getClass() != obj.getClass())
             return false;
         RIDefaultCacheKey other = (RIDefaultCacheKey) obj;
-        if (!Arrays.deepEquals(this.parameters, other.parameters))
-            return false;
-        return true;
+        return Arrays.deepEquals(this.parameters, other.parameters);
     }
 }

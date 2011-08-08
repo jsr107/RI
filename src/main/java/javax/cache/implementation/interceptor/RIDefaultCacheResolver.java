@@ -17,12 +17,14 @@
 
 package javax.cache.implementation.interceptor;
 
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
+
 import javax.cache.Cache;
+import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.CacheManagerFactory;
 import javax.cache.interceptor.CacheResolver;
-import java.lang.reflect.Method;
-import java.util.logging.Logger;
 
 /**
  * Default {@link CacheResolver} that uses the default {@link CacheManager} and finds the {@link Cache}
@@ -30,10 +32,9 @@ import java.util.logging.Logger;
  *
  * @author Eric Dalquist
  * @author Rick Hightower
- * @since 1.7
+ * @since 1.0
  */
 public class RIDefaultCacheResolver implements CacheResolver {
-
     private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     private final CacheManager cacheManager;
@@ -56,14 +57,16 @@ public class RIDefaultCacheResolver implements CacheResolver {
     /**
      * @see javax.cache.interceptor.CacheResolver#resolveCache(java.lang.String, java.lang.reflect.Method)
      */
+    @Override
     public <K, V> Cache<K, V> resolveCache(String cacheName, Method method) {
-
-        Cache<K, V> cache = cacheManager.getCache(cacheName);
-        if (cache == null) {
-            logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a copy of the default cache will be created.");
-            cache = cacheManager.<K, V>createCacheBuilder(cacheName).build();
+        final Cache<K, V> cache = this.cacheManager.getCache(cacheName);
+        if (cache != null) {
+            return cache;
         }
-        return cache;
+        
+        this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a copy of the default cache will be created.");
+        final CacheBuilder<K, V> cacheBuilder = this.cacheManager.<K, V>createCacheBuilder(cacheName);
+        return cacheBuilder.build();
     }
 
 }

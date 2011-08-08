@@ -14,18 +14,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package javax.cache.implementation.interceptor;
 
-import javax.enterprise.util.AnnotationLiteral;
-import javax.interceptor.InterceptorBinding;
 
 /**
+ * Defines the available cache interceptor types
  * 
- * @author pmuir
- *
+ * @author Eric Dalquist
+ * @version $Revision$
  */
-public class InterceptorBindingLiteral extends AnnotationLiteral<InterceptorBinding> implements InterceptorBinding {
-    private static final long serialVersionUID = 1L;
-   
+public enum InterceptorType {
+    /**
+     * @see javax.cache.interceptor.CacheResult
+     */
+    CACHE_RESULT,
+    /**
+     * @see javax.cache.interceptor.CachePut
+     */
+    CACHE_PUT,
+    /**
+     * @see javax.cache.interceptor.CacheRemoveEntry
+     */
+    CACHE_REMOVE_ENTRY,
+    /**
+     * @see javax.cache.interceptor.CacheRemoveAll
+     */
+    CACHE_REMOVE_ALL;
 }
