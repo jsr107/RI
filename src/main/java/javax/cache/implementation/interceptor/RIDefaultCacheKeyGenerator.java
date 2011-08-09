@@ -31,7 +31,7 @@ import javax.cache.interceptor.CacheKeyGenerator;
 public class RIDefaultCacheKeyGenerator implements CacheKeyGenerator {
 
     /**
-     * @see javax.cache.interceptor.CacheKeyGenerator#generateCacheKey(javax.interceptor.InvocationContext)
+     * @see javax.cache.interceptor.CacheKeyGenerator#generateCacheKey(javax.cache.interceptor.CacheInvocationContext)
      */
     @Override
     public CacheKey generateCacheKey(CacheInvocationContext invocationContext) {

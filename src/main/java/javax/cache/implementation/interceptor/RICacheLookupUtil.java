@@ -218,7 +218,7 @@ public class RICacheLookupUtil {
      * 
      * @param method The method to get parameter detail information for
      * @param cacheValueAllowed If the {@link CacheValue} annotation is legal for this method
-     * @return A {@link ParameterDetails} object, the lists it contains must be immutable.
+     * @return a ParameterDetails object, the lists it contains must be immutable.
      */
     protected ParameterDetails getParameterDetails(final Method method, final boolean cacheValueAllowed) {
         //Get parameter type and annotation details
