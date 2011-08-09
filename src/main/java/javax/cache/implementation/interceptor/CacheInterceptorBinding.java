@@ -21,11 +21,13 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.interceptor.InterceptorBinding;
 
 /**
- * 
- * @author pmuir
+ * Interceptor bindings are intermediate annotations that may be used to associate interceptors with target beans.
+ * <p/>
+ * Supports inline instantiation of annotation type instances.
  *
+ * @author Greg Luck
  */
-public class InterceptorBindingLiteral extends AnnotationLiteral<InterceptorBinding> implements InterceptorBinding {
-    private static final long serialVersionUID = 1L;
-   
+public class CacheInterceptorBinding extends AnnotationLiteral<InterceptorBinding> implements InterceptorBinding {
+
+    private static final long serialVersionUID = -8512943763770057165L;
 }

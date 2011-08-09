@@ -25,21 +25,22 @@ import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 
 /**
- * 
- * @author pmuir
+ * Service interface implemented by extensions. An extension is a service provider declared in META-INF/services.
  *
+ * @author Greg Luck
  */
 public class InterceptorExtension implements Extension {
-   
-   /**
-    * 
-    * @param event
-    */
-   void registerInterceptorBindings(@Observes BeforeBeanDiscovery event) {
-      event.addInterceptorBinding(CacheResult.class);
-      event.addInterceptorBinding(CachePut.class);
-      event.addInterceptorBinding(CacheRemoveEntry.class);
-      event.addInterceptorBinding(CacheRemoveAll.class);
-   }
+
+    /**
+     * Service interface implemented by extensions. An extension is a service provider declared in META-INF/services.
+     *
+     * @param beforeBeanDiscoveryEvent the event to register
+     */
+    void discoverInterceptorBindings(@Observes BeforeBeanDiscovery beforeBeanDiscoveryEvent) {
+        beforeBeanDiscoveryEvent.addInterceptorBinding(CachePut.class);
+        beforeBeanDiscoveryEvent.addInterceptorBinding(CacheResult.class);
+        beforeBeanDiscoveryEvent.addInterceptorBinding(CacheRemoveEntry.class);
+        beforeBeanDiscoveryEvent.addInterceptorBinding(CacheRemoveAll.class);
+    }
 
 }
