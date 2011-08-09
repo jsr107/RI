@@ -11,6 +11,8 @@
 
     <suppress checks="NPathComplexity" files="RICache.java"/>
     <suppress checks="NPathComplexity" files="RICacheLookupUtil.java"/>
+    <suppress checks="NPathComplexity" files="RICacheConfiguration.java"/>
     <suppress checks="CyclomaticComplexity" files="RICacheLookupUtil.java"/>
+    <suppress checks="CyclomaticComplexity" files="RICacheConfiguration.java"/>
 
 </suppressions>

@@ -108,11 +108,9 @@ public class RICacheLookupUtil {
         
         //Check for no annotations (should never actually happen, but lets be safe and return a good error message if it does)
         if (cacheResultAnnotation == null && cachePutAnnotation == null && cacheRemoveEntryAnnotation == null && cacheRemoveAllAnnotation == null) {
-            //TODO is this the right type of exception to throw here?
             throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method);
         } else if (!(cacheResultAnnotation != null ^ cachePutAnnotation != null ^ 
                 cacheRemoveEntryAnnotation != null ^ cacheRemoveAllAnnotation != null)) {
-            //TODO is this the right type of exception to throw here?
             throw new AnnotationFormatError(
                     "Multiple cache annotations were found on " + method + " only one cache annotation per method is allowed");
         } else if (cacheResultAnnotation != null) {

@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The reference implementation for JSR107.
@@ -411,7 +412,11 @@ public final class RICache<K, V> implements Cache<K, V> {
     public void stop() throws CacheException {
         status = CacheStatus.STOPPING;
         executorService.shutdown();
-        //TODO: maybe wait for executor to stop
+        try {
+            executorService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new CacheException(e);
+        }
         store.removeAll();
         status = CacheStatus.STOPPED;
     }
