@@ -63,6 +63,8 @@ public class RIDefaultCacheKey implements CacheKey {
             return false;
         if (getClass() != obj.getClass())
             return false;
+        if (this.hashCode != obj.hashCode()) 
+            return false;
         RIDefaultCacheKey other = (RIDefaultCacheKey) obj;
         return Arrays.deepEquals(this.parameters, other.parameters);
     }
