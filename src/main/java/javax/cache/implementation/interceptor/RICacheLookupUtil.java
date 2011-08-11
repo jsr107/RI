@@ -59,7 +59,7 @@ public class RICacheLookupUtil {
             new ConcurrentHashMap<Method, StaticCacheInvocationContext<? extends Annotation>>();
 
     /**
-     * Get the {@link javax.cache.interceptor.CacheKeyInvocationContextImpl} for the CDI {@link InvocationContext}
+     * Get the {@link CacheKeyInvocationContextImpl} for the CDI {@link InvocationContext}
      * 
      * @param invocationContext The CDI invocation context
      * @return The keyed cache invocation context
@@ -83,7 +83,7 @@ public class RICacheLookupUtil {
     }
     
     /**
-     * Get the {@link javax.cache.interceptor.CacheInvocationContextImpl} for the CDI {@link InvocationContext}
+     * Get the {@link CacheInvocationContextImpl} for the CDI {@link InvocationContext}
      * 
      * @param invocationContext The CDI invocation context
      * @return The cache invocation context
