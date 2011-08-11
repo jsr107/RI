@@ -16,12 +16,11 @@
  */
 package javax.cache.implementation.interceptor;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Set;
 
-import javax.cache.Cache;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheMethodDetails;
+import javax.cache.interceptor.CacheResolver;
 import javax.cache.interceptor.CacheResult;
 
 /**
@@ -30,33 +29,20 @@ import javax.cache.interceptor.CacheResult;
  * @author Eric Dalquist
  * @version $Revision$
  */
-class CacheResultMethodDetails extends KeyedMethodDetails {
-    private final CacheResult cacheResultAnnotation;
-
+class CacheResultMethodDetails extends StaticCacheKeyInvocationContext<CacheResult> {
     /**
-     * @param cache The cache to use
-     * @param methodAnotations All annotations that exist on the method
+     * @param cacheMethodDetails
+     * @param cacheResolver
      * @param cacheKeyGenerator The key generator to use
      * @param allParameters All parameter details
      * @param keyParameters Parameter details to use for key generation
-     * @param cacheResultAnnotation the annotation
      */
-    public CacheResultMethodDetails(Cache<Object, Object> cache, Set<Annotation> methodAnotations,
-            CacheKeyGenerator cacheKeyGenerator, 
-            List<CacheParameterDetails> allParameters,
-            List<CacheParameterDetails> keyParameters, 
-            CacheResult cacheResultAnnotation) {
-        
-        super(cache, methodAnotations, cacheKeyGenerator, allParameters, keyParameters);
-        
-        if (cacheResultAnnotation == null) {
-            throw new IllegalArgumentException("cacheResultAnnotation cannot be null");
-        }
+    public CacheResultMethodDetails(CacheMethodDetails<CacheResult> cacheMethodDetails, CacheResolver cacheResolver,
+            CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
+            List<CacheParameterDetails> keyParameters) {
 
-        this.cacheResultAnnotation = cacheResultAnnotation;
+        super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
     }
-
-
 
     /* (non-Javadoc)
      * @see javax.cache.implementation.interceptor.MethodDetails#getInterceptorType()
@@ -64,14 +50,5 @@ class CacheResultMethodDetails extends KeyedMethodDetails {
     @Override
     public InterceptorType getInterceptorType() {
         return InterceptorType.CACHE_RESULT;
-    }
-
-
-
-    /**
-     * @return the cacheResultAnnotation
-     */
-    public CacheResult getCacheResultAnnotation() {
-        return this.cacheResultAnnotation;
     }
 }

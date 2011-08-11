@@ -18,10 +18,10 @@ package javax.cache.implementation.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Set;
 
-import javax.cache.Cache;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheMethodDetails;
+import javax.cache.interceptor.CacheResolver;
 
 
 /**
@@ -29,54 +29,43 @@ import javax.cache.interceptor.CacheKeyGenerator;
  * 
  * @author Eric Dalquist
  * @version $Revision$
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.interceptor.CacheResult}, 
+ * {@link javax.cache.interceptor.CachePut}, {@link javax.cache.interceptor.CacheRemoveEntry}, or 
+ * {@link javax.cache.interceptor.CacheRemoveAll}.
  */
-abstract class KeyedMethodDetails extends MethodDetails {
+abstract class StaticCacheKeyInvocationContext<A extends Annotation> extends StaticCacheInvocationContext<A> {
     private final CacheKeyGenerator cacheKeyGenerator;
-    private final List<CacheParameterDetails> allParameters;
     private final List<CacheParameterDetails> keyParameters;
-
+    
     /**
-     * @param cache The cache to use
-     * @param methodAnotations All annotations that exist on the method
+     * @param cacheMethodDetails
+     * @param cacheResolver
      * @param cacheKeyGenerator The key generator to use
-     * @param allParameters All parameter details
      * @param keyParameters Parameter details to use for key generation
      */
-    public KeyedMethodDetails(
-            Cache<Object, Object> cache, Set<Annotation> methodAnotations,
-            CacheKeyGenerator cacheKeyGenerator,
-            List<CacheParameterDetails> allParameters,
+    public StaticCacheKeyInvocationContext(CacheMethodDetails<A> cacheMethodDetails, CacheResolver cacheResolver,
+            CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
             List<CacheParameterDetails> keyParameters) {
         
-        super(cache, methodAnotations);
+        super(cacheMethodDetails, cacheResolver, allParameters);
         
         if (cacheKeyGenerator == null) {
             throw new IllegalArgumentException("cacheKeyGenerator cannot be null");
-        }
-        if (allParameters == null) {
-            throw new IllegalArgumentException("allParameters cannot be null");
         }
         if (keyParameters == null) {
             throw new IllegalArgumentException("keyParameters cannot be null");
         }
         
         this.cacheKeyGenerator = cacheKeyGenerator;
-        this.allParameters = allParameters;
         this.keyParameters = keyParameters;
     }
+
     
     /**
      * @return the cacheKeyGenerator
      */
     public CacheKeyGenerator getCacheKeyGenerator() {
         return this.cacheKeyGenerator;
-    }
-
-    /**
-     * @return the allParameters
-     */
-    public List<CacheParameterDetails> getAllParameters() {
-        return this.allParameters;
     }
 
     /**

@@ -16,11 +16,11 @@
  */
 package javax.cache.implementation.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
+import java.util.List;
 
-import javax.cache.Cache;
+import javax.cache.interceptor.CacheMethodDetails;
 import javax.cache.interceptor.CacheRemoveAll;
+import javax.cache.interceptor.CacheResolver;
 
 /**
  * Details for a method annotated with {@link CacheRemoveAll}
@@ -28,25 +28,19 @@ import javax.cache.interceptor.CacheRemoveAll;
  * @author Eric Dalquist
  * @version $Revision$
  */
-class CacheRemoveAllMethodDetails extends MethodDetails {
-    private final CacheRemoveAll cacheRemoveAllAnnotation;
-
+class CacheRemoveAllMethodDetails extends StaticCacheInvocationContext<CacheRemoveAll> {
+    
     /**
-     * @param cache The cache to use
-     * @param methodAnotations All annotations that exist on the method
-     * @param cacheRemoveAllAnnotation the annotation
+     * Create a new details object for {@link CacheRemoveAll}
+     * 
+     * @param cacheMethodDetails The base details of the annotated method
+     * @param cacheResolver The cache resolver to use
+     * @param allParameters An immutable list of all parameter details
      */
     public CacheRemoveAllMethodDetails(
-            Cache<Object, Object> cache, Set<Annotation> methodAnotations,
-            CacheRemoveAll cacheRemoveAllAnnotation) {
-
-        super(cache, methodAnotations);
-        
-        if (cacheRemoveAllAnnotation == null) {
-            throw new IllegalArgumentException("cacheRemoveAllAnnotation cannot be null");
-        }
-        
-        this.cacheRemoveAllAnnotation = cacheRemoveAllAnnotation;
+            CacheMethodDetails<CacheRemoveAll> cacheMethodDetails,
+            CacheResolver cacheResolver, List<CacheParameterDetails> allParameters) {
+        super(cacheMethodDetails, cacheResolver, allParameters);
     }
 
     /* (non-Javadoc)
@@ -55,12 +49,5 @@ class CacheRemoveAllMethodDetails extends MethodDetails {
     @Override
     public InterceptorType getInterceptorType() {
         return InterceptorType.CACHE_REMOVE_ALL;
-    }
-
-    /**
-     * @return the cacheRemoveAllAnnotation
-     */
-    public CacheRemoveAll getCacheRemoveAllAnnotation() {
-        return this.cacheRemoveAllAnnotation;
     }
 }

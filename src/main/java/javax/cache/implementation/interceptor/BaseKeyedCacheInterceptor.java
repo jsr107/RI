@@ -16,6 +16,8 @@
  */
 package javax.cache.implementation.interceptor;
 
+import java.lang.annotation.Annotation;
+
 
 
 
@@ -23,28 +25,30 @@ package javax.cache.implementation.interceptor;
  * Base class for all interceptor implementations, contains utility methods
  *
  * @author Eric Dalquist
+ * @param <T> The type of static invocation context data expected
  */
-public abstract class BaseCacheInterceptor {
+public abstract class BaseKeyedCacheInterceptor<T extends StaticCacheKeyInvocationContext<?>> {
 
     /**
-     * Get, check the {@link InterceptorType} and cast the {@link MethodDetails} for the invocation.
+     * Get, check the {@link InterceptorType} and cast the {@link CacheMethodDetailsImpl} for the invocation.
      * 
-     * @param cacheInvocationContext The invocation context to get the {@link MethodDetails} from.
+     * @param cacheInvocationContext The invocation context to get the {@link CacheMethodDetailsImpl} from.
      * @param interceptorType The current interceptor type, used for validation.
-     * @return The casted {@link MethodDetails} object.
+     * @return The casted {@link CacheMethodDetailsImpl} object.
      */
     @SuppressWarnings("unchecked")
-    protected <T extends KeyedMethodDetails> T getMethodDetails(
-            final CacheInvocationContextImpl cacheInvocationContext, final InterceptorType interceptorType) {
+    protected T getStaticCacheKeyInvocationContext(
+            final CacheKeyInvocationContextImpl cacheInvocationContext, final InterceptorType interceptorType) {
         
-        final KeyedMethodDetails keyedMethodDetails = cacheInvocationContext.getKeyedMethodDetails();
+        final StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext = 
+                cacheInvocationContext.getStaticCacheKeyInvocationContext();
         
-        if (keyedMethodDetails.getInterceptorType() != interceptorType) {
+        if (staticCacheKeyInvocationContext.getInterceptorType() != interceptorType) {
             throw new IllegalStateException("AroundInvoke method for " + interceptorType + " called but MethodDetails.InterceptorType is " + 
-                    keyedMethodDetails.getInterceptorType());
+                    staticCacheKeyInvocationContext.getInterceptorType());
         }
         
-        return (T)keyedMethodDetails;
+        return (T)staticCacheKeyInvocationContext;
     }
 
 }

@@ -20,6 +20,7 @@ package javax.cache.implementation.interceptor;
 import javax.cache.Cache;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheResolver;
 import javax.cache.interceptor.CacheResult;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -28,16 +29,16 @@ import javax.interceptor.InvocationContext;
 
 
 /**
+ * Interceptor for {@link CacheResult}
  *
  * @author Rick Hightower
  * @author Eric Dalquist
  */
 @CacheResult @Interceptor
-public class RICacheResultInterceptor extends BaseCacheInterceptor {
+public class RICacheResultInterceptor extends BaseKeyedCacheInterceptor<CacheResultMethodDetails> {
     
     @Inject
     private RICacheLookupUtil lookup;
-    
  
     /**
      * @param invocationContext The intercepted invocation
@@ -46,15 +47,17 @@ public class RICacheResultInterceptor extends BaseCacheInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext invocationContext) throws Exception {
-        final CacheInvocationContextImpl cacheInvocationContext = this.lookup.getCacheInvocationContext(invocationContext);
-        final CacheResultMethodDetails methodDetails = getMethodDetails(cacheInvocationContext, InterceptorType.CACHE_RESULT);
+        final CacheKeyInvocationContextImpl cacheKeyInvocationContext = this.lookup.getCacheKeyInvocationContext(invocationContext);
+        final CacheResultMethodDetails methodDetails = 
+                this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_RESULT);
+        
+        final CacheResolver cacheResolver = methodDetails.getCacheResolver();
+        final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
 
         final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
-        final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheInvocationContext);
+        final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
         
-        final Cache<Object, Object> cache = methodDetails.getCache();
-        
-        final CacheResult cacheResultAnnotation = methodDetails.getCacheResultAnnotation();
+        final CacheResult cacheResultAnnotation = methodDetails.getCacheAnnotation();
         
         Object result;
         if (!cacheResultAnnotation.skipGet()) {

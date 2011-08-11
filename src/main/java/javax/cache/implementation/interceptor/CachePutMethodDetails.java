@@ -16,13 +16,12 @@
  */
 package javax.cache.implementation.interceptor;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Set;
 
-import javax.cache.Cache;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheMethodDetails;
 import javax.cache.interceptor.CachePut;
+import javax.cache.interceptor.CacheResolver;
 
 /**
  * Details for a method annotated with {@link CachePut}
@@ -30,39 +29,29 @@ import javax.cache.interceptor.CachePut;
  * @author Eric Dalquist
  * @version $Revision$
  */
-class CachePutMethodDetails extends KeyedMethodDetails {
-    private final CachePut cachePutAnnotation;
+class CachePutMethodDetails extends StaticCacheKeyInvocationContext<CachePut> {
     private final CacheParameterDetails cacheValueParameter;
-
+    
     /**
-     * @param cache The cache to use
-     * @param methodAnotations All annotations that exist on the method
+     * @param cacheMethodDetails
+     * @param cacheResolver
      * @param cacheKeyGenerator The key generator to use
      * @param allParameters All parameter details
      * @param keyParameters Parameter details to use for key generation
      * @param cacheValueParameter The parameter to store in the cache
-     * @param cachePutAnnotation The annotation
      */
-    public CachePutMethodDetails(Cache<Object, Object> cache, Set<Annotation> methodAnotations,
-            CacheKeyGenerator cacheKeyGenerator, 
-            List<CacheParameterDetails> allParameters,
-            List<CacheParameterDetails> keyParameters,
-            CacheParameterDetails cacheValueParameter,
-            CachePut cachePutAnnotation) {
+    public CachePutMethodDetails(CacheMethodDetails<CachePut> cacheMethodDetails, CacheResolver cacheResolver,
+            CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
+            List<CacheParameterDetails> keyParameters, CacheParameterDetails cacheValueParameter) {
         
-        super(cache, methodAnotations, cacheKeyGenerator, allParameters, keyParameters);
-        
+        super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
+
         if (cacheValueParameter == null) {
             throw new IllegalArgumentException("cacheValueParameter cannot be null");
         }
-        if (cachePutAnnotation == null) {
-            throw new IllegalArgumentException("cachePutAnnotation cannot be null");
-        }
         
         this.cacheValueParameter = cacheValueParameter;
-        this.cachePutAnnotation = cachePutAnnotation;
     }
-
 
 
     /* (non-Javadoc)
@@ -78,12 +67,5 @@ class CachePutMethodDetails extends KeyedMethodDetails {
      */
     public CacheParameterDetails getCacheValueParameter() {
         return this.cacheValueParameter;
-    }
-
-    /**
-     * @return the cachePutAnnotation
-     */
-    public CachePut getCachePutAnnotation() {
-        return this.cachePutAnnotation;
     }
 }

@@ -37,65 +37,71 @@ import javax.interceptor.InvocationContext;
  * @author Eric Dalquist
  * @version $Revision$
  */
-class CacheInvocationContextImpl implements CacheInvocationContext {
-    private final KeyedMethodDetails keyedMethodDetails;
+class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
+    private final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext;
     private final InvocationContext invocationContext;
     private final CacheInvocationParameter[] allParameters;
-    private final CacheInvocationParameter[] keyParameters;
-    private final CacheInvocationParameter valueParameter;
     
     /**
      * Create a CacheInvocationContextImpl
      * 
-     * @param keyedMethodDetails The pre-processed method details data
+     * @param staticCacheInvocationContext The pre-processed method details data
      * @param invocationContext The current invocation context
      */
-    public CacheInvocationContextImpl(KeyedMethodDetails keyedMethodDetails, InvocationContext invocationContext) {
-        this.keyedMethodDetails = keyedMethodDetails;
+    public CacheInvocationContextImpl(StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, 
+            InvocationContext invocationContext) {
+        
+        this.staticCacheInvocationContext = staticCacheInvocationContext;
         this.invocationContext = invocationContext;
         
         final Object[] parameters = invocationContext.getParameters();
         
         //Build array of all CacheInvocationParameter from CacheParameterDetails List
-        final List<CacheParameterDetails> allParameterDetails = keyedMethodDetails.getAllParameters();
+        final List<CacheParameterDetails> allParameterDetails = staticCacheInvocationContext.getAllParameters();
         this.allParameters = new CacheInvocationParameter[allParameterDetails.size()];
         for (final CacheParameterDetails parameterDetails : allParameterDetails) {
             final int parameterPosition = parameterDetails.getParameterPosition();
             this.allParameters[parameterPosition] = new CacheInvocationParameterImpl(parameterDetails, parameters[parameterPosition]);
         }
-        
-        //Build array of key CacheParameterDetails from CacheParameterDetails List
-        final List<CacheParameterDetails> keyParameterDetails = keyedMethodDetails.getKeyParameters();
-        this.keyParameters = new CacheInvocationParameter[keyParameterDetails.size()];
-        int pIdx = 0;
-        for (final CacheParameterDetails parameterDetails : keyParameterDetails) {
-            final int parameterPosition = parameterDetails.getParameterPosition();
-            this.keyParameters[pIdx++] = this.allParameters[parameterPosition];
-        }
-        
-        //If this is for a CachePut get the CacheInvocationParameter for the CacheValue
-        if (keyedMethodDetails.getInterceptorType() == InterceptorType.CACHE_PUT) {
-            final CachePutMethodDetails cachePutMethodDetails = (CachePutMethodDetails)keyedMethodDetails;
-            final CacheParameterDetails cacheValueParameter = cachePutMethodDetails.getCacheValueParameter();
-            final int parameterPosition = cacheValueParameter.getParameterPosition();
-            this.valueParameter = this.allParameters[parameterPosition];
-        } else {
-            this.valueParameter = null;
-        }
     }
     
     /**
-     * @return The method details data
+     * @return the staticCacheInvocationContext
      */
-    public KeyedMethodDetails getKeyedMethodDetails() {
-        return this.keyedMethodDetails;
+    public StaticCacheInvocationContext<? extends Annotation> getStaticCacheInvocationContext() {
+        return this.staticCacheInvocationContext;
     }
 
-    /**
-     * @return The underlying invocation context
+    /* (non-Javadoc)
+     * @see javax.cache.interceptor.CacheMethodDetails#getAnnotations()
      */
-    public InvocationContext getInvocationContext() {
-        return this.invocationContext;
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return this.staticCacheInvocationContext.getAnnotations();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.cache.interceptor.CacheMethodDetails#getCacheAnnotation()
+     */
+    @Override
+    public Annotation getCacheAnnotation() {
+        return this.staticCacheInvocationContext.getCacheAnnotation();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.cache.interceptor.CacheMethodDetails#getCacheName()
+     */
+    @Override
+    public String getCacheName() {
+        return this.staticCacheInvocationContext.getCacheName();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.cache.interceptor.CacheMethodDetails#getMethod()
+     */
+    @Override
+    public Method getMethod() {
+        return this.invocationContext.getMethod();
     }
 
     /* (non-Javadoc)
@@ -107,45 +113,11 @@ class CacheInvocationContextImpl implements CacheInvocationContext {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#getMethod()
-     */
-    @Override
-    public Method getMethod() {
-        return this.invocationContext.getMethod();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#getAnnotations()
-     */
-    @Override
-    public Set<Annotation> getAnnotations() {
-        return this.keyedMethodDetails.getMethodAnotations();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#getKeyParameters()
-     */
-    @Override
-    public CacheInvocationParameter[] getKeyParameters() {
-        //Defensive copy to protect from modification
-        return Arrays.copyOf(this.keyParameters, this.keyParameters.length);
-    }
-
-    /* (non-Javadoc)
      * @see javax.cache.interceptor.CacheInvocationContext#getAllParameters()
      */
     @Override
     public CacheInvocationParameter[] getAllParameters() {
-        //Defensive copy to protect from modification
         return Arrays.copyOf(this.allParameters, this.allParameters.length);
-    }
-
-    /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#getValueParameter()
-     */
-    @Override
-    public CacheInvocationParameter getValueParameter() {
-        return this.valueParameter;
     }
 
     /* (non-Javadoc)

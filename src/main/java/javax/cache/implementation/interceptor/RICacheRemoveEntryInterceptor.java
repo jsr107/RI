@@ -21,6 +21,7 @@ import javax.cache.Cache;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CacheRemoveEntry;
+import javax.cache.interceptor.CacheResolver;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -28,12 +29,13 @@ import javax.interceptor.InvocationContext;
 
 
 /**
+ * Interceptor for {@link CacheRemoveEntry}
  * 
  * @author Rick Hightower
  * @author Eric Dalquist
  */
 @CacheRemoveEntry @Interceptor
-public class RICacheRemoveEntryInterceptor extends BaseCacheInterceptor {
+public class RICacheRemoveEntryInterceptor extends BaseKeyedCacheInterceptor<CacheRemoveEntryMethodDetails> {
     
     @Inject
     private RICacheLookupUtil lookup;
@@ -46,20 +48,16 @@ public class RICacheRemoveEntryInterceptor extends BaseCacheInterceptor {
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext invocationContext) throws Exception {
-        final CacheInvocationContextImpl cacheInvocationContext = this.lookup.getCacheInvocationContext(invocationContext);
-        final CacheRemoveEntryMethodDetails methodDetails = getMethodDetails(cacheInvocationContext, InterceptorType.CACHE_REMOVE_ENTRY);
-
-        final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
+        final CacheKeyInvocationContextImpl cacheKeyInvocationContext = this.lookup.getCacheKeyInvocationContext(invocationContext);
+        final CacheRemoveEntryMethodDetails methodDetails = 
+                this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_REMOVE_ENTRY);
         
-        final Cache<Object, Object> cache = methodDetails.getCache();
-        
-        final CacheRemoveEntry cacheRemoveEntryAnnotation = methodDetails.getCacheRemoveEntryAnnotation();
+        final CacheRemoveEntry cacheRemoveEntryAnnotation = methodDetails.getCacheAnnotation();
         final boolean afterInvocation = cacheRemoveEntryAnnotation.afterInvocation();
         
         //If pre-invocation - remove entry
         if (!afterInvocation) {
-            final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheInvocationContext);
-            cache.remove(cacheKey);
+            cacheRemove(cacheKeyInvocationContext, methodDetails);
         }
         
         //Call the annotated method
@@ -67,11 +65,27 @@ public class RICacheRemoveEntryInterceptor extends BaseCacheInterceptor {
         
         //If post-invocation - remove entry
         if (afterInvocation) {
-            final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheInvocationContext);
-            cache.remove(cacheKey);
+            cacheRemove(cacheKeyInvocationContext, methodDetails);
         }
         
         return result;
     }
 
+    /**
+     * Remove entry from cache
+     * 
+     * @param cacheKeyInvocationContext The invocation context 
+     * @param methodDetails The details about the cached method
+     */
+    protected void cacheRemove(final CacheKeyInvocationContextImpl cacheKeyInvocationContext,
+            final CacheRemoveEntryMethodDetails methodDetails) {
+        
+        final CacheResolver cacheResolver = methodDetails.getCacheResolver();
+        final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
+
+        final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
+        final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
+        
+        cache.remove(cacheKey);
+    }
 }

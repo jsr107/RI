@@ -4,6 +4,7 @@ http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
     <interceptors>
         <class>javax.cache.implementation.interceptor.RICacheResultInterceptor</class>
+        <class>javax.cache.implementation.interceptor.RICachePutInterceptor</class>
         <class>javax.cache.implementation.interceptor.RICacheRemoveEntryInterceptor</class>
         <class>javax.cache.implementation.interceptor.RICacheRemoveAllInterceptor</class>
     </interceptors>

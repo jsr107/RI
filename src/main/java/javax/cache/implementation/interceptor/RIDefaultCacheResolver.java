@@ -17,56 +17,41 @@
 
 package javax.cache.implementation.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.logging.Logger;
+import java.lang.annotation.Annotation;
 
 import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheManager;
-import javax.cache.CacheManagerFactory;
+import javax.cache.interceptor.CacheInvocationContext;
 import javax.cache.interceptor.CacheResolver;
 
 /**
- * Default {@link CacheResolver} that uses the default {@link CacheManager} and finds the {@link Cache}
- * using {@link CacheManager#getCache(String)}, {@link CacheManager#createCacheBuilder(String)}}.
+ * Simple cache resolver that always returns the same {@link Cache}
  *
  * @author Eric Dalquist
  * @author Rick Hightower
  * @since 1.0
  */
 public class RIDefaultCacheResolver implements CacheResolver {
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
-
-    private final CacheManager cacheManager;
+    private final Cache<Object, Object> cache;
 
     /**
-     * Constructs the resolver
-     * @param cacheManager the cache manager to use
+     * Create a new default cache resolver that always returns the specified cache
+     * 
+     * @param cache The cache to return for all calls to {@link #resolveCache(CacheInvocationContext)}
      */
-    public RIDefaultCacheResolver(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
-    }
-
-    /**
-     * Constructs the resolver
-     */
-    public RIDefaultCacheResolver() {
-        this.cacheManager = CacheManagerFactory.INSTANCE.getCacheManager();
-    }
-
-    /**
-     * @see javax.cache.interceptor.CacheResolver#resolveCache(java.lang.String, java.lang.reflect.Method)
-     */
-    @Override
-    public <K, V> Cache<K, V> resolveCache(String cacheName, Method method) {
-        final Cache<K, V> cache = this.cacheManager.getCache(cacheName);
-        if (cache != null) {
-            return cache;
+    public RIDefaultCacheResolver(Cache<Object, Object> cache) {
+        if (cache == null) {
+            throw new IllegalArgumentException("The Cache can not be null");
         }
         
-        this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a copy of the default cache will be created.");
-        final CacheBuilder<K, V> cacheBuilder = this.cacheManager.<K, V>createCacheBuilder(cacheName);
-        return cacheBuilder.build();
+        this.cache = cache;
     }
 
+    /* (non-Javadoc)
+     * @see javax.cache.interceptor.CacheResolver#resolveCache(javax.cache.interceptor.CacheInvocationContext)
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <K, V> Cache<K, V> resolveCache(CacheInvocationContext<Annotation> cacheInvocationContext) {
+        return (Cache<K, V>)this.cache;
+    }
 }

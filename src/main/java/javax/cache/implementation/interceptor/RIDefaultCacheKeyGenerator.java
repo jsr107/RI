@@ -16,10 +16,12 @@
  */
 package javax.cache.implementation.interceptor;
 
-import javax.cache.interceptor.CacheInvocationContext;
+import java.lang.annotation.Annotation;
+
 import javax.cache.interceptor.CacheInvocationParameter;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheKeyInvocationContext;
 
 /**
  * Creates a {@link RIDefaultCacheKey} for the {@link javax.interceptor.InvocationContext}.
@@ -30,12 +32,12 @@ import javax.cache.interceptor.CacheKeyGenerator;
  */
 public class RIDefaultCacheKeyGenerator implements CacheKeyGenerator {
 
-    /**
+    /* (non-Javadoc)
      * @see javax.cache.interceptor.CacheKeyGenerator#generateCacheKey(javax.cache.interceptor.CacheInvocationContext)
      */
     @Override
-    public CacheKey generateCacheKey(CacheInvocationContext invocationContext) {
-        final CacheInvocationParameter[] keyParameters = invocationContext.getKeyParameters();
+    public CacheKey generateCacheKey(CacheKeyInvocationContext<Annotation> cacheKeyInvocationContext) {
+        final CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
         
         final Object[] parameters = new Object[keyParameters.length];
         for (int index = 0; index < keyParameters.length; index++) {

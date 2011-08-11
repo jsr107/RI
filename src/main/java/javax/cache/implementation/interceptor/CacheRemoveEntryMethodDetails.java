@@ -16,13 +16,12 @@
  */
 package javax.cache.implementation.interceptor;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Set;
 
-import javax.cache.Cache;
 import javax.cache.interceptor.CacheKeyGenerator;
+import javax.cache.interceptor.CacheMethodDetails;
 import javax.cache.interceptor.CacheRemoveEntry;
+import javax.cache.interceptor.CacheResolver;
 
 /**
  * Details for a method annotated with {@link CacheRemoveEntry}
@@ -30,31 +29,22 @@ import javax.cache.interceptor.CacheRemoveEntry;
  * @author Eric Dalquist
  * @version $Revision$
  */
-class CacheRemoveEntryMethodDetails extends KeyedMethodDetails {
-    private final CacheRemoveEntry cacheRemoveEntryAnnotation;
-
+class CacheRemoveEntryMethodDetails extends StaticCacheKeyInvocationContext<CacheRemoveEntry> {
+    
     /**
-     * @param cache The cache to use
-     * @param methodAnotations All annotations that exist on the method
+     * @param cacheMethodDetails
+     * @param cacheResolver
      * @param cacheKeyGenerator The key generator to use
      * @param allParameters All parameter details
      * @param keyParameters Parameter details to use for key generation
-     * @param cacheRemoveEntryAnnotation the annotation
      */
-    public CacheRemoveEntryMethodDetails(Cache<Object, Object> cache, Set<Annotation> methodAnotations,
-            CacheKeyGenerator cacheKeyGenerator, 
-            List<CacheParameterDetails> allParameters,
-            List<CacheParameterDetails> keyParameters, 
-            CacheRemoveEntry cacheRemoveEntryAnnotation) {
-        
-        super(cache, methodAnotations, cacheKeyGenerator, allParameters, keyParameters);
-        
-        if (cacheRemoveEntryAnnotation == null) {
-            throw new IllegalArgumentException("cacheRemoveEntryAnnotation cannot be null");
-        }
+    public CacheRemoveEntryMethodDetails(CacheMethodDetails<CacheRemoveEntry> cacheMethodDetails,
+            CacheResolver cacheResolver, CacheKeyGenerator cacheKeyGenerator,
+            List<CacheParameterDetails> allParameters, List<CacheParameterDetails> keyParameters) {
 
-        this.cacheRemoveEntryAnnotation = cacheRemoveEntryAnnotation;
+        super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
     }
+
 
     /* (non-Javadoc)
      * @see javax.cache.implementation.interceptor.MethodDetails#getInterceptorType()
@@ -62,12 +52,5 @@ class CacheRemoveEntryMethodDetails extends KeyedMethodDetails {
     @Override
     public InterceptorType getInterceptorType() {
         return InterceptorType.CACHE_REMOVE_ENTRY;
-    }
-
-    /**
-     * @return the cacheRemoveEntryAnnotation
-     */
-    public CacheRemoveEntry getCacheRemoveEntryAnnotation() {
-        return this.cacheRemoveEntryAnnotation;
     }
 }

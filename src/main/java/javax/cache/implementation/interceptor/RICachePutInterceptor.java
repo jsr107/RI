@@ -22,6 +22,7 @@ import javax.cache.interceptor.CacheInvocationParameter;
 import javax.cache.interceptor.CacheKey;
 import javax.cache.interceptor.CacheKeyGenerator;
 import javax.cache.interceptor.CachePut;
+import javax.cache.interceptor.CacheResolver;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -29,11 +30,13 @@ import javax.interceptor.InvocationContext;
 
 
 /**
+ * Interceptor for {@link CachePut}
+ * 
  * @author Rick Hightower
  * @author Eric Dalquist
  */
 @CachePut @Interceptor
-public class RICachePutInterceptor extends BaseCacheInterceptor {
+public class RICachePutInterceptor extends BaseKeyedCacheInterceptor<CachePutMethodDetails> {
     
     @Inject
     private RICacheLookupUtil lookup;
@@ -46,32 +49,51 @@ public class RICachePutInterceptor extends BaseCacheInterceptor {
      */
     @AroundInvoke
     public Object cachePut(InvocationContext invocationContext) throws Exception {
-        final CacheInvocationContextImpl cacheInvocationContext = this.lookup.getCacheInvocationContext(invocationContext);
-        final CachePutMethodDetails methodDetails = getMethodDetails(cacheInvocationContext, InterceptorType.CACHE_PUT);
-
-        final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
+        final CacheKeyInvocationContextImpl cacheKeyInvocationContext = this.lookup.getCacheKeyInvocationContext(invocationContext);
+        final CachePutMethodDetails methodDetails = this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_PUT);
         
-        final Cache<Object, Object> cache = methodDetails.getCache();
-        
-        final CachePut cachePutAnnotation = methodDetails.getCachePutAnnotation();
+        final CachePut cachePutAnnotation = methodDetails.getCacheAnnotation();
         final boolean afterInvocation = cachePutAnnotation.afterInvocation();
         
-        final CacheInvocationParameter valueParameter = cacheInvocationContext.getValueParameter();
+        final CacheInvocationParameter valueParameter = cacheKeyInvocationContext.getValueParameter();
         final Object value = valueParameter.getValue();
         
         if (!afterInvocation) {
-            final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheInvocationContext);
-            cache.put(cacheKey, value);
+            cacheValue(cacheKeyInvocationContext, methodDetails, value);
         }
         
         //Call the annotated method
         final Object result = invocationContext.proceed();
         
         if (afterInvocation) {
-            final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheInvocationContext);
-            cache.put(cacheKey, value);
+            cacheValue(cacheKeyInvocationContext, methodDetails, value);
         }
         
         return result;
+    }
+
+
+    /**
+     * Lookup the Cache, generate a CacheKey and store the value in the cache.
+     * 
+     * @param cacheKeyInvocationContext The invocation context 
+     * @param methodDetails The details about the cached method
+     * @param value The value to cache
+     */
+    protected void cacheValue(final CacheKeyInvocationContextImpl cacheKeyInvocationContext,
+            final CachePutMethodDetails methodDetails, final Object value) {
+        
+        //Ignore null values
+        if (value == null) {
+            return;
+        }
+        
+        final CacheResolver cacheResolver = methodDetails.getCacheResolver();
+        final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
+
+        final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
+        final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
+        
+        cache.put(cacheKey, value);
     }
 }
