@@ -18,10 +18,7 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
-import javax.cache.CacheException;
-import javax.cache.CacheStatisticsMBean;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.cache.CacheStatistics;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
@@ -29,14 +26,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The reference implementation for JSR107.
- * <p/>
  */
-public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
+public class RICacheStatistics implements CacheStatistics, Serializable {
+
+    private static final long serialVersionUID = -5589437411679003894L;
 
     private transient Cache cache;
-
-    //TODO greg: use this, finish off
-    private final ObjectName objectName;
 
     private final AtomicLong cacheRemovals = new AtomicLong();
     private final AtomicLong cacheExpiries = new AtomicLong();
@@ -45,6 +40,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     private final AtomicLong cacheMisses = new AtomicLong();
     private final AtomicLong cacheEvictions = new AtomicLong();
 
+    private Date lastCollectionStartDate = new Date();
 
     /**
      * Constructs a cache statistics object
@@ -54,31 +50,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      */
     public RICacheStatistics(Cache cache, String cacheManagerName) {
         this.cache = cache;
-        objectName = createObjectName(cacheManagerName, cache.getName());
     }
-
-    /**
-     * Creates an object name using the scheme "javax.cache:type=CacheStatistics,CacheManager=<cacheManagerName>,name=<cacheName>"
-     */
-    private ObjectName createObjectName(String cacheManagerName, String cacheName) {
-        try {
-            return new ObjectName("javax.cache:type=CacheStatistics,CacheManager="
-                    + cacheManagerName + ",name=" + mbeanSafe(cacheName));
-        } catch (MalformedObjectNameException e) {
-            throw new CacheException(e);
-        }
-    }
-
-    /**
-     * Filter out invalid ObjectName characters from string.
-     *
-     * @param string input string
-     * @return A valid JMX ObjectName attribute value.
-     */
-    public static String mbeanSafe(String string) {
-        return string == null ? "" : string.replaceAll(":|=|\n", ".");
-    }
-
 
     /**
      * {@inheritDoc}
@@ -117,8 +89,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      */
     @Override
     public Date statsAccumulatingFrom() {
-        return null;
-        //Todo change body of implemented methods use File | Settings | File Templates.
+        return lastCollectionStartDate;
     }
 
     /**
@@ -217,7 +188,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     @Override
     public long getAverageGetMillis() {
         return 0;
-        //Todo change body of implemented methods use File | Settings | File Templates.
+        //Todo
     }
 
     /**
@@ -228,7 +199,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
     @Override
     public long getAveragePutMillis() {
         return 0;
-        //Todo change body of implemented methods use File | Settings | File Templates.
+        //Todo
     }
 
     /**
@@ -238,7 +209,7 @@ public class RICacheStatistics implements CacheStatisticsMBean, Serializable {
      */
     @Override
     public long getAverageRemoveMillis() {
-        //Todo change body of implemented methods use File | Settings | File Templates.
+        //Todo
         return 0;
     }
 

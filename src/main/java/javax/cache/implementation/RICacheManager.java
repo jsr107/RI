@@ -25,6 +25,7 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -90,6 +91,17 @@ public class RICacheManager implements CacheManager {
         synchronized (caches) {
             return caches.get(cacheName);
         }
+    }
+
+    /**
+     * Returns a list of caches managed by this CacheManager
+     *
+     * @return the Caches or an empty list if there are none
+     * @throws IllegalStateException if the CacheManager is not {@link javax.cache.CacheStatus#STARTED}
+     */
+    @Override
+    public Collection<Cache> getCaches() {
+        return caches.values();
     }
 
     private void addCacheInternal(Cache<?, ?> cache) throws CacheException {

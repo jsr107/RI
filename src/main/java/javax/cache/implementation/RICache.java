@@ -23,7 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
-import javax.cache.CacheStatisticsMBean;
+import javax.cache.CacheStatistics;
 import javax.cache.CacheStatus;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
@@ -196,7 +196,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheStatisticsMBean getStatistics() {
+    public CacheStatistics getStatistics() {
         checkStatusStarted();
         if (statisticsEnabled()) {
             return statistics;
