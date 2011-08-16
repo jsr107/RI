@@ -129,6 +129,38 @@ public final class RICacheConfiguration implements CacheConfiguration {
         this.transactionsEnabled.set(transactionEnabled);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CacheConfiguration)) return false;
+
+        CacheConfiguration that = (CacheConfiguration) o;
+
+        if (isReadThrough() != that.isReadThrough()) return false;
+        if (isStatisticsEnabled() != that.isStatisticsEnabled()) return false;
+        if (isStoreByValue() != that.isStoreByValue()) return false;
+        if (isTransactionEnabled() != that.isTransactionEnabled()) return false;
+        if (isWriteThrough() != that.isWriteThrough()) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = readThrough.hashCode();
+        boolean b;
+
+        b = isWriteThrough();
+        result = 31 * result + (b ? 1 : 0);
+        b = isStoreByValue();
+        result = 31 * result + (b ? 1 : 0);
+        b = isStatisticsEnabled();
+        result = 31 * result + (b ? 1 : 0);
+        b = isTransactionEnabled();
+        result = 31 * result + (b ? 1 : 0);
+        return result;
+    }
+
     /**
      * Builds the config
      * @author Yannis Cosmadopoulos
