@@ -71,10 +71,10 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * Constructs a cache.
      *
-     * @param cacheName     the cache name
+     * @param cacheName        the cache name
      * @param cacheManagerName the cache manager name
-     * @param configuration the configuration
-     * @param cacheLoader   the cache loader
+     * @param configuration    the configuration
+     * @param cacheLoader      the cache loader
      */
     private RICache(String cacheName, String cacheManagerName, CacheConfiguration configuration,
                     CacheLoader<K, V> cacheLoader, CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
@@ -86,8 +86,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         store = configuration.isStoreByValue() ?
-            new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(), new RIByValueSerializer<V>()) :
-            new RIByReferenceSimpleCache<K, V>();
+                new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(), new RIByValueSerializer<V>()) :
+                new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this, cacheManagerName);
         for (ListenerRegistration<K, V> listener : listeners) {
             registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
@@ -211,18 +211,22 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public void put(K key, V value) {
         checkStatusStarted();
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         store.put(key, value);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
+            statistics.addPutTimeNano(System.nanoTime() - start);
         }
     }
 
     @Override
     public V getAndPut(K key, V value) throws CacheException {
         checkStatusStarted();
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         V result = store.getAndPut(key, value);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
+            statistics.addPutTimeNano(System.nanoTime() - start);
         }
         return result;
     }
@@ -233,12 +237,14 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public void putAll(Map<? extends K, ? extends V> map) {
         checkStatusStarted();
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         if (map.containsKey(null)) {
             throw new NullPointerException("key");
         }
         store.putAll(map);
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(map.size());
+            statistics.addPutTimeNano(System.nanoTime() - start);
         }
     }
 
@@ -248,9 +254,11 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result = store.putIfAbsent(key, value);
         if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
+            statistics.addPutTimeNano(System.nanoTime() - start);
         }
         return result;
     }
@@ -261,9 +269,11 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public boolean remove(Object key) {
         checkStatusStarted();
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result = store.remove(key);
         if (result && statisticsEnabled()) {
             statistics.increaseCacheRemovals(1);
+            statistics.addRemoveTimeNano(System.nanoTime() - start);
         }
         return result;
     }
@@ -437,6 +447,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     /**
      * Sets the CacheManager. This may only be done once.
+     *
      * @param cacheManager the CacheManager this cache has been added to.
      * @throws CacheException if done more than once
      */
@@ -689,7 +700,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * Construct a builder.
          *
-         * @param cacheName the name of the cache to be built
+         * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
          */
         public Builder(String cacheName, String cacheManagerName) {
@@ -755,6 +766,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     /**
      * A struct :)
+     *
      * @param <K>
      * @param <V>
      */
@@ -772,14 +784,25 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     private V getInternal(Object key) {
         //noinspection SuspiciousMethodCalls
-        V  value = store.get(key);
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
+
+        V value = store.get(key);
+        if (statisticsEnabled()) {
+            statistics.addGetTimeNano(System.nanoTime() - start);
+        }
         if (value == null) {
+            if (statisticsEnabled()) {
+                statistics.increaseCacheMisses(1);
+            }
             if (cacheLoader != null) {
                 return getFromLoader(key);
             } else {
                 return null;
             }
         } else {
+            if (statisticsEnabled()) {
+                statistics.increaseCacheHits(1);
+            }
             return value;
         }
     }

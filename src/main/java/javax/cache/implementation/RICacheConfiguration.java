@@ -130,29 +130,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     /**
-     * todo update when this stabilises
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof CacheConfiguration)) return false;
-
-        CacheConfiguration that = (CacheConfiguration) o;
-
-        return readThrough.get() == that.isReadThrough() &&
-                storeByValue.get() == that.isStoreByValue() &&
-                writeThrough.get() == that.isWriteThrough();
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (readThrough.get() ? 1 : 0);
-        result = 31 * result + (writeThrough.get() ? 1 : 0);
-        result = 31 * result + (storeByValue.get() ? 1 : 0);
-        return result;
-    }
-
-    /**
      * Builds the config
      * @author Yannis Cosmadopoulos
      */

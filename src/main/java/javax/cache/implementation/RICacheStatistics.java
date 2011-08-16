@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RICacheStatistics implements CacheStatistics, Serializable {
 
     private static final long serialVersionUID = -5589437411679003894L;
+    private static final long NANOSECONDS_IN_A_MILLISECOND = 1000000L;
+
 
     private transient Cache cache;
 
@@ -39,6 +41,9 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
     private final AtomicLong cacheHits = new AtomicLong();
     private final AtomicLong cacheMisses = new AtomicLong();
     private final AtomicLong cacheEvictions = new AtomicLong();
+    private final AtomicLong cachePutTimeTakenNanos = new AtomicLong();
+    private final AtomicLong cacheGetTimeTakenNanos = new AtomicLong();
+    private final AtomicLong cacheRemoveTimeTakenNanos = new AtomicLong();
 
     private Date lastCollectionStartDate = new Date();
 
@@ -70,6 +75,8 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
 
     /**
      * {@inheritDoc}
+     * <p/>
+     * Statistics will also automatically be cleared if internal counters overflow.
      */
     @Override
     public void clearStatistics() {
@@ -79,6 +86,10 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
         cacheExpiries.set(0);
         cacheHits.set(0);
         cacheEvictions.set(0);
+        cacheGetTimeTakenNanos.set(0);
+        cachePutTimeTakenNanos.set(0);
+        cacheRemoveTimeTakenNanos.set(0);
+        lastCollectionStartDate = new Date();
     }
 
     /**
@@ -150,7 +161,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
     /**
      * The total number of puts to the cache.
      * <p/>
-     * A put is counted even if it is immediately evicted. A replace invcludes a put and remove.
+     * A put is counted even if it is immediately evicted. A replace includes a put and remove.
      *
      * @return the number of hits
      */
@@ -187,8 +198,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      */
     @Override
     public long getAverageGetMillis() {
-        return 0;
-        //Todo
+        return (cacheGetTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
     }
 
     /**
@@ -198,8 +208,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      */
     @Override
     public long getAveragePutMillis() {
-        return 0;
-        //Todo
+        return (cachePutTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
     }
 
     /**
@@ -209,8 +218,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      */
     @Override
     public long getAverageRemoveMillis() {
-        //Todo
-        return 0;
+        return (cacheRemoveTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
     }
 
     //package local incrementers
@@ -261,6 +269,49 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      */
     void increaseCacheEvictions(long number) {
         cacheEvictions.getAndAdd(number);
+    }
+
+    /**
+     * Increments the get time accumulator
+     * @param duration the time taken in nanoseconds
+     */
+    public void addGetTimeNano(long duration) {
+        if (cacheGetTimeTakenNanos.get() <= Long.MAX_VALUE - duration) {
+            cacheGetTimeTakenNanos.addAndGet(duration);
+        } else {
+            //counter full. Just reset.
+            clearStatistics();
+            cacheGetTimeTakenNanos.set(duration);
+        }
+    }
+
+
+    /**
+     * Increments the put time accumulator
+     * @param duration the time taken in nanoseconds
+     */
+    public void addPutTimeNano(long duration) {
+        if (cachePutTimeTakenNanos.get() <= Long.MAX_VALUE - duration) {
+            cachePutTimeTakenNanos.addAndGet(duration);
+        } else {
+            //counter full. Just reset.
+            clearStatistics();
+            cachePutTimeTakenNanos.set(duration);
+        }
+    }
+
+    /**
+     * Increments the remove time accumulator
+     * @param duration the time taken in nanoseconds
+     */
+    public void addRemoveTimeNano(long duration) {
+        if (cacheRemoveTimeTakenNanos.get() <= Long.MAX_VALUE - duration) {
+            cacheRemoveTimeTakenNanos.addAndGet(duration);
+        } else {
+            //counter full. Just reset.
+            clearStatistics();
+            cacheRemoveTimeTakenNanos.set(duration);
+        }
     }
 
 }
