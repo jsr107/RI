@@ -41,24 +41,27 @@ public class RICacheManager implements CacheManager {
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
     private final String name;
+    private final ClassLoader classLoader;
 
     /**
      * Constructs a new RICacheManager with the specified name.
      *
+     * @param classLoader the ClassLoader that should be used in converting values into Java Objects. May be null.
      * @param name the name of this cache manager
      * @throws NullPointerException if name is null.
      */
-    public RICacheManager(String name) {
+    public RICacheManager(ClassLoader classLoader, String name) {
         if (name == null) {
             throw new NullPointerException("No name specified");
         }
+        this.classLoader = classLoader;
         this.name = name;
     }
 
     /**
      * {@inheritDoc}
      * <p/>
-     * The name returned will be that passed in to the constructor {@link #RICacheManager(String)}
+     * The name returned will be that passed in to the constructor {@link #RICacheManager(ClassLoader, String)}
      */
     @Override
     public String getName() {
