@@ -17,7 +17,6 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheException;
-import javax.cache.Serializer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
