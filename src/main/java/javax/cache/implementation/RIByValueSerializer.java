@@ -34,6 +34,19 @@ import java.util.Arrays;
  * @since 1.7
  */
 public class RIByValueSerializer<V> implements Serializer<V> {
+    private final ClassLoader classLoader;
+
+    /**
+     * Constructor
+     * @param classLoader the class loader
+     */
+    public RIByValueSerializer(ClassLoader classLoader) {
+        if (classLoader == null) {
+            throw new NullPointerException("classLoader");
+        }
+        this.classLoader = classLoader;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -42,7 +55,7 @@ public class RIByValueSerializer<V> implements Serializer<V> {
         if (value == null) {
             throw new NullPointerException();
         }
-        return new RIBinary<V>(value);
+        return new RIBinary<V>(classLoader, value);
     }
 
     /**
@@ -51,8 +64,10 @@ public class RIByValueSerializer<V> implements Serializer<V> {
     private static final class RIBinary<V> implements Binary<V> {
         private final byte[] bytes;
         private final int hashCode;
+        private final ClassLoader classLoader;
 
-        private RIBinary(V value) {
+        private RIBinary(ClassLoader classLoader, V value) {
+            this.classLoader = classLoader;
             hashCode = value.hashCode();
             try {
                 bytes = toBytes(value);
@@ -93,7 +108,9 @@ public class RIByValueSerializer<V> implements Serializer<V> {
 
         private byte[] toBytes(V value) throws IOException {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
             try {
+                Thread.currentThread().setContextClassLoader(classLoader);
                 ObjectOutputStream oos = new ObjectOutputStream(bos);
                 oos.writeObject(value);
                 bos.flush();
@@ -104,13 +121,16 @@ public class RIByValueSerializer<V> implements Serializer<V> {
                 } catch (IOException e) {
                     // eat this up
                 }
+                Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
 
         private V fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
             ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
             ObjectInputStream ois;
+            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
             try {
+                Thread.currentThread().setContextClassLoader(classLoader);
                 ois = new ObjectInputStream(bos);
                 return (V) ois.readObject();
             } finally {
@@ -119,6 +139,7 @@ public class RIByValueSerializer<V> implements Serializer<V> {
                 } catch (IOException e) {
                     // eat this up
                 }
+                Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         }
     }

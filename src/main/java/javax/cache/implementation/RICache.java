@@ -72,11 +72,14 @@ public final class RICache<K, V> implements Cache<K, V> {
      * Constructs a cache.
      *
      * @param cacheName        the cache name
+     * @param classLoader      the class loader
      * @param cacheManagerName the cache manager name
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
+     * @param listeners        the cache listeners
      */
-    private RICache(String cacheName, String cacheManagerName, CacheConfiguration configuration,
+    private RICache(String cacheName, ClassLoader classLoader,
+                    String cacheManagerName, CacheConfiguration configuration,
                     CacheLoader<K, V> cacheLoader, CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         status = CacheStatus.UNINITIALISED;
         assert configuration != null;
@@ -86,7 +89,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         store = configuration.isStoreByValue() ?
-                new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(), new RIByValueSerializer<V>()) :
+                new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(classLoader), new RIByValueSerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this, cacheManagerName);
         for (ListenerRegistration<K, V> listener : listeners) {
@@ -692,6 +695,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public static class Builder<K, V> implements CacheBuilder<K, V> {
         private final String cacheName;
+        private final ClassLoader classLoader;
         private final String cacheManagerName;
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
@@ -703,11 +707,15 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
          */
-        public Builder(String cacheName, String cacheManagerName) {
+        public Builder(String cacheName, ClassLoader classLoader, String cacheManagerName) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
             }
             this.cacheName = cacheName;
+            if (classLoader == null) {
+                throw new NullPointerException("cacheLoader");
+            }
+            this.classLoader = classLoader;
             if (cacheManagerName == null) {
                 throw new NullPointerException("cacheManagerName");
             }
@@ -724,7 +732,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K, V>(cacheName, cacheManagerName, configuration, cacheLoader, listeners);
+            return new RICache<K, V>(cacheName, classLoader, cacheManagerName, configuration, cacheLoader, listeners);
         }
 
         /**

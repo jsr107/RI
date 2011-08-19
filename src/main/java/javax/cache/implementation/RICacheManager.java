@@ -76,7 +76,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName) {
-        return new RICacheBuilder<K, V>(cacheName);
+        return new RICacheBuilder<K, V>(cacheName, classLoader, name);
     }
 
     /**
@@ -180,8 +180,8 @@ public class RICacheManager implements CacheManager {
     private class RICacheBuilder<K, V> implements CacheBuilder<K, V> {
         private final RICache.Builder<K, V> cacheBuilder;
 
-        public RICacheBuilder(String cacheName) {
-            cacheBuilder = new RICache.Builder<K, V>(cacheName, name);
+        public RICacheBuilder(String cacheName, ClassLoader classLoader, String managerName) {
+            cacheBuilder = new RICache.Builder<K, V>(cacheName, classLoader, managerName);
         }
 
         @Override
