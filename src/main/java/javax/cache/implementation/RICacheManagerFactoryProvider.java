@@ -38,6 +38,23 @@ public class RICacheManagerFactoryProvider implements CacheManagerFactoryProvide
         return new RICacheManager(classLoader, name);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * The RI implementation uses the thread's context ClassLoader.
+     */
+    @Override
+    public ClassLoader getDefaultClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * The RI supports {@link OptionalFeature#ANNOTATIONS} and
+     * {@link OptionalFeature#STORE_BY_REFERENCE}.
+     * It does not support {@link OptionalFeature#JTA}
+     */
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
         switch (optionalFeature) {

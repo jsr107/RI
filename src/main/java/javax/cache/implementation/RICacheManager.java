@@ -46,11 +46,14 @@ public class RICacheManager implements CacheManager {
     /**
      * Constructs a new RICacheManager with the specified name.
      *
-     * @param classLoader the ClassLoader that should be used in converting values into Java Objects. May be null.
+     * @param classLoader the ClassLoader that should be used in converting values into Java Objects.
      * @param name the name of this cache manager
-     * @throws NullPointerException if name is null.
+     * @throws NullPointerException if classLoader or name is null.
      */
     public RICacheManager(ClassLoader classLoader, String name) {
+        if (classLoader == null) {
+            throw new NullPointerException("No classLoader specified");
+        }
         if (name == null) {
             throw new NullPointerException("No name specified");
         }
