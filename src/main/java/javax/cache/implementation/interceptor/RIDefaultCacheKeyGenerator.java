@@ -28,7 +28,7 @@ import javax.cache.interceptor.CacheKeyInvocationContext;
  * 
  * @author Eric Dalquist
  * @author Rick Hightower
- * @since 1.7
+ * @since 1.0
  */
 public class RIDefaultCacheKeyGenerator implements CacheKeyGenerator {
 

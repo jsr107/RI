@@ -31,7 +31,7 @@ import javax.cache.interceptor.CacheKey;
  * is immutable. The value returned by {@link #hashCode()} is calculated in the constructor.
  *
  * @author Eric Dalquist
- * @since 1.7
+ * @since 1.0
  */
 public class RIDefaultCacheKey implements CacheKey {
 

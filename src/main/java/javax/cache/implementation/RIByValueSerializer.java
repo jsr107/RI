@@ -31,7 +31,7 @@ import java.util.Arrays;
  *
  * @param <V> the type of values
  * @author Yannis Cosmadopoulos
- * @since 1.7
+ * @since 1.0
  */
 public class RIByValueSerializer<V> implements Serializer<V> {
     private final ClassLoader classLoader;
