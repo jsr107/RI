@@ -20,8 +20,10 @@ import javax.cache.CacheException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.util.Arrays;
 
 /**
@@ -70,7 +72,7 @@ public class RIByValueSerializer<V> implements Serializer<V> {
             this.classLoader = classLoader;
             hashCode = value.hashCode();
             try {
-                bytes = toBytes(value, classLoader);
+                bytes = toBytes(value);
             } catch (IOException e) {
                 throw new CacheException("Serializer: " + e.getMessage(), e);
             }
@@ -106,16 +108,6 @@ public class RIByValueSerializer<V> implements Serializer<V> {
             return hashCode;
         }
 
-        private byte[] toBytes(V value, ClassLoader classLoader) throws IOException {
-            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(classLoader);
-            try {
-                return toBytes(value);
-            } finally {
-                Thread.currentThread().setContextClassLoader(oldClassLoader);
-            }
-        }
-
         private byte[] toBytes(V value) throws IOException {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try {
@@ -133,26 +125,38 @@ public class RIByValueSerializer<V> implements Serializer<V> {
         }
 
         private V fromBytes(byte[] bytes, ClassLoader classLoader) throws IOException, ClassNotFoundException {
-            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(classLoader);
-            try {
-                return fromBytes(bytes);
-            } finally {
-                Thread.currentThread().setContextClassLoader(oldClassLoader);
-            }
-        }
-
-        private V fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
             ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
             ObjectInputStream ois;
             try {
-                ois = new ObjectInputStream(bos);
+                ois = new MyObjectInputStream(bos, classLoader);
                 return (V) ois.readObject();
             } finally {
                 try {
                     bos.close();
                 } catch (IOException e) {
                     // eat this up
+                }
+            }
+        }
+
+        /**
+         * want to use our classloader to resolve classes
+         */
+        private static final class MyObjectInputStream extends ObjectInputStream {
+            private final ClassLoader classloader;
+
+            private MyObjectInputStream(InputStream in, ClassLoader classloader) throws IOException {
+                super(in);
+                this.classloader = classloader;
+            }
+
+            @Override
+            protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                String name = desc.getName();
+                try {
+                    return Class.forName(name, false, classloader);
+                } catch (ClassNotFoundException ex) {
+                    return super.resolveClass(desc);
                 }
             }
         }
