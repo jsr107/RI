@@ -83,6 +83,17 @@ class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     }
 
     /**
+     * @param key      the key
+     * @param oldValue the old value to be checked
+     * @return true if removed
+     * @see javax.cache.Cache#remove(Object)
+     */
+    @Override
+    public boolean remove(Object key, Object oldValue) {
+        return store.remove(key, oldValue);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

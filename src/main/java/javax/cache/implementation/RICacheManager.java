@@ -23,6 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
+import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
 import java.util.Collection;
@@ -42,6 +43,7 @@ public class RICacheManager implements CacheManager {
     private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
     private final String name;
     private final ClassLoader classLoader;
+    private Status status;
 
     /**
      * Constructs a new RICacheManager with the specified name.
@@ -51,6 +53,7 @@ public class RICacheManager implements CacheManager {
      * @throws NullPointerException if classLoader or name is null.
      */
     public RICacheManager(ClassLoader classLoader, String name) {
+        status = Status.UNINITIALISED;
         if (classLoader == null) {
             throw new NullPointerException("No classLoader specified");
         }
@@ -59,6 +62,7 @@ public class RICacheManager implements CacheManager {
         }
         this.classLoader = classLoader;
         this.name = name;
+        status = Status.STARTED;
     }
 
     /**
@@ -69,6 +73,17 @@ public class RICacheManager implements CacheManager {
     @Override
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the status of this CacheManager.
+     * <p/>
+     *
+     * @return one of {@link javax.cache.Status}
+     */
+    @Override
+    public Status getStatus() {
+        return status;
     }
 
     /**
@@ -103,7 +118,7 @@ public class RICacheManager implements CacheManager {
      * Returns a list of caches managed by this CacheManager
      *
      * @return the Caches or an empty list if there are none
-     * @throws IllegalStateException if the CacheManager is not {@link javax.cache.CacheStatus#STARTED}
+     * @throws IllegalStateException if the CacheManager is not {@link javax.cache.Status#STARTED}
      */
     @Override
     public Collection<Cache> getCaches() {
@@ -153,6 +168,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public void shutdown() {
+        status = Status.STOPPING;
         for (Cache cache : caches.values()) {
             try {
                 cache.stop();
@@ -160,6 +176,7 @@ public class RICacheManager implements CacheManager {
                 getLogger().log(Level.WARNING, "Error stopping cache: " + cache);
             }
         }
+        status = Status.STOPPED;
     }
 
     /**

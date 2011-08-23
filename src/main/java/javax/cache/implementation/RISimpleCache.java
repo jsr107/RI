@@ -30,7 +30,7 @@ import java.util.Map;
  * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
  */
-interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
+interface RISimpleCache<K, V> extends Iterable<Map.Entry<K, V>> {
 
     /**
      * @param key the key
@@ -47,14 +47,14 @@ interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
     boolean containsKey(Object key);
 
     /**
-     * @param key the key
+     * @param key   the key
      * @param value the valu
      * @see javax.cache.Cache#put(Object, Object)
      */
     void put(K key, V value);
 
     /**
-     * @param key the key
+     * @param key   the key
      * @param value the value
      * @return the old value
      * @see javax.cache.Cache#getAndPut(Object, Object)
@@ -68,7 +68,7 @@ interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
     void putAll(Map<? extends K, ? extends V> map);
 
     /**
-     * @param key the key
+     * @param key   the key
      * @param value the value
      * @return true if replace happened
      * @see javax.cache.Cache#putIfAbsent(Object, Object)
@@ -84,13 +84,22 @@ interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
 
     /**
      * @param key the key
+     * @param oldValue the old value to be checked
+     * @return true if removed
+     * @see javax.cache.Cache#remove(Object)
+     */
+    boolean remove(Object key, V oldValue);
+
+
+    /**
+     * @param key the key
      * @return the previous value
      * @see javax.cache.Cache#getAndRemove(Object)
      */
     V getAndRemove(Object key);
 
     /**
-     * @param key the key
+     * @param key      the key
      * @param oldValue old value
      * @param newValue new value
      * @return whether replace happened
@@ -99,7 +108,7 @@ interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
     boolean replace(K key, V oldValue, V newValue);
 
     /**
-     * @param key the key
+     * @param key   the key
      * @param value the value
      * @return whether replaced
      * @see javax.cache.Cache#replace(Object, Object)
@@ -107,7 +116,7 @@ interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
     boolean replace(K key, V value);
 
     /**
-     * @param key the key
+     * @param key   the key
      * @param value the new value
      * @return the old value
      * @see javax.cache.Cache#replace(Object, Object)
@@ -115,8 +124,8 @@ interface RISimpleCache<K, V> extends  Iterable<Map.Entry<K, V>> {
     V getAndReplace(K key, V value);
 
     /**
-     * @see java.util.Map#size()
      * @return the size
+     * @see java.util.Map#size()
      */
     int size();
 

@@ -17,6 +17,7 @@
 
 package javax.cache.implementation;
 
+import javax.cache.CacheException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -122,6 +123,14 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     @Override
     public boolean remove(Object key) {
         return store.remove(createSearchObject(key));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean remove(Object key, V oldValue) throws CacheException {
+        return store.remove(createSearchObject(key), createValueHolder(oldValue));
     }
 
     /**
