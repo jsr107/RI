@@ -17,22 +17,20 @@
 package javax.cache.implementation;
 
 /**
- * Tagging interface for a binary representation of a value or key.
+ * Internal storage.
  * An implementation may be a wrapper of a byte array, an interface to a stream or to a NIO buffer.
  *
  * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-interface Serializer<V> {
+public interface Binary<V> {
     /**
-     * Convert a value to a binary.
+     * Get the stored value
      *
-     * @param value the value
-     * @return binary representation of value
-     * @throws javax.cache.CacheException is an error occurred during serialization
-     * @throws NullPointerException if value is null
-     * @throws IllegalArgumentException if the value can not be stored
+     * @return the value
+     * @throws javax.cache.CacheException if an error occurred during de-serialization or if binary is not
+     * a Binary obtained from a call to keyToBinary of a compatible serializer.
      */
-    Binary<V> createBinary(V value);
+    V get();
 }

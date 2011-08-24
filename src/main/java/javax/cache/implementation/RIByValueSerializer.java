@@ -36,17 +36,14 @@ import java.util.Arrays;
  * @since 1.0
  */
 public class RIByValueSerializer<V> implements Serializer<V> {
-    private final ClassLoader classLoader;
+    private final SerializationHelper serializationHelper;
 
     /**
      * Constructor
      * @param classLoader the class loader
      */
     public RIByValueSerializer(ClassLoader classLoader) {
-        if (classLoader == null) {
-            throw new NullPointerException("classLoader");
-        }
-        this.classLoader = classLoader;
+        this.serializationHelper = new SerializationHelper(classLoader);
     }
 
     /**
@@ -57,7 +54,9 @@ public class RIByValueSerializer<V> implements Serializer<V> {
         if (value == null) {
             throw new NullPointerException();
         }
-        return new RIBinary<V>(classLoader, value);
+        //TODO: do we want to validate?
+        //serializationHelper.validate(value);
+        return new RIBinary<V>(serializationHelper, value);
     }
 
     /**
@@ -66,15 +65,15 @@ public class RIByValueSerializer<V> implements Serializer<V> {
     private static final class RIBinary<V> implements Binary<V> {
         private final byte[] bytes;
         private final int hashCode;
-        private final ClassLoader classLoader;
+        private final SerializationHelper serializationHelper;
 
-        private RIBinary(ClassLoader classLoader, V value) {
-            this.classLoader = classLoader;
+        private RIBinary(SerializationHelper serializationHelper, V value) {
+            this.serializationHelper = serializationHelper;
             hashCode = value.hashCode();
             try {
-                bytes = toBytes(value);
+                bytes = serializationHelper.toBytes(value);
             } catch (IOException e) {
-                throw new CacheException("Serializer: " + e.getMessage(), e);
+                throw new IllegalArgumentException("Serializer: " + e.getMessage(), e);
             }
         }
 
@@ -84,7 +83,7 @@ public class RIByValueSerializer<V> implements Serializer<V> {
         @Override
         public V get() {
             try {
-                return fromBytes(bytes, classLoader);
+                return (V) serializationHelper.fromBytes(bytes);
             } catch (IOException e) {
                 throw new CacheException("Serializer: " + e.getMessage(), e);
             } catch (ClassNotFoundException e) {
@@ -107,8 +106,22 @@ public class RIByValueSerializer<V> implements Serializer<V> {
         public int hashCode() {
             return hashCode;
         }
+    }
 
-        private byte[] toBytes(V value) throws IOException {
+    /**
+     * Simple helper to go to and from byte arrays using a classloader
+     */
+    private static final class SerializationHelper {
+        private final ClassLoader classLoader;
+
+        private SerializationHelper(ClassLoader classLoader) {
+            if (classLoader == null) {
+                throw new NullPointerException("classLoader");
+            }
+            this.classLoader = classLoader;
+        }
+
+        public byte[] toBytes(Object value) throws IOException {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try {
                 ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -124,12 +137,12 @@ public class RIByValueSerializer<V> implements Serializer<V> {
             }
         }
 
-        private V fromBytes(byte[] bytes, ClassLoader classLoader) throws IOException, ClassNotFoundException {
+        public Object fromBytes(byte[] bytes) throws IOException, ClassNotFoundException {
             ByteArrayInputStream bos = new ByteArrayInputStream(bytes);
             ObjectInputStream ois;
             try {
                 ois = new MyObjectInputStream(bos, classLoader);
-                return (V) ois.readObject();
+                return ois.readObject();
             } finally {
                 try {
                     bos.close();
@@ -139,8 +152,20 @@ public class RIByValueSerializer<V> implements Serializer<V> {
             }
         }
 
+        public void validate(Object toStore) {
+            Class class1 = toStore.getClass();
+            try {
+                Class class2 = classLoader.loadClass(class1.getName());
+                if (class1 !=  class2) {
+                    throw new IllegalArgumentException("from different class loader: " + toStore);
+                }
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("not in class loader: " + toStore);
+            }
+        }
+
         /**
-         * want to use our classloader to resolve classes
+         * want to use our ClassLoader to resolve classes
          */
         private static final class MyObjectInputStream extends ObjectInputStream {
             private final ClassLoader classloader;

@@ -35,8 +35,8 @@ import java.util.Map;
 class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     private final Serializer<V> valueSerializer;
     private final Serializer<K> keySerializer;
-    private final RIByReferenceSimpleCache<Serializer.Binary<K>, Serializer.Binary<V>> store =
-        new RIByReferenceSimpleCache<Serializer.Binary<K>, Serializer.Binary<V>>();
+    private final RIByReferenceSimpleCache<Binary<K>, Binary<V>> store =
+        new RIByReferenceSimpleCache<Binary<K>, Binary<V>>();
 
     /**
      * Constructor
@@ -146,8 +146,8 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> map) {
-        HashMap<Serializer.Binary<K>, Serializer.Binary<V>> toStore =
-            new HashMap<Serializer.Binary<K>, Serializer.Binary<V>>(map.size());
+        HashMap<Binary<K>, Binary<V>> toStore =
+            new HashMap<Binary<K>, Binary<V>>(map.size());
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             toStore.put(createKeyHolder(entry.getKey()),
                 createValueHolder(entry.getValue()));
@@ -173,41 +173,52 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
 
     // utilities --------------------------------------------
 
-    private V returnValue(Serializer.Binary<V> binary) {
+    private V returnValue(Binary<V> binary) {
         return binary == null ? null : binary.get();
     }
 
-    private Serializer.Binary<V> createValueHolder(V value) {
+    private Binary<V> createValueHolder(V value) {
         if (value == null) {
             throw new NullPointerException("value");
         }
         return valueSerializer.createBinary(value);
     }
 
-    private Serializer.Binary<K> createKeyHolder(K key) {
+    private Binary<K> createKeyHolder(K key) {
         if (key == null) {
             throw new NullPointerException("key");
         }
         return keySerializer.createBinary(key);
     }
 
-    private Object createSearchObject(final Object o) {
-        return new Object() {
-            @Override
-            public boolean equals(Object o1) {
-                if (this == o1) return true;
-                if (o1 == null || !(o1 instanceof Serializer.Binary)) return false;
+    private Object createSearchObject(Object o) {
+        return new SearchObject(o);
+    }
 
-                Serializer.Binary that = (Serializer.Binary) o1;
+    /**
+     * Wrapped object for search
+     */
+    private static final class SearchObject {
+        private final Object searchObject;
 
-                return o.hashCode() == that.hashCode() && o.equals(that.get());
-            }
+        private SearchObject(Object searchObject) {
+            this.searchObject = searchObject;
+        }
 
-            @Override
-            public int hashCode() {
-                return o.hashCode();
-            }
-        };
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || !(o instanceof Binary)) return false;
+
+            Binary that = (Binary) o;
+
+            return searchObject.hashCode() == that.hashCode() && searchObject.equals(that.get());
+        }
+
+        @Override
+        public int hashCode() {
+            return searchObject.hashCode();
+        }
     }
 
     /**
@@ -217,9 +228,9 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      * @param <V> value type
      */
     private static final class WrappedIterator<K, V> implements Iterator<Map.Entry<K, V>> {
-        private final Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> iterator;
+        private final Iterator<Map.Entry<Binary<K>, Binary<V>>> iterator;
 
-        private WrappedIterator(Iterator<Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>>> iterator) {
+        private WrappedIterator(Iterator<Map.Entry<Binary<K>, Binary<V>>> iterator) {
             this.iterator = iterator;
         }
 
@@ -230,7 +241,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
 
         @Override
         public Map.Entry<K, V> next() {
-            Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> next = iterator.next();
+            Map.Entry<Binary<K>, Binary<V>> next = iterator.next();
             return new WrappedEntry<K, V>(next);
         }
 
@@ -246,9 +257,9 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
          * @param <V> value type
          */
         private static final class WrappedEntry<K, V> implements Map.Entry<K, V> {
-            private final Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> entry;
+            private final Map.Entry<Binary<K>, Binary<V>> entry;
 
-            private WrappedEntry(Map.Entry<Serializer.Binary<K>, Serializer.Binary<V>> entry) {
+            private WrappedEntry(Map.Entry<Binary<K>, Binary<V>> entry) {
                 this.entry = entry;
             }
 
