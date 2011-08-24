@@ -55,7 +55,7 @@ public class RIDefaultCacheResolverFactory implements CacheResolverFactory {
      * Constructs the resolver
      */
     public RIDefaultCacheResolverFactory() {
-        this.cacheManager = CacheManagerFactory.INSTANCE.getCacheManager();
+        this.cacheManager = CacheManagerFactory.getCacheManager();
     }
 
     /* (non-Javadoc)
