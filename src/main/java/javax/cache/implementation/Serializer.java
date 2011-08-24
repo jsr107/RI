@@ -20,13 +20,13 @@ package javax.cache.implementation;
  * Tagging interface for a binary representation of a value or key.
  * An implementation may be a wrapper of a byte array, an interface to a stream or to a NIO buffer.
  *
- * @param <V> the type of cached values
+ * @param <T> the type of the object
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-interface Serializer<V> {
+interface Serializer<T> {
     /**
-     * Convert a value to a binary.
+     * Convert an object to a binary.
      *
      * @param value the value
      * @return binary representation of value
@@ -34,5 +34,5 @@ interface Serializer<V> {
      * @throws NullPointerException if value is null
      * @throws IllegalArgumentException if the value can not be stored
      */
-    Binary<V> createBinary(V value);
+    Binary<T> createBinary(T value);
 }

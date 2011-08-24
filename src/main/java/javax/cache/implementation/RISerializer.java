@@ -31,18 +31,18 @@ import java.util.Arrays;
  * <p/>
  * This serializer uses java serialization.
  *
- * @param <V> the type of values
+ * @param <T> the type of object to be stored
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class RIByValueSerializer<V> implements Serializer<V> {
+public class RISerializer<T> implements Serializer<T> {
     private final SerializationHelper serializationHelper;
 
     /**
      * Constructor
      * @param classLoader the class loader
      */
-    public RIByValueSerializer(ClassLoader classLoader) {
+    public RISerializer(ClassLoader classLoader) {
         this.serializationHelper = new SerializationHelper(classLoader);
     }
 
@@ -50,13 +50,13 @@ public class RIByValueSerializer<V> implements Serializer<V> {
      * {@inheritDoc}
      */
     @Override
-    public Binary<V> createBinary(V value) {
+    public Binary<T> createBinary(T value) {
         if (value == null) {
             throw new NullPointerException();
         }
         //TODO: do we want to validate?
         //serializationHelper.validate(value);
-        return new RIBinary<V>(serializationHelper, value);
+        return new RIBinary<T>(serializationHelper, value);
     }
 
     /**

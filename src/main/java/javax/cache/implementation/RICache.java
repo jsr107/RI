@@ -90,7 +90,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         store = configuration.isStoreByValue() ?
-                new RIByValueSimpleCache<K, V>(new RIByValueSerializer<K>(classLoader), new RIByValueSerializer<V>(classLoader)) :
+                new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader), new RISerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this, cacheManagerName);
         for (ListenerRegistration<K, V> listener : listeners) {

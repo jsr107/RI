@@ -17,20 +17,20 @@
 package javax.cache.implementation;
 
 /**
- * Internal storage.
+ * Internal storage of an object.
+ * The object may be a key or a value.
  * An implementation may be a wrapper of a byte array, an interface to a stream or to a NIO buffer.
  *
- * @param <V> the type of cached values
+ * @param <T> the type of cached values
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public interface Binary<V> {
+public interface Binary<T> {
     /**
      * Get the stored value
      *
      * @return the value
-     * @throws javax.cache.CacheException if an error occurred during de-serialization or if binary is not
-     * a Binary obtained from a call to keyToBinary of a compatible serializer.
+     * @throws javax.cache.CacheException if an error occurred during conversion to V.
      */
-    V get();
+    T get();
 }
