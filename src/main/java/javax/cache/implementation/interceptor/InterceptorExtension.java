@@ -16,10 +16,10 @@
  */
 package javax.cache.implementation.interceptor;
 
-import javax.cache.interceptor.CachePut;
-import javax.cache.interceptor.CacheRemoveAll;
-import javax.cache.interceptor.CacheRemoveEntry;
-import javax.cache.interceptor.CacheResult;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheResult;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;

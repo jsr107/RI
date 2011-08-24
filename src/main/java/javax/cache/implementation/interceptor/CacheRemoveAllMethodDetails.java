@@ -18,9 +18,9 @@ package javax.cache.implementation.interceptor;
 
 import java.util.List;
 
-import javax.cache.interceptor.CacheMethodDetails;
-import javax.cache.interceptor.CacheRemoveAll;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheResolver;
 
 /**
  * Details for a method annotated with {@link CacheRemoveAll}

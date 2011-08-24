@@ -19,9 +19,9 @@ package javax.cache.implementation.interceptor;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-import javax.cache.interceptor.CacheKeyGenerator;
-import javax.cache.interceptor.CacheMethodDetails;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheResolver;
 
 
 /**
@@ -29,9 +29,9 @@ import javax.cache.interceptor.CacheResolver;
  * 
  * @author Eric Dalquist
  * @version $Revision$
- * @param <A> The type of annotation this context information is for. One of {@link javax.cache.interceptor.CacheResult}, 
- * {@link javax.cache.interceptor.CachePut}, {@link javax.cache.interceptor.CacheRemoveEntry}, or 
- * {@link javax.cache.interceptor.CacheRemoveAll}.
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ * {@link javax.cache.annotation.CacheRemoveAll}.
  */
 abstract class StaticCacheKeyInvocationContext<A extends Annotation> extends StaticCacheInvocationContext<A> {
     private final CacheKeyGenerator cacheKeyGenerator;

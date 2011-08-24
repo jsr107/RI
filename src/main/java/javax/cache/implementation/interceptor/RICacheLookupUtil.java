@@ -28,17 +28,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.cache.interceptor.CacheDefaults;
-import javax.cache.interceptor.CacheKeyGenerator;
-import javax.cache.interceptor.CacheKeyParam;
-import javax.cache.interceptor.CacheMethodDetails;
-import javax.cache.interceptor.CachePut;
-import javax.cache.interceptor.CacheRemoveAll;
-import javax.cache.interceptor.CacheRemoveEntry;
-import javax.cache.interceptor.CacheResolver;
-import javax.cache.interceptor.CacheResolverFactory;
-import javax.cache.interceptor.CacheResult;
-import javax.cache.interceptor.CacheValue;
+import javax.cache.annotation.CacheDefaults;
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheKeyParam;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheResolver;
+import javax.cache.annotation.CacheResolverFactory;
+import javax.cache.annotation.CacheResult;
+import javax.cache.annotation.CacheValue;
 import javax.inject.Inject;
 import javax.interceptor.InvocationContext;
 

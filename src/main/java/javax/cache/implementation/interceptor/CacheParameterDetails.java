@@ -46,25 +46,25 @@ class CacheParameterDetails {
     }
     
     /**
-     * @see javax.cache.interceptor.CacheInvocationParameter#getBaseType()
+     * @see javax.cache.annotation.CacheInvocationParameter#getBaseType()
      */
     public Type getBaseType() {
         return this.baseType;
     }
     /**
-     * @see javax.cache.interceptor.CacheInvocationParameter#getRawType()
+     * @see javax.cache.annotation.CacheInvocationParameter#getRawType()
      */
     public Class<?> getRawType() {
         return this.rawType;
     }
     /**
-     * @see javax.cache.interceptor.CacheInvocationParameter#getAnnotations()
+     * @see javax.cache.annotation.CacheInvocationParameter#getAnnotations()
      */
     public Set<Annotation> getAnnotations() {
         return this.annotations;
     }
     /**
-     * @see javax.cache.interceptor.CacheInvocationParameter#getParameterPosition()
+     * @see javax.cache.annotation.CacheInvocationParameter#getParameterPosition()
      */
     public int getParameterPosition() {
         return this.parameterPosition;

@@ -20,8 +20,8 @@ package javax.cache.implementation.interceptor;
 import java.lang.annotation.Annotation;
 
 import javax.cache.Cache;
-import javax.cache.interceptor.CacheRemoveAll;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheResolver;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;

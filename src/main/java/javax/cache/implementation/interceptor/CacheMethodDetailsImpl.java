@@ -20,18 +20,18 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import javax.cache.interceptor.CacheMethodDetails;
+import javax.cache.annotation.CacheMethodDetails;
 
 
 /**
- * Static details about the annotated method, used with {@link javax.cache.interceptor.CacheResolverFactory} to
- * find the {@link javax.cache.interceptor.CacheResolver};
+ * Static details about the annotated method, used with {@link javax.cache.annotation.CacheResolverFactory} to
+ * find the {@link javax.cache.annotation.CacheResolver};
  * 
  * @author Eric Dalquist
  * @version $Revision$
- * @param <A> The type of annotation this context information is for. One of {@link javax.cache.interceptor.CacheResult}, 
- * {@link javax.cache.interceptor.CachePut}, {@link javax.cache.interceptor.CacheRemoveEntry}, or 
- * {@link javax.cache.interceptor.CacheRemoveAll}.
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ * {@link javax.cache.annotation.CacheRemoveAll}.
  */
 class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails<A> {
     private final Method targetMethod;
@@ -70,7 +70,7 @@ class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails
     
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getMethod()
+     * @see javax.cache.annotation.CacheMethodDetails#getMethod()
      */
     @Override
     public Method getMethod() {
@@ -78,7 +78,7 @@ class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getAnnotations()
+     * @see javax.cache.annotation.CacheMethodDetails#getAnnotations()
      */
     @Override
     public Set<Annotation> getAnnotations() {
@@ -86,7 +86,7 @@ class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getCacheAnnotation()
+     * @see javax.cache.annotation.CacheMethodDetails#getCacheAnnotation()
      */
     @Override
     public A getCacheAnnotation() {
@@ -94,7 +94,7 @@ class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getCacheName()
+     * @see javax.cache.annotation.CacheMethodDetails#getCacheName()
      */
     @Override
     public String getCacheName() {

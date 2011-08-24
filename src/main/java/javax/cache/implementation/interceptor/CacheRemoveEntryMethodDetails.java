@@ -18,10 +18,10 @@ package javax.cache.implementation.interceptor;
 
 import java.util.List;
 
-import javax.cache.interceptor.CacheKeyGenerator;
-import javax.cache.interceptor.CacheMethodDetails;
-import javax.cache.interceptor.CacheRemoveEntry;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheResolver;
 
 /**
  * Details for a method annotated with {@link CacheRemoveEntry}

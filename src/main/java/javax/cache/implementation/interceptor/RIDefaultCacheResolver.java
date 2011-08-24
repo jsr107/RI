@@ -20,8 +20,8 @@ package javax.cache.implementation.interceptor;
 import java.lang.annotation.Annotation;
 
 import javax.cache.Cache;
-import javax.cache.interceptor.CacheInvocationContext;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheInvocationContext;
+import javax.cache.annotation.CacheResolver;
 
 /**
  * Simple cache resolver that always returns the same {@link Cache}
@@ -47,7 +47,7 @@ public class RIDefaultCacheResolver implements CacheResolver {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheResolver#resolveCache(javax.cache.interceptor.CacheInvocationContext)
+     * @see javax.cache.annotation.CacheResolver#resolveCache(javax.cache.annotation.CacheInvocationContext)
      */
     @Override
     @SuppressWarnings("unchecked")

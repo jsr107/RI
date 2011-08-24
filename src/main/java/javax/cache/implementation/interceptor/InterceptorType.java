@@ -25,19 +25,19 @@ package javax.cache.implementation.interceptor;
  */
 public enum InterceptorType {
     /**
-     * @see javax.cache.interceptor.CacheResult
+     * @see javax.cache.annotation.CacheResult
      */
     CACHE_RESULT,
     /**
-     * @see javax.cache.interceptor.CachePut
+     * @see javax.cache.annotation.CachePut
      */
     CACHE_PUT,
     /**
-     * @see javax.cache.interceptor.CacheRemoveEntry
+     * @see javax.cache.annotation.CacheRemoveEntry
      */
     CACHE_REMOVE_ENTRY,
     /**
-     * @see javax.cache.interceptor.CacheRemoveAll
+     * @see javax.cache.annotation.CacheRemoveAll
      */
     CACHE_REMOVE_ALL;
 }

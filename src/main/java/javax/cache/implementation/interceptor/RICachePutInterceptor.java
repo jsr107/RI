@@ -18,11 +18,11 @@ package javax.cache.implementation.interceptor;
 
 
 import javax.cache.Cache;
-import javax.cache.interceptor.CacheInvocationParameter;
-import javax.cache.interceptor.CacheKey;
-import javax.cache.interceptor.CacheKeyGenerator;
-import javax.cache.interceptor.CachePut;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheResolver;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;

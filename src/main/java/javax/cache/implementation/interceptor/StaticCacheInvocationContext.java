@@ -22,15 +22,15 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-import javax.cache.interceptor.CacheMethodDetails;
-import javax.cache.interceptor.CacheResolver;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheResolver;
 
 /**
  * @author Eric Dalquist
  * @version $Revision$
- * @param <A> The type of annotation this context information is for. One of {@link javax.cache.interceptor.CacheResult}, 
- * {@link javax.cache.interceptor.CachePut}, {@link javax.cache.interceptor.CacheRemoveEntry}, or 
- * {@link javax.cache.interceptor.CacheRemoveAll}.
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ * {@link javax.cache.annotation.CacheRemoveAll}.
  */
 abstract class StaticCacheInvocationContext<A extends Annotation> implements CacheMethodDetails<A> {
     private final CacheMethodDetails<A> cacheMethodDetails;

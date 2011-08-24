@@ -19,7 +19,7 @@ package javax.cache.implementation.interceptor;
 
 import java.util.Arrays;
 
-import javax.cache.interceptor.CacheKey;
+import javax.cache.annotation.CacheKey;
 
 /**
  * Default cache key implementation. Keeps a reference to a copy of the entire parameter array from

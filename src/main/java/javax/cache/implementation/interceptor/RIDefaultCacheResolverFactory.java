@@ -24,9 +24,9 @@ import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.CacheManagerFactory;
-import javax.cache.interceptor.CacheMethodDetails;
-import javax.cache.interceptor.CacheResolver;
-import javax.cache.interceptor.CacheResolverFactory;
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheResolver;
+import javax.cache.annotation.CacheResolverFactory;
 
 /**
  * Default {@link CacheResolverFactory} that uses the default {@link CacheManager} and finds the {@link Cache}
@@ -59,7 +59,7 @@ public class RIDefaultCacheResolverFactory implements CacheResolverFactory {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheResolverFactory#getCacheResolver(javax.cache.interceptor.CacheMethodDetails)
+     * @see javax.cache.annotation.CacheResolverFactory#getCacheResolver(javax.cache.annotation.CacheMethodDetails)
      */
     @Override
     public CacheResolver getCacheResolver(CacheMethodDetails<? extends Annotation> cacheMethodDetails) {

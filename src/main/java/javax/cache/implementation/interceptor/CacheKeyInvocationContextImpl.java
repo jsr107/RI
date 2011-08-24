@@ -20,8 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.cache.interceptor.CacheInvocationParameter;
-import javax.cache.interceptor.CacheKeyInvocationContext;
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.interceptor.InvocationContext;
 
 
@@ -83,7 +83,7 @@ class CacheKeyInvocationContextImpl extends CacheInvocationContextImpl implement
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheKeyInvocationContext#getKeyParameters()
+     * @see javax.cache.annotation.CacheKeyInvocationContext#getKeyParameters()
      */
     @Override
     public CacheInvocationParameter[] getKeyParameters() {
@@ -91,7 +91,7 @@ class CacheKeyInvocationContextImpl extends CacheInvocationContextImpl implement
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheKeyInvocationContext#getValueParameter()
+     * @see javax.cache.annotation.CacheKeyInvocationContext#getValueParameter()
      */
     @Override
     public CacheInvocationParameter getValueParameter() {

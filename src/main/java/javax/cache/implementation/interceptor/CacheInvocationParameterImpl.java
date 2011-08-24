@@ -20,7 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.cache.interceptor.CacheInvocationParameter;
+import javax.cache.annotation.CacheInvocationParameter;
 
 /**
  * Provides caching specific information about a method parameter for intercepted method invocations.
@@ -44,7 +44,7 @@ class CacheInvocationParameterImpl implements CacheInvocationParameter {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationParameter#getBaseType()
+     * @see javax.cache.annotation.CacheInvocationParameter#getBaseType()
      */
     @Override
     public Type getBaseType() {
@@ -52,7 +52,7 @@ class CacheInvocationParameterImpl implements CacheInvocationParameter {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationParameter#getRawType()
+     * @see javax.cache.annotation.CacheInvocationParameter#getRawType()
      */
     @Override
     public Class<?> getRawType() {
@@ -60,7 +60,7 @@ class CacheInvocationParameterImpl implements CacheInvocationParameter {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationParameter#getValue()
+     * @see javax.cache.annotation.CacheInvocationParameter#getValue()
      */
     @Override
     public Object getValue() {
@@ -68,7 +68,7 @@ class CacheInvocationParameterImpl implements CacheInvocationParameter {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationParameter#getAnnotations()
+     * @see javax.cache.annotation.CacheInvocationParameter#getAnnotations()
      */
     @Override
     public Set<Annotation> getAnnotations() {
@@ -76,7 +76,7 @@ class CacheInvocationParameterImpl implements CacheInvocationParameter {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationParameter#getParameterPosition()
+     * @see javax.cache.annotation.CacheInvocationParameter#getParameterPosition()
      */
     @Override
     public int getParameterPosition() {

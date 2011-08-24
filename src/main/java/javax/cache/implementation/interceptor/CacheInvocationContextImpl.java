@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import javax.cache.interceptor.CacheInvocationContext;
-import javax.cache.interceptor.CacheInvocationParameter;
+import javax.cache.annotation.CacheInvocationContext;
+import javax.cache.annotation.CacheInvocationParameter;
 import javax.interceptor.InvocationContext;
 
 
@@ -73,7 +73,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getAnnotations()
+     * @see javax.cache.annotation.CacheMethodDetails#getAnnotations()
      */
     @Override
     public Set<Annotation> getAnnotations() {
@@ -81,7 +81,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getCacheAnnotation()
+     * @see javax.cache.annotation.CacheMethodDetails#getCacheAnnotation()
      */
     @Override
     public Annotation getCacheAnnotation() {
@@ -89,7 +89,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getCacheName()
+     * @see javax.cache.annotation.CacheMethodDetails#getCacheName()
      */
     @Override
     public String getCacheName() {
@@ -97,7 +97,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheMethodDetails#getMethod()
+     * @see javax.cache.annotation.CacheMethodDetails#getMethod()
      */
     @Override
     public Method getMethod() {
@@ -105,7 +105,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#getTarget()
+     * @see javax.cache.annotation.CacheInvocationContext#getTarget()
      */
     @Override
     public Object getTarget() {
@@ -113,7 +113,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#getAllParameters()
+     * @see javax.cache.annotation.CacheInvocationContext#getAllParameters()
      */
     @Override
     public CacheInvocationParameter[] getAllParameters() {
@@ -121,7 +121,7 @@ class CacheInvocationContextImpl implements CacheInvocationContext<Annotation> {
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.interceptor.CacheInvocationContext#unwrap(java.lang.Class)
+     * @see javax.cache.annotation.CacheInvocationContext#unwrap(java.lang.Class)
      */
     @SuppressWarnings("unchecked")
     @Override
