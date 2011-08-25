@@ -44,7 +44,7 @@ public class RICacheManager implements CacheManager {
     private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
     private final String name;
     private final ClassLoader classLoader;
-    private Status status;
+    private volatile Status status;
 
     /**
      * Constructs a new RICacheManager with the specified name.
@@ -110,20 +110,22 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public <K, V> Cache<K, V> getCache(String cacheName) {
+        if (status != Status.STARTED) {
+            throw new IllegalStateException();
+        }
         synchronized (caches) {
             return caches.get(cacheName);
         }
     }
 
     /**
-     * Returns a list of caches managed by this CacheManager
-     *
-     * @return the Caches or an empty list if there are none
-     * @throws IllegalStateException if the CacheManager is not {@link javax.cache.Status#STARTED}
+     * {@inheritDoc}
      */
     @Override
     public Collection<Cache> getCaches() {
-        return caches.values();
+        synchronized (caches) {
+            return new ArrayList<Cache>(caches.values());
+        }
     }
 
     private void addCacheInternal(Cache<?, ?> cache) throws CacheException {
@@ -142,10 +144,13 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public boolean removeCache(String cacheName) {
-        Cache oldCache;
-        if (cacheName == null) {
-            throw new NullPointerException("name");
+        if (status != Status.STARTED) {
+            throw new IllegalStateException();
         }
+        if (cacheName == null) {
+            throw new NullPointerException();
+        }
+        Cache oldCache;
         synchronized (caches) {
             oldCache = caches.remove(cacheName);
         }
@@ -169,6 +174,9 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public void shutdown() {
+        if (status != Status.STARTED) {
+            throw new IllegalStateException();
+        }
         status = Status.STOPPING;
         ArrayList<Cache> cacheList;
         synchronized (caches) {
