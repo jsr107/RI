@@ -26,6 +26,7 @@ import javax.cache.CacheManager;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -169,7 +170,12 @@ public class RICacheManager implements CacheManager {
     @Override
     public void shutdown() {
         status = Status.STOPPING;
-        for (Cache cache : caches.values()) {
+        ArrayList<Cache> cacheList;
+        synchronized (caches) {
+            cacheList = new ArrayList<Cache>(caches.values());
+            caches.clear();
+        }
+        for (Cache cache : cacheList) {
             try {
                 cache.stop();
             } catch (Exception e) {
