@@ -75,22 +75,25 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param cacheName        the cache name
      * @param classLoader      the class loader
      * @param cacheManagerName the cache manager name
+     * @param immutableClasses the set of immutable classes
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
      * @param listeners        the cache listeners
      */
     private RICache(String cacheName, ClassLoader classLoader,
-                    String cacheManagerName, CacheConfiguration configuration,
+                    String cacheManagerName, Set<Class> immutableClasses, CacheConfiguration configuration,
                     CacheLoader<K, V> cacheLoader, CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         status = Status.UNINITIALISED;
         assert configuration != null;
         assert cacheName != null;
         assert cacheManagerName != null;
+        assert immutableClasses != null;
         this.cacheName = cacheName;
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         store = configuration.isStoreByValue() ?
-                new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader), new RISerializer<V>(classLoader)) :
+                new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader, immutableClasses),
+                        new RISerializer<V>(classLoader, immutableClasses)) :
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this, cacheManagerName);
         for (ListenerRegistration<K, V> listener : listeners) {
@@ -703,6 +706,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final String cacheName;
         private final ClassLoader classLoader;
         private final String cacheManagerName;
+        private final Set<Class> immutableClasses;
         private CacheConfiguration configuration;
         private CacheLoader<K, V> cacheLoader;
         private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
@@ -713,7 +717,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
          */
-        public Builder(String cacheName, ClassLoader classLoader, String cacheManagerName) {
+        public Builder(String cacheName, ClassLoader classLoader, String cacheManagerName, Set<Class> immutableClasses) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
             }
@@ -726,6 +730,10 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("cacheManagerName");
             }
             this.cacheManagerName = cacheManagerName;
+            if (immutableClasses == null) {
+                throw new NullPointerException("immutableClasses");
+            }
+            this.immutableClasses = immutableClasses;
         }
 
         /**
@@ -738,7 +746,8 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration == null) {
                 configuration = new RICacheConfiguration.Builder().build();
             }
-            return new RICache<K, V>(cacheName, classLoader, cacheManagerName, configuration, cacheLoader, listeners);
+            return new RICache<K, V>(cacheName, classLoader, cacheManagerName, immutableClasses,
+                    configuration, cacheLoader, listeners);
         }
 
         /**

@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
  * The reference implementation for JSR107.
@@ -37,13 +38,18 @@ import java.util.Arrays;
  */
 public class RISerializer<T> implements Serializer<T> {
     private final SerializationHelper serializationHelper;
+    private final Set<Class> immutableClasses;
 
     /**
      * Constructor
      * @param classLoader the class loader
+     * @param immutableClasses the immutable classes
      */
-    public RISerializer(ClassLoader classLoader) {
+    public RISerializer(ClassLoader classLoader, Set<Class> immutableClasses) {
+        assert classLoader != null;
+        assert immutableClasses != null;
         this.serializationHelper = new SerializationHelper(classLoader);
+        this.immutableClasses = immutableClasses;
     }
 
     /**
@@ -56,7 +62,41 @@ public class RISerializer<T> implements Serializer<T> {
         }
         //TODO: do we want to validate?
         //serializationHelper.validate(value);
-        return new RIBinary<T>(serializationHelper, value);
+        return immutableClasses.contains(value.getClass()) ?
+                new RIByReferenceBinary<T>(value) :
+                new RIBinary<T>(value, serializationHelper);
+    }
+
+    /**
+     * Binary that stores by reference
+     * @param <V> the type
+     */
+    private static final class RIByReferenceBinary<V> implements Binary<V> {
+        private final V value;
+
+        public RIByReferenceBinary(V value) {
+            this.value = value;
+        }
+
+        @Override
+        public V get() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Binary binary = (Binary) o;
+
+            return hashCode() == binary.hashCode() && get().equals(binary.get());
+        }
+
+        @Override
+        public int hashCode() {
+            return value.hashCode();
+        }
     }
 
     /**
@@ -67,7 +107,7 @@ public class RISerializer<T> implements Serializer<T> {
         private final int hashCode;
         private final SerializationHelper serializationHelper;
 
-        private RIBinary(SerializationHelper serializationHelper, V value) {
+        private RIBinary(V value, SerializationHelper serializationHelper) {
             this.serializationHelper = serializationHelper;
             hashCode = value.hashCode();
             try {
@@ -96,10 +136,16 @@ public class RISerializer<T> implements Serializer<T> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            RIBinary riBinary = (RIBinary) o;
+            if (o instanceof RIBinary) {
+                RIBinary riBinary = (RIBinary) o;
 
-            return hashCode == riBinary.hashCode &&
-                    (Arrays.equals(bytes, riBinary.bytes) || get().equals(riBinary.get()));
+                return hashCode == riBinary.hashCode &&
+                        (Arrays.equals(bytes, riBinary.bytes));
+            } else {
+                Binary binary = (Binary) o;
+                return hashCode == binary.hashCode() &&
+                        get().equals(binary.get());
+            }
         }
 
         @Override

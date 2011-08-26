@@ -46,6 +46,7 @@ public class RICacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
+    private final HashSet<Class> immutableClasses = new HashSet<Class>();
     private final String name;
     private final ClassLoader classLoader;
     private volatile Status status;
@@ -185,11 +186,25 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
+    public void addImmutableClass(Class immutableClass) {
+        if (immutableClass == null) {
+            throw new NullPointerException();
+        }
+        immutableClasses.add(immutableClass);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void shutdown() {
         if (status != Status.STARTED) {
             throw new IllegalStateException();
         }
         status = Status.STOPPING;
+        synchronized (immutableClasses) {
+            immutableClasses.clear();
+        }
         ArrayList<Cache> cacheList;
         synchronized (caches) {
             cacheList = new ArrayList<Cache>(caches.values());
@@ -224,7 +239,7 @@ public class RICacheManager implements CacheManager {
         private final RICache.Builder<K, V> cacheBuilder;
 
         public RICacheBuilder(String cacheName, ClassLoader classLoader, String managerName) {
-            cacheBuilder = new RICache.Builder<K, V>(cacheName, classLoader, managerName);
+            cacheBuilder = new RICache.Builder<K, V>(cacheName, classLoader, managerName, immutableClasses);
         }
 
         @Override
