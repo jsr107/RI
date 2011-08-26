@@ -27,8 +27,10 @@ import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,9 +124,9 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public Collection<Cache> getCaches() {
+    public Set<Cache> getCaches() {
         synchronized (caches) {
-            return new ArrayList<Cache>(caches.values());
+            return Collections.unmodifiableSet(new HashSet<Cache>(caches.values()));
         }
     }
 
