@@ -57,13 +57,6 @@ public class RICachingProvider implements CachingProvider {
      */
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
-         return isSupportedInternal(optionalFeature);
-    }
-
-    /**
-     * Static method to allow lookup from {@link CacheManager}
-     */
-    static boolean isSupportedInternal(OptionalFeature optionalFeature) {
         switch (optionalFeature) {
             case ANNOTATIONS:
                 return true;

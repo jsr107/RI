@@ -23,6 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
+import javax.cache.CacheManagerFactory;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
@@ -177,7 +178,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
-        return RICachingProvider.isSupportedInternal(optionalFeature);
+        return CacheManagerFactory.isSupported(optionalFeature);
     }
 
     /**
