@@ -18,7 +18,7 @@ package javax.cache.implementation;
 
 import javax.cache.CacheManager;
 import javax.cache.OptionalFeature;
-import javax.cache.spi.ServiceProvider;
+import javax.cache.spi.CachingProvider;
 
 /**
  * The reference implementation for JSR107.
@@ -26,7 +26,7 @@ import javax.cache.spi.ServiceProvider;
  *
  * @author Yannis Cosmadopoulos
  */
-public class RIServiceProvider implements ServiceProvider {
+public class RICachingProvider implements CachingProvider {
     /**
      * {@inheritDoc}
      */
@@ -35,7 +35,7 @@ public class RIServiceProvider implements ServiceProvider {
         if (name == null) {
             throw new NullPointerException("CacheManager name not specified");
         }
-        return new RICacheManager(classLoader, name);
+        return new RICacheManager(name, classLoader);
     }
 
     /**
@@ -57,6 +57,13 @@ public class RIServiceProvider implements ServiceProvider {
      */
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
+         return isSupportedInternal(optionalFeature);
+    }
+
+    /**
+     * Static method to allow lookup from {@link CacheManager}
+     */
+    static boolean isSupportedInternal(OptionalFeature optionalFeature) {
         switch (optionalFeature) {
             case ANNOTATIONS:
                 return true;
@@ -68,4 +75,5 @@ public class RIServiceProvider implements ServiceProvider {
                 return false;
         }
     }
+
 }
