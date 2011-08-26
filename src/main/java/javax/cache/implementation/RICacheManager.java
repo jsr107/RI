@@ -23,6 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
+import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
@@ -55,7 +56,7 @@ public class RICacheManager implements CacheManager {
      * @param name the name of this cache manager
      * @throws NullPointerException if classLoader or name is null.
      */
-    public RICacheManager(ClassLoader classLoader, String name) {
+    public RICacheManager(String name, ClassLoader classLoader) {
         status = Status.UNINITIALISED;
         if (classLoader == null) {
             throw new NullPointerException("No classLoader specified");
@@ -71,7 +72,7 @@ public class RICacheManager implements CacheManager {
     /**
      * {@inheritDoc}
      * <p/>
-     * The name returned will be that passed in to the constructor {@link #RICacheManager(ClassLoader, String)}
+     * The name returned will be that passed in to the constructor {@link #RICacheManager(String, ClassLoader)}
      */
     @Override
     public String getName() {
@@ -169,6 +170,14 @@ public class RICacheManager implements CacheManager {
     @Override
     public Object getUserTransaction() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isSupported(OptionalFeature optionalFeature) {
+        return RICachingProvider.isSupportedInternal(optionalFeature);
     }
 
     /**
