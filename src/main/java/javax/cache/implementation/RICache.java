@@ -154,19 +154,18 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Future<V> load(K key, CacheLoader<K, V> specificLoader, Object loaderArgument) {
+    public Future<V> load(K key) {
         checkStatusStarted();
-        CacheLoader<K, V> loader = getCacheLoader(specificLoader);
-        if (loader == null) {
-            return null;
-        }
         if (key == null) {
             throw new NullPointerException("key");
+        }
+        if (cacheLoader == null) {
+            return null;
         }
         if (containsKey(key)) {
             return null;
         }
-        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, loader, key, loaderArgument));
+        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, cacheLoader, key));
         executorService.submit(task);
         return task;
     }
@@ -175,25 +174,20 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Future<Map<K, V>> loadAll(Collection<? extends K> keys, CacheLoader<K, V> specificLoader, Object loaderArgument) {
+    public Future<Map<K, V>> loadAll(Collection<? extends K> keys) {
         checkStatusStarted();
         if (keys == null) {
             throw new NullPointerException("keys");
         }
-        CacheLoader<K, V> loader = getCacheLoader(specificLoader);
-        if (loader == null) {
+        if (cacheLoader == null) {
             return null;
         }
         if (keys.contains(null)) {
             throw new NullPointerException("key");
         }
-        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, loader, keys, loaderArgument));
+        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, cacheLoader, keys));
         executorService.submit(task);
         return task;
-    }
-
-    private CacheLoader<K, V> getCacheLoader(CacheLoader<K, V> specificLoader) {
-        return specificLoader == null ? cacheLoader : specificLoader;
     }
 
     /**
@@ -651,18 +645,16 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final RICache<K, V> cache;
         private final CacheLoader<K, V> cacheLoader;
         private final K key;
-        private final Object arg;
 
-        RICacheLoaderLoadCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, K key, Object arg) {
+        RICacheLoaderLoadCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, K key) {
             this.cache = cache;
             this.cacheLoader = cacheLoader;
             this.key = key;
-            this.arg = arg;
         }
 
         @Override
         public V call() throws Exception {
-            Entry<K, V> entry = cacheLoader.load(key, arg);
+            Entry<K, V> entry = cacheLoader.load(key);
             cache.put(entry.getKey(), entry.getValue());
             return entry.getValue();
         }
@@ -679,13 +671,11 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final RICache<K, V> cache;
         private final CacheLoader<K, V> cacheLoader;
         private final Collection<? extends K> keys;
-        private final Object arg;
 
-        RICacheLoaderLoadAllCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, Collection<? extends K> keys, Object arg) {
+        RICacheLoaderLoadAllCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, Collection<? extends K> keys) {
             this.cache = cache;
             this.cacheLoader = cacheLoader;
             this.keys = keys;
-            this.arg = arg;
         }
 
         @Override
@@ -696,7 +686,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                     keysNotInStore.add(key);
                 }
             }
-            Map<K, V> value = cacheLoader.loadAll(keysNotInStore, arg);
+            Map<K, V> value = cacheLoader.loadAll(keysNotInStore);
             cache.putAll(value);
             return value;
         }
@@ -832,7 +822,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private V getFromLoader(Object key) {
-        Cache.Entry<K, V> entry = cacheLoader.load(key, null);
+        Cache.Entry<K, V> entry = cacheLoader.load(key);
         if (entry != null) {
             store.put(entry.getKey(), entry.getValue());
             return entry.getValue();
