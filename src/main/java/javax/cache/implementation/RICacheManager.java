@@ -119,7 +119,7 @@ public class RICacheManager implements CacheManager {
             throw new IllegalStateException();
         }
         synchronized (caches) {
-            return caches.get(cacheName);
+            return (Cache<K, V>) caches.get(cacheName);
         }
     }
 
@@ -127,9 +127,13 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public Set<Cache> getCaches() {
+    public <K, V> Set<Cache<K, V>> getCaches() {
         synchronized (caches) {
-            return Collections.unmodifiableSet(new HashSet<Cache>(caches.values()));
+            HashSet<Cache<K, V>> set = new HashSet<Cache<K, V>>();
+            for (Cache<?, ?> cache : caches.values()) {
+                set.add((Cache<K, V>) cache);
+            }
+            return Collections.unmodifiableSet(set);
         }
     }
 
