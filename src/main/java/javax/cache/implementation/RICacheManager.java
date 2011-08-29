@@ -254,12 +254,6 @@ public class RICacheManager implements CacheManager {
         }
 
         @Override
-        public CacheBuilder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
-            cacheBuilder.setCacheConfiguration(configuration);
-            return this;
-        }
-
-        @Override
         public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             cacheBuilder.setCacheLoader(cacheLoader);
             return this;
@@ -268,6 +262,36 @@ public class RICacheManager implements CacheManager {
         @Override
         public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
             cacheBuilder.registerCacheEntryListener(listener, scope, synchronous);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setStoreByValue(boolean storeByValue) {
+            cacheBuilder.setStoreByValue(storeByValue);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setTransactionEnabled(boolean enableTransactions) {
+            cacheBuilder.setTransactionEnabled(enableTransactions);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setStatisticsEnabled(boolean enableStatistics) {
+            cacheBuilder.setStatisticsEnabled(enableStatistics);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setReadThrough(boolean readThrough) {
+            cacheBuilder.setReadThrough(readThrough);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setWriteThrough(boolean writeThrough) {
+            cacheBuilder.setWriteThrough(writeThrough);
             return this;
         }
     }

@@ -707,7 +707,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final ClassLoader classLoader;
         private final String cacheManagerName;
         private final Set<Class> immutableClasses;
-        private CacheConfiguration configuration;
+        private final RICacheConfiguration.Builder configurationBuilder = new RICacheConfiguration.Builder();
         private CacheLoader<K, V> cacheLoader;
         private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
@@ -743,26 +743,9 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public RICache<K, V> build() {
-            if (configuration == null) {
-                configuration = new RICacheConfiguration.Builder().build();
-            }
+            CacheConfiguration configuration = configurationBuilder.build();
             return new RICache<K, V>(cacheName, classLoader, cacheManagerName, immutableClasses,
                     configuration, cacheLoader, listeners);
-        }
-
-        /**
-         * Set the cache configuration.
-         *
-         * @param configuration the cache configuration
-         * @return the builder
-         */
-        @Override
-        public Builder<K, V> setCacheConfiguration(CacheConfiguration configuration) {
-            if (configuration == null) {
-                throw new NullPointerException("configuration");
-            }
-            this.configuration = configuration;
-            return this;
         }
 
         /**
@@ -783,6 +766,36 @@ public final class RICache<K, V> implements Cache<K, V> {
         @Override
         public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
             listeners.add(new ListenerRegistration<K, V>(listener, scope, synchronous));
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setStoreByValue(boolean storeByValue) {
+            configurationBuilder.setStoreByValue(storeByValue);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setTransactionEnabled(boolean enableTransactions) {
+            configurationBuilder.setTransactionEnabled(enableTransactions);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setStatisticsEnabled(boolean enableStatistics) {
+            configurationBuilder.setStatisticsEnabled(enableStatistics);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setReadThrough(boolean readThrough) {
+            configurationBuilder.setReadThrough(readThrough);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setWriteThrough(boolean writeThrough) {
+            configurationBuilder.setWriteThrough(writeThrough);
             return this;
         }
     }

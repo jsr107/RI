@@ -93,14 +93,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
      * {@inheritDoc}
      */
     @Override
-    public void setStoreByValue(boolean storeByValue) {
-        this.storeByValue.set(storeByValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean isStatisticsEnabled() {
         return statisticsEnabled.get();
     }
@@ -119,14 +111,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
     @Override
     public boolean isTransactionEnabled() {
         return transactionsEnabled.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setTransactionEnabled(boolean transactionEnabled) {
-        this.transactionsEnabled.set(transactionEnabled);
     }
 
     @Override
@@ -207,6 +191,28 @@ public final class RICacheConfiguration implements CacheConfiguration {
          */
         public Builder setStoreByValue(boolean storeByValue) {
             this.storeByValue = storeByValue;
+            return this;
+        }
+
+        /**
+         * Set whether statistics are enabled
+         *
+         * @param statisticsEnabled statistics are enabled
+         * @return this Builder instance
+         */
+        public Builder setStatisticsEnabled(boolean statisticsEnabled) {
+            this.statisticsEnabled = statisticsEnabled;
+            return this;
+        }
+
+        /**
+         * Set whether transactions are enabled
+         *
+         * @param transactionsEnabled whether transactions are enabled
+         * @return this Builder instance
+         */
+        public Builder setTransactionEnabled(boolean transactionsEnabled) {
+            this.transactionsEnabled = transactionsEnabled;
             return this;
         }
 

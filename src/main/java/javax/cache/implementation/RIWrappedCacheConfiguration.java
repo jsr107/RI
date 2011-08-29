@@ -83,14 +83,6 @@ class RIWrappedCacheConfiguration implements CacheConfiguration {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setStoreByValue(boolean storeByValue) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @return true if statistics collection is enabled
      */
     @Override
@@ -118,16 +110,6 @@ class RIWrappedCacheConfiguration implements CacheConfiguration {
     @Override
     public boolean isTransactionEnabled() {
         return config.isTransactionEnabled();
-    }
-
-    /**
-     * Sets whether transactions are enabled for this cache
-     *
-     * @param enableTransactions true fo enable transactions, false to disable
-     */
-    @Override
-    public void setTransactionEnabled(boolean enableTransactions) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
