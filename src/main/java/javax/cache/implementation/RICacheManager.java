@@ -24,6 +24,7 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheManagerFactory;
+import javax.cache.CacheWriter;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
@@ -256,6 +257,12 @@ public class RICacheManager implements CacheManager {
         @Override
         public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
             cacheBuilder.setCacheLoader(cacheLoader);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
+            cacheBuilder.setCacheWriter(cacheWriter);
             return this;
         }
 

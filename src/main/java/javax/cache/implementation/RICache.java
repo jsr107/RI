@@ -24,6 +24,8 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
+import javax.cache.CacheWriter;
+import javax.cache.InvalidConfigurationException;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
@@ -63,9 +65,10 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final String cacheName;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
+    private final CacheWriter<K, V> cacheWriter;
+    private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
-    private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
     private volatile CacheManager cacheManager;
     private volatile RICacheStatistics statistics;
 
@@ -78,11 +81,13 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param immutableClasses the set of immutable classes
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
+     * @param cacheWriter      the cache writer
      * @param listeners        the cache listeners
      */
     private RICache(String cacheName, ClassLoader classLoader,
                     String cacheManagerName, Set<Class> immutableClasses, CacheConfiguration configuration,
-                    CacheLoader<K, V> cacheLoader, CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
+                    CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter,
+                    CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         status = Status.UNINITIALISED;
         assert configuration != null;
         assert cacheName != null;
@@ -91,6 +96,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.cacheName = cacheName;
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
+        this.cacheWriter = cacheWriter;
         store = configuration.isStoreByValue() ?
                 new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader, immutableClasses),
                         new RISerializer<V>(classLoader, immutableClasses)) :
@@ -709,6 +715,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final Set<Class> immutableClasses;
         private final RICacheConfiguration.Builder configurationBuilder = new RICacheConfiguration.Builder();
         private CacheLoader<K, V> cacheLoader;
+        private CacheWriter<K, V> cacheWriter;
         private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
         /**
@@ -744,8 +751,14 @@ public final class RICache<K, V> implements Cache<K, V> {
         @Override
         public RICache<K, V> build() {
             CacheConfiguration configuration = configurationBuilder.build();
+            if (configuration.isReadThrough() && (cacheLoader == null)) {
+                throw new InvalidConfigurationException("cacheLoader");
+            }
+            if (configuration.isWriteThrough() && (cacheWriter == null)) {
+                throw new InvalidConfigurationException("cacheWriter");
+            }
             return new RICache<K, V>(cacheName, classLoader, cacheManagerName, immutableClasses,
-                    configuration, cacheLoader, listeners);
+                    configuration, cacheLoader, cacheWriter, listeners);
         }
 
         /**
@@ -760,6 +773,15 @@ public final class RICache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("cacheLoader");
             }
             this.cacheLoader = cacheLoader;
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
+            if (cacheWriter == null) {
+                throw new NullPointerException("cacheWriter");
+            }
+            this.cacheWriter = cacheWriter;
             return this;
         }
 
