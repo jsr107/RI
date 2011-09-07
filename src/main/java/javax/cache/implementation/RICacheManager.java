@@ -19,7 +19,6 @@ package javax.cache.implementation;
 
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
-import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
@@ -99,16 +98,6 @@ public class RICacheManager implements CacheManager {
     @Override
     public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName) {
         return new RICacheBuilder<K, V>(cacheName, classLoader, name);
-    }
-
-    /**
-     * Will return an RI implementation.
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public CacheConfiguration createCacheConfiguration() {
-        return new RICacheConfiguration.Builder().build();
     }
 
     /**
