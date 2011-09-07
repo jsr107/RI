@@ -23,6 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
+import javax.cache.CacheManagerFactory;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.InvalidConfigurationException;
@@ -63,13 +64,13 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     private final RISimpleCache<K, V> store;
     private final String cacheName;
+    private final String cacheManagerName;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final CacheWriter<K, V> cacheWriter;
     private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
-    private volatile CacheManager cacheManager;
     private volatile RICacheStatistics statistics;
 
     /**
@@ -84,8 +85,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param cacheWriter      the cache writer
      * @param listeners        the cache listeners
      */
-    private RICache(String cacheName, ClassLoader classLoader,
-                    String cacheManagerName, Set<Class> immutableClasses, CacheConfiguration configuration,
+    private RICache(String cacheName, String cacheManagerName,
+                    Set<Class> immutableClasses, ClassLoader classLoader,
+                    CacheConfiguration configuration,
                     CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter,
                     CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         status = Status.UNINITIALISED;
@@ -94,6 +96,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         assert cacheManagerName != null;
         assert immutableClasses != null;
         this.cacheName = cacheName;
+        this.cacheManagerName = cacheManagerName;
         this.configuration = new RIWrappedCacheConfiguration(configuration);
         this.cacheLoader = cacheLoader;
         this.cacheWriter = cacheWriter;
@@ -120,7 +123,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public CacheManager getCacheManager() {
-        return cacheManager;
+        return CacheManagerFactory.getCacheManager(cacheManagerName);
     }
 
     /**
@@ -467,21 +470,6 @@ public final class RICache<K, V> implements Cache<K, V> {
         return status;
     }
 
-    /**
-     * Sets the CacheManager. This may only be done once.
-     *
-     * @param cacheManager the CacheManager this cache has been added to.
-     * @throws CacheException if done more than once
-     */
-    void setCacheManager(CacheManager cacheManager) {
-        if (this.cacheManager != null) {
-            throw new CacheException("A cache can only be associated with a CacheManager once");
-        }
-        this.cacheManager = cacheManager;
-        //needs the CacheManager
-        statistics = new RICacheStatistics(this, cacheManager.getName());
-    }
-
     private boolean statisticsEnabled() {
         return configuration.isStatisticsEnabled();
     }
@@ -724,7 +712,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
          */
-        public Builder(String cacheName, ClassLoader classLoader, String cacheManagerName, Set<Class> immutableClasses) {
+        public Builder(String cacheName, String cacheManagerName, Set<Class> immutableClasses, ClassLoader classLoader) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
             }
@@ -757,7 +745,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (configuration.isWriteThrough() && (cacheWriter == null)) {
                 throw new InvalidConfigurationException("cacheWriter");
             }
-            return new RICache<K, V>(cacheName, classLoader, cacheManagerName, immutableClasses,
+            return new RICache<K, V>(cacheName, cacheManagerName, immutableClasses, classLoader,
                     configuration, cacheLoader, cacheWriter, listeners);
         }
 
