@@ -711,6 +711,8 @@ public final class RICache<K, V> implements Cache<K, V> {
          *
          * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
+         * @param immutableClasses the immutable classes
+         * @param classLoader the class loader
          */
         public Builder(String cacheName, String cacheManagerName, Set<Class> immutableClasses, ClassLoader classLoader) {
             if (cacheName == null) {
