@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
-import javax.cache.CacheManagerFactory;
+import javax.cache.Caching;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
@@ -55,7 +55,7 @@ public class RIDefaultCacheResolverFactory implements CacheResolverFactory {
      * Constructs the resolver
      */
     public RIDefaultCacheResolverFactory() {
-        this.cacheManager = CacheManagerFactory.getCacheManager();
+        this.cacheManager = Caching.getCacheManager();
     }
 
     /* (non-Javadoc)

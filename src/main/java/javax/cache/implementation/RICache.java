@@ -23,7 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
-import javax.cache.CacheManagerFactory;
+import javax.cache.Caching;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.InvalidConfigurationException;
@@ -123,7 +123,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public CacheManager getCacheManager() {
-        return CacheManagerFactory.getCacheManager(cacheManagerName);
+        return Caching.getCacheManager(cacheManagerName);
     }
 
     /**

@@ -19,7 +19,7 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
-import javax.cache.CacheManagerFactory;
+import javax.cache.Caching;
 import javax.cache.InvalidConfigurationException;
 import javax.cache.OptionalFeature;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -193,7 +193,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * @return this Builder instance
          */
         public Builder setStoreByValue(boolean storeByValue) {
-            if (!storeByValue && !CacheManagerFactory.isSupported(OptionalFeature.STORE_BY_REFERENCE)) {
+            if (!storeByValue && !Caching.isSupported(OptionalFeature.STORE_BY_REFERENCE)) {
                 throw new InvalidConfigurationException("storeByValue");
             }
             this.storeByValue = storeByValue;
@@ -218,7 +218,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * @return this Builder instance
          */
         public Builder setTransactionEnabled(boolean transactionsEnabled) {
-            if (transactionsEnabled && !CacheManagerFactory.isSupported(OptionalFeature.JTA)) {
+            if (transactionsEnabled && !Caching.isSupported(OptionalFeature.JTA)) {
                 throw new InvalidConfigurationException("transactionsEnabled");
             }
             this.transactionsEnabled = transactionsEnabled;
