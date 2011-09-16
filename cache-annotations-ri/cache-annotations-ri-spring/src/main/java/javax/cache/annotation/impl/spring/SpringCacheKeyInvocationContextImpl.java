@@ -20,7 +20,7 @@ package javax.cache.annotation.impl.spring;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import javax.cache.annotation.impl.AbstractCacheKeyInvocationContextImpl;
+import javax.cache.annotation.impl.AbstractInternalCacheKeyInvocationContext;
 import javax.cache.annotation.impl.StaticCacheKeyInvocationContext;
 
 import org.aopalliance.intercept.MethodInvocation;
@@ -29,7 +29,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class SpringCacheKeyInvocationContextImpl extends AbstractCacheKeyInvocationContextImpl<MethodInvocation> {
+public class SpringCacheKeyInvocationContextImpl extends AbstractInternalCacheKeyInvocationContext<MethodInvocation> {
 
     public SpringCacheKeyInvocationContextImpl(
             StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
@@ -39,7 +39,7 @@ public class SpringCacheKeyInvocationContextImpl extends AbstractCacheKeyInvocat
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheInvocationContextImpl#getParameters(java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractInternalCacheInvocationContext#getParameters(java.lang.Object)
      */
     @Override
     protected Object[] getParameters(MethodInvocation invocation) {
@@ -47,7 +47,7 @@ public class SpringCacheKeyInvocationContextImpl extends AbstractCacheKeyInvocat
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheInvocationContextImpl#getMethod(java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractInternalCacheInvocationContext#getMethod(java.lang.Object)
      */
     @Override
     protected Method getMethod(MethodInvocation invocation) {
@@ -55,7 +55,7 @@ public class SpringCacheKeyInvocationContextImpl extends AbstractCacheKeyInvocat
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheInvocationContextImpl#getTarget(java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractInternalCacheInvocationContext#getTarget(java.lang.Object)
      */
     @Override
     protected Object getTarget(MethodInvocation invocation) {

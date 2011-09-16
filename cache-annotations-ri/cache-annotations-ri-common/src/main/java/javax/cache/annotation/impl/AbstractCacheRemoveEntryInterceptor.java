@@ -17,6 +17,8 @@
 package javax.cache.annotation.impl;
 
 
+import java.lang.annotation.Annotation;
+
 import javax.cache.Cache;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
@@ -42,7 +44,8 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
      * @throws Throwable if {@link #proceed(Object)} threw
      */
     public final Object cacheRemoveEntry(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
-        final AbstractCacheKeyInvocationContextImpl<I> cacheKeyInvocationContext = cacheContextSource.getCacheKeyInvocationContext(invocation);
+        final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext = 
+                cacheContextSource.getCacheKeyInvocationContext(invocation);
         final CacheRemoveEntryMethodDetails methodDetails = 
                 this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_REMOVE_ENTRY);
         
@@ -71,7 +74,7 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
      * @param cacheKeyInvocationContext The invocation context 
      * @param methodDetails The details about the cached method
      */
-    private void cacheRemove(final AbstractCacheKeyInvocationContextImpl<I> cacheKeyInvocationContext,
+    private void cacheRemove(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
             final CacheRemoveEntryMethodDetails methodDetails) {
         
         final CacheResolver cacheResolver = methodDetails.getCacheResolver();

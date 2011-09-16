@@ -37,7 +37,7 @@ public interface CacheContextSource<I> {
      * @param invocation The intercepted invocation
      * @return Information about the invocation
      */
-    AbstractCacheKeyInvocationContextImpl<I> getCacheKeyInvocationContext(I invocation);
+    InternalCacheKeyInvocationContext<? extends Annotation> getCacheKeyInvocationContext(I invocation);
     
     /**
      * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult}, 
@@ -47,7 +47,7 @@ public interface CacheContextSource<I> {
      * @param invocation The intercepted invocation
      * @return Information about the invocation
      */
-    AbstractCacheInvocationContextImpl<I> getCacheInvocationContext(I invocation);
+    InternalCacheInvocationContext<? extends Annotation> getCacheInvocationContext(I invocation);
     
     /**
      * Get static information about a method annotated with {@link javax.cache.annotation.CacheResult}, 

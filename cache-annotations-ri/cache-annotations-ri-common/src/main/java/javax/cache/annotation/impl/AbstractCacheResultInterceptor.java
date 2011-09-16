@@ -17,6 +17,8 @@
 package javax.cache.annotation.impl;
 
 
+import java.lang.annotation.Annotation;
+
 import javax.cache.Cache;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
@@ -43,7 +45,8 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
      * @throws Throwable if {@link #proceed(Object)} threw
      */
     public final Object cacheResult(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
-        final AbstractCacheKeyInvocationContextImpl<I> cacheKeyInvocationContext = cacheContextSource.getCacheKeyInvocationContext(invocation);
+        final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext = 
+                cacheContextSource.getCacheKeyInvocationContext(invocation);
         final CacheResultMethodDetails methodDetails = 
                 this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_RESULT);
         

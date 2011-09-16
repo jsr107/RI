@@ -17,10 +17,9 @@
 
 package javax.cache.annotation.impl.cdi;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import javax.cache.annotation.impl.AbstractCacheInvocationContextImpl;
+import javax.cache.annotation.impl.AbstractInternalCacheInvocationContext;
 import javax.cache.annotation.impl.StaticCacheInvocationContext;
 import javax.interceptor.InvocationContext;
 
@@ -28,17 +27,17 @@ import javax.interceptor.InvocationContext;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class CdiCacheInvocationContextImpl extends AbstractCacheInvocationContextImpl<InvocationContext> {
+public class CdiCacheInvocationContextImpl extends AbstractInternalCacheInvocationContext<InvocationContext> {
     
     public CdiCacheInvocationContextImpl(
-            StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext,
+            StaticCacheInvocationContext<A> staticCacheInvocationContext,
             InvocationContext invocation) {
 
         super(staticCacheInvocationContext, invocation);
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheInvocationContextImpl#getParameters(java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractInternalCacheInvocationContext#getParameters(java.lang.Object)
      */
     @Override
     protected Object[] getParameters(InvocationContext invocation) {
@@ -46,7 +45,7 @@ public class CdiCacheInvocationContextImpl extends AbstractCacheInvocationContex
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheInvocationContextImpl#getMethod(java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractInternalCacheInvocationContext#getMethod(java.lang.Object)
      */
     @Override
     protected Method getMethod(InvocationContext invocation) {
@@ -54,7 +53,7 @@ public class CdiCacheInvocationContextImpl extends AbstractCacheInvocationContex
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheInvocationContextImpl#getTarget(java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractInternalCacheInvocationContext#getTarget(java.lang.Object)
      */
     @Override
     protected Object getTarget(InvocationContext invocation) {

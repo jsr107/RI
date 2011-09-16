@@ -16,7 +16,6 @@
  */
 package javax.cache.annotation.impl.spring.config;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import javax.cache.annotation.impl.CacheContextSource;
@@ -54,7 +53,7 @@ public class CacheStaticMethodMatcherPointcut extends StaticMethodMatcherPointcu
      */
     @Override
     public boolean matches(Method method, Class<?> targetClass) {
-        final StaticCacheInvocationContext<? extends Annotation> methodDetails = this.cacheContextSource.getMethodDetails(method, targetClass);
+        final StaticCacheInvocationContext<A> methodDetails = this.cacheContextSource.getMethodDetails(method, targetClass);
         return methodDetails != null && methodDetails.getInterceptorType() == interceptorType;
     }
 }

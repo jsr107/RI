@@ -41,7 +41,7 @@ public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCache
      * @throws Throwable if {@link #proceed(Object)} threw
      */
     public final Object cacheRemoveAll(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
-        final AbstractCacheInvocationContextImpl<I> cacheInvocationContext = cacheContextSource.getCacheInvocationContext(invocation);
+        final InternalCacheInvocationContext<? extends Annotation> cacheInvocationContext = cacheContextSource.getCacheInvocationContext(invocation);
         
         final StaticCacheInvocationContext<CacheRemoveAll> methodDetails = 
                 this.getCacheInvocationContext(cacheInvocationContext, InterceptorType.CACHE_REMOVE_ALL);
@@ -71,7 +71,7 @@ public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCache
      * @param cacheInvocationContext The invocation context 
      * @param methodDetails The details about the cached method
      */
-    protected void removeAll(final AbstractCacheInvocationContextImpl<I> cacheInvocationContext,
+    protected void removeAll(final InternalCacheInvocationContext<? extends Annotation> cacheInvocationContext,
             final StaticCacheInvocationContext<CacheRemoveAll> methodDetails) {
         final CacheResolver cacheResolver = methodDetails.getCacheResolver();
         final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheInvocationContext);
@@ -87,7 +87,7 @@ public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCache
      */
     @SuppressWarnings("unchecked")
     protected <T extends StaticCacheInvocationContext<?>> T getCacheInvocationContext(
-            final AbstractCacheInvocationContextImpl<I> cacheInvocationContext, final InterceptorType interceptorType) {
+            final InternalCacheInvocationContext<? extends Annotation> cacheInvocationContext, final InterceptorType interceptorType) {
         
         final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = 
                 cacheInvocationContext.getStaticCacheInvocationContext();

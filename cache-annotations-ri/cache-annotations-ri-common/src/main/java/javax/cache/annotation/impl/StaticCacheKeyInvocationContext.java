@@ -33,7 +33,7 @@ import javax.cache.annotation.CacheResolver;
  * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
  * {@link javax.cache.annotation.CacheRemoveAll}.
  */
-public abstract class StaticCacheKeyInvocationContext<A extends Annotation> extends StaticCacheInvocationContext<A> {
+public abstract class StaticCacheKeyInvocationContext<A extends Annotation> extends AbstractStaticCacheInvocationContext<A> {
     private final CacheKeyGenerator cacheKeyGenerator;
     private final List<CacheParameterDetails> keyParameters;
     

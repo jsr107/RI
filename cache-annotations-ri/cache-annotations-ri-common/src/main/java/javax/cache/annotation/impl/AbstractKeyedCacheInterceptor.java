@@ -39,7 +39,7 @@ public abstract class AbstractKeyedCacheInterceptor<I, T extends StaticCacheKeyI
      */
     @SuppressWarnings("unchecked")
     protected T getStaticCacheKeyInvocationContext(
-            final AbstractCacheKeyInvocationContextImpl<I> cacheInvocationContext, final InterceptorType interceptorType) {
+            final InternalCacheKeyInvocationContext<?> cacheInvocationContext, final InterceptorType interceptorType) {
         
         final StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext = 
                 cacheInvocationContext.getStaticCacheKeyInvocationContext();

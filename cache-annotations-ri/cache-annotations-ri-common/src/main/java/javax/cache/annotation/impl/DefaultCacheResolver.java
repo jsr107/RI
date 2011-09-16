@@ -48,7 +48,7 @@ public class DefaultCacheResolver implements CacheResolver {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <K, V> Cache<K, V> resolveCache(CacheInvocationContext<Annotation> cacheInvocationContext) {
+    public <K, V> Cache<K, V> resolveCache(CacheInvocationContext<? extends Annotation> cacheInvocationContext) {
         return (Cache<K, V>)this.cache;
     }
 }

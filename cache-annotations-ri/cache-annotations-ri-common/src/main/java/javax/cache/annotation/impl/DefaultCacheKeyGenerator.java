@@ -36,7 +36,7 @@ public class DefaultCacheKeyGenerator implements CacheKeyGenerator {
      * @see javax.cache.annotation.CacheKeyGenerator#generateCacheKey(javax.cache.annotation.CacheInvocationContext)
      */
     @Override
-    public CacheKey generateCacheKey(CacheKeyInvocationContext<Annotation> cacheKeyInvocationContext) {
+    public CacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext) {
         final CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
         
         final Object[] parameters = new Object[keyParameters.length];

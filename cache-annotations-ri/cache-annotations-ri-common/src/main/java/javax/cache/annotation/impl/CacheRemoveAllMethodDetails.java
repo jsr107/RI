@@ -28,7 +28,7 @@ import javax.cache.annotation.CacheResolver;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class CacheRemoveAllMethodDetails extends StaticCacheInvocationContext<CacheRemoveAll> {
+public class CacheRemoveAllMethodDetails extends AbstractStaticCacheInvocationContext<CacheRemoveAll> {
     
     /**
      * Create a new details object for {@link CacheRemoveAll}

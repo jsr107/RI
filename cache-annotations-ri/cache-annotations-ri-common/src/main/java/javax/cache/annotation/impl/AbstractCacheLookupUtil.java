@@ -53,14 +53,14 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
             new ConcurrentHashMap<MethodKey, StaticCacheInvocationContext<? extends Annotation>>();
 
     /**
-     * Get the {@link AbstractCacheKeyInvocationContextImpl} for the CDI invocation
+     * Get the {@link AbstractInternalCacheKeyInvocationContext} for the CDI invocation
      * 
      * @param invocation The CDI invocation context
      * @return The keyed cache invocation context
      * @throws UnsupportedOperationException if the invocation context is not for a method that has an annotation for which CacheInvocationContext exists.
      */
     @Override
-    public AbstractCacheKeyInvocationContextImpl<I> getCacheKeyInvocationContext(I invocation) {
+    public InternalCacheKeyInvocationContext<? extends Annotation> getCacheKeyInvocationContext(I invocation) {
         final Method method = this.getMethod(invocation);
         final Object target = this.getTarget(invocation);
         final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, target.getClass());
@@ -74,7 +74,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
             }
             default: {
                 throw new UnsupportedOperationException(
-                        "Cannot get AbstractCacheKeyInvocationContextImpl for interceptor type: " + 
+                        "Cannot get AbstractInternalCacheKeyInvocationContext for interceptor type: " + 
                         staticCacheInvocationContext.getInterceptorType());
             }
         }
@@ -87,17 +87,17 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
      * @param invocation The intercepted method invocation
      * @return The cache invocation context
      */
-    protected abstract AbstractCacheKeyInvocationContextImpl<I> createCacheKeyInvocationContextImpl(
+    protected abstract InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
             StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext, I invocation);
 
     /**
-     * Get the {@link AbstractCacheInvocationContextImpl} for the invocation
+     * Get the {@link AbstractInternalCacheInvocationContext} for the invocation
      * 
      * @param invocation The CDI invocation context
      * @return The cache invocation context
      */
     @Override
-    public AbstractCacheInvocationContextImpl<I> getCacheInvocationContext(I invocation) {
+    public InternalCacheInvocationContext<? extends Annotation> getCacheInvocationContext(I invocation) {
         final Method method = this.getMethod(invocation);
         final Object target = this.getTarget(invocation);
         final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, target.getClass());
@@ -111,7 +111,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
      * @param invocation The intercepted method invocation
      * @return The cache invocation context
      */
-    protected abstract AbstractCacheInvocationContextImpl<I> createCacheInvocationContextImpl(
+    protected abstract InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
             StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, I invocation);
     
     /**
@@ -276,13 +276,13 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     protected abstract Method getMethod(I invocation);
 
     /**
-     * Create a StaticCacheInvocationContext implementation to wrap the CacheMethodDetails.
+     * Create a AbstractStaticCacheInvocationContext implementation to wrap the CacheMethodDetails.
      * 
      * @param cacheMethodDetails The method details to wrap, must not be null
      * @param cacheResolver The cache resolver to use for the annotated method, must not be null
      * @param cacheKeyGenerator The key generator to use, may be null only if {@link CacheMethodDetails#getCacheAnnotation()} is {@link CacheRemoveAll}
      * @param parameterDetails Details about the method parameters, may be null only if {@link CacheMethodDetails#getCacheAnnotation()} is {@link CacheRemoveAll}
-     * @return A StaticCacheInvocationContext implementation
+     * @return A AbstractStaticCacheInvocationContext implementation
      */
     @SuppressWarnings("unchecked")
     protected final StaticCacheInvocationContext<? extends Annotation> createStaticCacheInvocationContext(
@@ -292,7 +292,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
 
         final Annotation cacheAnnotation = cacheMethodDetails.getCacheAnnotation();
         
-        //Create the appropriate StaticCacheInvocationContext impl based on the annotation type
+        //Create the appropriate AbstractStaticCacheInvocationContext impl based on the annotation type
         if (cacheAnnotation instanceof CacheResult) {
             return new CacheResultMethodDetails((CacheMethodDetails<CacheResult>)cacheMethodDetails, 
                     cacheResolver, cacheKeyGenerator, parameterDetails.allParameters, parameterDetails.keyParameters);
@@ -308,7 +308,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
                     cacheResolver, parameterDetails.allParameters);
         }
 
-        throw new AnnotationFormatError("Could not create StaticCacheInvocationContext for unknown cache annotation: " + cacheAnnotation);
+        throw new AnnotationFormatError("Could not create AbstractStaticCacheInvocationContext for unknown cache annotation: " + cacheAnnotation);
     }
     
     

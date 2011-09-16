@@ -17,6 +17,8 @@
 package javax.cache.annotation.impl;
 
 
+import java.lang.annotation.Annotation;
+
 import javax.cache.Cache;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKey;
@@ -43,7 +45,8 @@ public abstract class AbstractCachePutInterceptor<I> extends AbstractKeyedCacheI
      * @throws Throwable if {@link #proceed(Object)} threw
      */
     public Object cachePut(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
-        final AbstractCacheKeyInvocationContextImpl<I> cacheKeyInvocationContext = cacheContextSource.getCacheKeyInvocationContext(invocation);
+        final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext = 
+                cacheContextSource.getCacheKeyInvocationContext(invocation);
         final CachePutMethodDetails methodDetails = this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_PUT);
         
         final CachePut cachePutAnnotation = methodDetails.getCacheAnnotation();
@@ -74,7 +77,7 @@ public abstract class AbstractCachePutInterceptor<I> extends AbstractKeyedCacheI
      * @param methodDetails The details about the cached method
      * @param value The value to cache
      */
-    protected void cacheValue(final AbstractCacheKeyInvocationContextImpl<I> cacheKeyInvocationContext,
+    protected void cacheValue(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
             final CachePutMethodDetails methodDetails, final Object value) {
         
         //Ignore null values

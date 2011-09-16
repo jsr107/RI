@@ -22,11 +22,11 @@ import java.lang.reflect.Method;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
-import javax.cache.annotation.impl.AbstractCacheInvocationContextImpl;
-import javax.cache.annotation.impl.AbstractCacheKeyInvocationContextImpl;
 import javax.cache.annotation.impl.AbstractCacheLookupUtil;
 import javax.cache.annotation.impl.DefaultCacheKeyGenerator;
 import javax.cache.annotation.impl.DefaultCacheResolverFactory;
+import javax.cache.annotation.impl.InternalCacheInvocationContext;
+import javax.cache.annotation.impl.InternalCacheKeyInvocationContext;
 import javax.cache.annotation.impl.StaticCacheInvocationContext;
 import javax.cache.annotation.impl.StaticCacheKeyInvocationContext;
 import javax.inject.Inject;
@@ -50,18 +50,18 @@ public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> 
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
      */
     @Override
-    protected AbstractCacheKeyInvocationContextImpl<InvocationContext> createCacheKeyInvocationContextImpl(
+    protected InternalCacheKeyInvocationContext<A> createCacheKeyInvocationContextImpl(
             StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
             InvocationContext invocation) {
         return new CdiCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.StaticCacheInvocationContext, java.lang.Object)
+     * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
      */
     @Override
-    protected AbstractCacheInvocationContextImpl<InvocationContext> createCacheInvocationContextImpl(
-            StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext,
+    protected InternalCacheInvocationContext<Annotation> createCacheInvocationContextImpl(
+            StaticCacheInvocationContext<A> staticCacheInvocationContext,
             InvocationContext invocation) {
         return new CdiCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
     }
