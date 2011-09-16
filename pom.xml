@@ -9,7 +9,7 @@
     <groupId>javax.cache.implementation</groupId>
     <artifactId>cache-ri</artifactId>
     <version>0.3-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>JSR107 RI</name>
     <url>https://github.com/jsr107/RI</url>
@@ -18,26 +18,67 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+    
+    <modules>
+        <module>cache-checkstyle</module>
+        <module>cache-annotations-ri</module>
+        <module>cache-ri-impl</module>
+    </modules>    
 
-    <dependencies>
-        <dependency>
-            <groupId>javax.cache</groupId>
-            <artifactId>cache-api</artifactId>
-            <version>${pom.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
-            <scope>compile</scope>
-        </dependency>
-
-    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>javax.cache</groupId>
+                <artifactId>cache-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+    
+            <dependency>
+                <groupId>javax.enterprise</groupId>
+                <artifactId>cdi-api</artifactId>
+                <version>1.0-SP4</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.6</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>cache-checkstyle</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <configLocation>checkstyle.xml</configLocation>
+                        <suppressionsLocation>suppressions.xml</suppressionsLocation>
+                        <headerLocation>ClassHeader.txt</headerLocation>
+                        <enableRSS>false</enableRSS>
+                        <linkXRef>true</linkXRef>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <failOnViolation>true</failOnViolation>
+                        <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                        <enableRulesSummary>true</enableRulesSummary>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
-
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
@@ -46,7 +87,6 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -73,35 +113,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>checkstyle</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <configLocation>${basedir}/checkstyle/checkstyle.xml
-                    </configLocation>
-                    <suppressionsLocation>${basedir}/checkstyle/suppressions.xml
-                    </suppressionsLocation>
-                    <headerLocation>${basedir}/checkstyle/ClassHeader.txt
-                    </headerLocation>
-                    <enableRSS>false</enableRSS>
-                    <linkXRef>true</linkXRef>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                    <failOnViolation>true</failOnViolation>
-                    <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                    <enableRulesSummary>true</enableRulesSummary>
-                </configuration>
             </plugin>
         </plugins>
     </build>
