@@ -1,1 +1,9 @@
+*.iml
+*.ipr
+*.iws
+.idea
+target
 /.settings
+/.project
+/.classpath
+/.checkstyle
