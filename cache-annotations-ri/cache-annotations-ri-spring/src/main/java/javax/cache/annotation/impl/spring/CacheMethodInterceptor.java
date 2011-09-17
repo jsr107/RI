@@ -22,9 +22,14 @@ import javax.cache.annotation.impl.InterceptorType;
 import org.aopalliance.intercept.MethodInterceptor;
 
 /**
+ * Common subclass for all jcache interceptors
+ * 
  * @author Eric Dalquist
  * @version $Revision$
  */
 public interface CacheMethodInterceptor extends MethodInterceptor {
-    public InterceptorType getInterceptorType();
+    /**
+     * @return The type of intereceptor
+     */
+    InterceptorType getInterceptorType();
 }

@@ -16,6 +16,7 @@
  */
 package javax.cache.annotation.impl.spring.config;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import javax.cache.annotation.impl.CacheContextSource;
@@ -38,6 +39,12 @@ public class CacheStaticMethodMatcherPointcut extends StaticMethodMatcherPointcu
     private final CacheContextSource<MethodInvocation> cacheContextSource;
     private final InterceptorType interceptorType;
     
+    /**
+     * Create pointcut that uses the specific cache context source and operations on the specified interceptor type
+     * 
+     * @param cacheContextSource Source to retrieve invocation context information from
+     * @param cacheInterceptor The type of interceptor this pointcut is for
+     */
     public CacheStaticMethodMatcherPointcut(CacheContextSource<MethodInvocation> cacheContextSource, CacheMethodInterceptor cacheInterceptor) {
         Assert.notNull(cacheContextSource);
         Assert.notNull(cacheInterceptor);
@@ -47,13 +54,15 @@ public class CacheStaticMethodMatcherPointcut extends StaticMethodMatcherPointcu
     }
 
     /**
-     * Returns true if the configured {@link CacheContextSource#getAdviceType(Method, Class)}
-     * method returns an {@link InterceptorType} other than {@link InterceptorType#NONE}.
+     * Returns true if the configured {@link CacheContextSource#getMethodDetails(Method, Class)}
+     * method returns an {@link StaticCacheInvocationContext} with an {@link InterceptorType} that matches
+     * the type passed into the constructor
+     * 
      * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
      */
     @Override
     public boolean matches(Method method, Class<?> targetClass) {
-        final StaticCacheInvocationContext<A> methodDetails = this.cacheContextSource.getMethodDetails(method, targetClass);
+        final StaticCacheInvocationContext<? extends Annotation> methodDetails = this.cacheContextSource.getMethodDetails(method, targetClass);
         return methodDetails != null && methodDetails.getInterceptorType() == interceptorType;
     }
 }

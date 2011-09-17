@@ -26,13 +26,24 @@ import javax.cache.annotation.impl.StaticCacheKeyInvocationContext;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
+ * Spring specific cache key invocation context using {@link MethodInvocation}
+ * 
  * @author Eric Dalquist
  * @version $Revision$
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ * {@link javax.cache.annotation.CacheRemoveAll}.
  */
-public class SpringCacheKeyInvocationContextImpl extends AbstractInternalCacheKeyInvocationContext<MethodInvocation> {
+public class SpringCacheKeyInvocationContextImpl<A extends Annotation> extends AbstractInternalCacheKeyInvocationContext<MethodInvocation, A> {
 
+    /**
+     * Create new cache key invocation context for the static context and invocation
+     * 
+     * @param staticCacheKeyInvocationContext Static information about the invoked method
+     * @param invocation The AOP Alliance invocation context
+     */
     public SpringCacheKeyInvocationContextImpl(
-            StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
+            StaticCacheKeyInvocationContext<A> staticCacheKeyInvocationContext,
             MethodInvocation invocation) {
 
         super(staticCacheKeyInvocationContext, invocation);

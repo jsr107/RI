@@ -22,9 +22,6 @@ import javax.cache.annotation.impl.DefaultCacheResolverFactory;
 import javax.cache.annotation.impl.spring.CacheContextSourceImpl;
 import javax.cache.annotation.impl.spring.CacheResultInterceptor;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.springframework.aop.Pointcut;
-import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
 import org.springframework.beans.MutablePropertyValues;
@@ -40,12 +37,14 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
+ * Class that handles the parsing the custom jcache namespace elements in a spring bean definition file
+ * 
  * @author Eric Dalquist
  */
 public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitionParser {
-    public static final String XSD_ATTR__CACHE_MANAGER = "cache-manager";
+    private static final String XSD_ATTR_CACHE_MANAGER = "cache-manager";
 
-    static final String JCACHE_CACHE_OPERATION_SOURCE_BEAN_NAME = AnnotationDrivenJCacheBeanDefinitionParser.class
+    private static final String JCACHE_CACHE_OPERATION_SOURCE_BEAN_NAME = AnnotationDrivenJCacheBeanDefinitionParser.class
             .getPackage().getName() + ".internalJCacheOperationSourceAdvisor";
     
     /* (non-Javadoc)
@@ -83,9 +82,9 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
     }
 
     /**
-     * Create a {@link CacheAttributeSource} bean that will be used by the advisor and interceptor
+     * Create a {@link CacheContextSourceImpl} bean that will be used by the advisor and interceptor
      * 
-     * @return Reference to the {@link CacheAttributeSource}. Should never be null.
+     * @return Reference to the {@link CacheContextSourceImpl}. Should never be null.
      */
     protected RuntimeBeanReference setupCacheOperationSource(Element element, ParserContext parserContext,
             Object elementSource) {
@@ -97,7 +96,7 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
         final RootBeanDefinition defaultCacheResolverFactory = new RootBeanDefinition(DefaultCacheResolverFactory.class);
         cacheAttributeSource.setSource(elementSource);
         cacheAttributeSource.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-        final String cacheManagerName = element.getAttribute(XSD_ATTR__CACHE_MANAGER);
+        final String cacheManagerName = element.getAttribute(XSD_ATTR_CACHE_MANAGER);
         if (StringUtils.hasText(cacheManagerName)) {
             final RuntimeBeanReference cacheManagerReference = new RuntimeBeanReference(cacheManagerName);
             
@@ -144,9 +143,9 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
     }
 
     /**
-     * Create {@link MethodInterceptor} that is applies the caching logic to advised methods.
+     * Create {@link org.aopalliance.intercept.MethodInterceptor} that is applies the caching logic to advised methods.
      * 
-     * @return Reference to the {@link MethodInterceptor}. Should never be null.
+     * @return Reference to the {@link org.aopalliance.intercept.MethodInterceptor}. Should never be null.
      */
     protected RuntimeBeanReference setupInterceptor(Class<? extends AbstractCacheInterceptor<?>> interceptorClass, 
             ParserContext parserContext, Object elementSource,
@@ -166,17 +165,17 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
     }
 
     /**
-     * Create {@link PointcutAdvisor} that puts the {@link Pointcut} and {@link MethodInterceptor} together.
-     * 
-     * @return Reference to the {@link PointcutAdvisor}. Should never be null.
+     * Create {@link org.springframework.aop.PointcutAdvisor} that puts the {@link org.springframework.aop.Pointcut} and {@link MethodInterceptor} together.
      */
     protected void setupPointcutAdvisor(Class<? extends AbstractCacheInterceptor<?>> interceptorClass,
             Element element, ParserContext parserContext,
             Object elementSource, RuntimeBeanReference cacheOperationSourceReference) {
         
-        final RuntimeBeanReference interceptorReference = this.setupInterceptor(interceptorClass, parserContext, elementSource, cacheOperationSourceReference);
+        final RuntimeBeanReference interceptorReference = 
+                this.setupInterceptor(interceptorClass, parserContext, elementSource, cacheOperationSourceReference);
         
-        final RuntimeBeanReference pointcutReference = this.setupPointcut(parserContext, elementSource, cacheOperationSourceReference, interceptorReference);
+        final RuntimeBeanReference pointcutReference = 
+                this.setupPointcut(parserContext, elementSource, cacheOperationSourceReference, interceptorReference);
         
         
         final RootBeanDefinition pointcutAdvisor = new RootBeanDefinition(DefaultBeanFactoryPointcutAdvisor.class);

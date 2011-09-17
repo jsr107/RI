@@ -40,7 +40,7 @@ public class CacheResultInterceptor extends AbstractCacheResultInterceptor<Invoc
     /**
      * @param invocationContext The intercepted invocation
      * @return The result from {@link InvocationContext#proceed()}
-     * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
+     * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
      */
     @AroundInvoke
     public Object cacheResult(InvocationContext invocationContext) throws Throwable {

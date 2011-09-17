@@ -41,7 +41,7 @@ public class CachePutInterceptor extends AbstractCachePutInterceptor<InvocationC
     /**
      * @param invocationContext The intercepted invocation
      * @return The result from {@link InvocationContext#proceed()}
-     * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
+     * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
      */
     @AroundInvoke
     public Object cachePut(InvocationContext invocationContext) throws Throwable {

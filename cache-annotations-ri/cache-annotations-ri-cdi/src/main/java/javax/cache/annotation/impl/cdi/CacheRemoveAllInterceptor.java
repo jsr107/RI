@@ -39,7 +39,7 @@ public class CacheRemoveAllInterceptor extends AbstractCacheRemoveAllInterceptor
     /**
      * @param invocationContext The intercepted invocation
      * @return The result from {@link InvocationContext#proceed()}
-     * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
+     * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
      */
     @AroundInvoke
     public Object cacheRemoveAll(InvocationContext invocationContext) throws Throwable {

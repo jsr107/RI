@@ -40,7 +40,9 @@ import org.springframework.util.ClassUtils;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class CacheContextSourceImpl extends AbstractCacheLookupUtil<MethodInvocation> implements CacheContextSource<MethodInvocation>, BeanFactoryAware {
+public class CacheContextSourceImpl 
+        extends AbstractCacheLookupUtil<MethodInvocation> 
+        implements CacheContextSource<MethodInvocation>, BeanFactoryAware {
 
     private CacheKeyGenerator defaultCacheKeyGenerator;
     private CacheResolverFactory defaultCacheResolverFactory;
@@ -72,7 +74,7 @@ public class CacheContextSourceImpl extends AbstractCacheLookupUtil<MethodInvoca
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
      */
     @Override
-    protected InternalCacheKeyInvocationContext<A> createCacheKeyInvocationContextImpl(
+    protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
             StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
             MethodInvocation invocation) {
         return new SpringCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
@@ -82,8 +84,8 @@ public class CacheContextSourceImpl extends AbstractCacheLookupUtil<MethodInvoca
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
      */
     @Override
-    protected InternalCacheInvocationContext<Annotation> createCacheInvocationContextImpl(
-            StaticCacheInvocationContext<A> staticCacheInvocationContext, MethodInvocation invocation) {
+    protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
+            StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, MethodInvocation invocation) {
         return new SpringCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
     }
     

@@ -25,13 +25,24 @@ import javax.cache.annotation.impl.StaticCacheKeyInvocationContext;
 import javax.interceptor.InvocationContext;
 
 /**
+ * CDI specific cache key invocation context using {@link InvocationContext}
+ * 
  * @author Eric Dalquist
  * @version $Revision$
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ * {@link javax.cache.annotation.CacheRemoveAll}.
  */
-public class CdiCacheKeyInvocationContextImpl extends AbstractInternalCacheKeyInvocationContext<InvocationContext> {
+public class CdiCacheKeyInvocationContextImpl<A extends Annotation> extends AbstractInternalCacheKeyInvocationContext<InvocationContext, A> {
     
+    /**
+     * Create new cache key invocation context for the static context and invocation
+     * 
+     * @param staticCacheKeyInvocationContext Static information about the invoked method
+     * @param invocation The CDI invocation context
+     */
     public CdiCacheKeyInvocationContextImpl(
-            StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
+            StaticCacheKeyInvocationContext<A> staticCacheKeyInvocationContext,
             InvocationContext invocation) {
 
         super(staticCacheKeyInvocationContext, invocation);
