@@ -48,7 +48,6 @@ import javax.cache.annotation.CacheValue;
  * @param <I> The intercepted method invocation
  */
 public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I> {
-    
     private final ConcurrentMap<MethodKey, StaticCacheInvocationContext<? extends Annotation>> methodDetailsCache = 
             new ConcurrentHashMap<MethodKey, StaticCacheInvocationContext<? extends Annotation>>();
 
@@ -64,6 +63,10 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         final Method method = this.getMethod(invocation);
         final Object target = this.getTarget(invocation);
         final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, target.getClass());
+        if (staticCacheInvocationContext == null) {
+            throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method + 
+                    " for intercepted invocation to be valid: " + invocation);
+        }
 
         switch (staticCacheInvocationContext.getInterceptorType()) {
             case CACHE_RESULT:
@@ -101,6 +104,10 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         final Method method = this.getMethod(invocation);
         final Object target = this.getTarget(invocation);
         final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, target.getClass());
+        if (staticCacheInvocationContext == null) {
+            throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method + 
+                    " for intercepted invocation to be valid: " + invocation);
+        }
         return createCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
     }
     
@@ -162,8 +169,8 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         final ParameterDetails parameterDetails;
         
         if (cacheResultAnnotation == null && cachePutAnnotation == null && cacheRemoveEntryAnnotation == null && cacheRemoveAllAnnotation == null) {
-            //Check for no annotations (should never actually happen, but lets be safe and return a good error message if it does)
-            throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method);
+            //Check for no annotations, just ignore the method
+            return null;
         } else if (!(cacheResultAnnotation != null ^ cachePutAnnotation != null ^ 
                 cacheRemoveEntryAnnotation != null ^ cacheRemoveAllAnnotation != null)) {
             //Check for more than one caching annotation
@@ -236,7 +243,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
             //CacheRemoveAll doesn't have key generation
             cacheKeyGenerator = null;
         } else {
-            throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method);
+            return null;
         }
 
         //Create immutable Set of all annotations on the method
@@ -481,11 +488,13 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
      * @param methodCacheName The cache name specified by the method level annotation
      * @param cacheDefaultsAnnotation The class level cache defaults
      * @param method The annotated method
-     * @param target The target object, if not null a default cache name will be generated if no name is specified
+     * @param targetClass The target class, if not null a default cache name will be generated if no name is specified
      * @return The resolved cache name
      * @throws AnnotationFormatError If target is null and no cache name is specified in the method or class level annotations
      */
-    protected String resolveCacheName(String methodCacheName, CacheDefaults cacheDefaultsAnnotation, Method method, Object target) {
+    protected String resolveCacheName(String methodCacheName, CacheDefaults cacheDefaultsAnnotation, 
+            Method method, Class<? extends Object> targetClass) {
+        
         if (!"".equals(methodCacheName)) {
             return methodCacheName;
         }
@@ -498,8 +507,8 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         }
         
         //A target was provided, that implies we should generate the cache name
-        if (target != null) {
-            final String fqClassName = target.getClass().getName();
+        if (targetClass != null) {
+            final String fqClassName = targetClass.getName();
             final StringBuilder generatedCacheNameBuilder = new StringBuilder(fqClassName);
             generatedCacheNameBuilder.append(".");
             generatedCacheNameBuilder.append(method.getName());

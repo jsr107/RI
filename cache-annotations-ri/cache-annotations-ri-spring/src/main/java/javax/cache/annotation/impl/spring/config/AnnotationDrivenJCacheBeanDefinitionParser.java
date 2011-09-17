@@ -20,6 +20,9 @@ import javax.cache.annotation.impl.AbstractCacheInterceptor;
 import javax.cache.annotation.impl.DefaultCacheKeyGenerator;
 import javax.cache.annotation.impl.DefaultCacheResolverFactory;
 import javax.cache.annotation.impl.spring.CacheContextSourceImpl;
+import javax.cache.annotation.impl.spring.CachePutInterceptor;
+import javax.cache.annotation.impl.spring.CacheRemoveAllInterceptor;
+import javax.cache.annotation.impl.spring.CacheRemoveEntryInterceptor;
 import javax.cache.annotation.impl.spring.CacheResultInterceptor;
 
 import org.springframework.aop.config.AopNamespaceUtils;
@@ -66,13 +69,13 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
             this.setupPointcutAdvisor(CacheResultInterceptor.class,
                     element, parserContext, elementSource, cacheOperationSourceReference);
             
-            this.setupPointcutAdvisor(CacheResultInterceptor.class,
+            this.setupPointcutAdvisor(CachePutInterceptor.class,
                     element, parserContext, elementSource, cacheOperationSourceReference);
             
-            this.setupPointcutAdvisor(CacheResultInterceptor.class,
+            this.setupPointcutAdvisor(CacheRemoveEntryInterceptor.class,
                     element, parserContext, elementSource, cacheOperationSourceReference);
 
-            this.setupPointcutAdvisor(CacheResultInterceptor.class,
+            this.setupPointcutAdvisor(CacheRemoveAllInterceptor.class,
                     element, parserContext, elementSource, cacheOperationSourceReference);
 
             return registry.getBeanDefinition(JCACHE_CACHE_OPERATION_SOURCE_BEAN_NAME);
@@ -112,7 +115,7 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
 
         final MutablePropertyValues propertyValues = cacheAttributeSource.getPropertyValues();
         propertyValues.addPropertyValue("defaultCacheKeyGenerator", defaultCacheKeyGenerator);
-        propertyValues.addPropertyValue("cacheResolverFactory", defaultCacheResolverFactory);
+        propertyValues.addPropertyValue("defaultCacheResolverFactory", defaultCacheResolverFactory);
 
         final BeanDefinitionRegistry registry = parserContext.getRegistry();
         registry.registerBeanDefinition(JCACHE_CACHE_OPERATION_SOURCE_BEAN_NAME, cacheAttributeSource);
@@ -137,8 +140,11 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
         constructorArgumentValues.addIndexedArgumentValue(1, cacheInterceptorSourceRuntimeReference);
         pointcut.setConstructorArgumentValues(constructorArgumentValues);
 
-        final XmlReaderContext readerContext = parserContext.getReaderContext();
-        final String pointcutBeanName = readerContext.registerWithGeneratedName(pointcut);
+        final String pointcutBeanName = pointcut.getBeanClassName() + "_" + cacheInterceptorSourceRuntimeReference.getBeanName();
+        
+        final BeanDefinitionRegistry registry = parserContext.getRegistry();
+        registry.registerBeanDefinition(pointcutBeanName, pointcut);
+        
         return new RuntimeBeanReference(pointcutBeanName);
     }
 

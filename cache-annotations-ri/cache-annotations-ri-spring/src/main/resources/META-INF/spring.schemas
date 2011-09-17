@@ -1,1 +1,1 @@
-https\://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring-1.0.xsd=javax/cache/interceptor/impl/spring/jcache-spring-1.0.xsd
+https\://raw.github.com/jsr107/jcache-annotations/master/cache-annotations-ri-spring/src/main/resources/javax/cache/interceptor/impl/spring/jcache-spring-1.0.xsd=javax/cache/interceptor/impl/spring/jcache-spring-1.0.xsd
