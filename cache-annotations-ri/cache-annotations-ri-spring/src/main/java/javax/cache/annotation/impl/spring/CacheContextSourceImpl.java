@@ -93,8 +93,8 @@ public class CacheContextSourceImpl
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#getTarget(java.lang.Object)
      */
     @Override
-    protected Object getTarget(MethodInvocation invocation) {
-        return invocation.getThis();
+    protected Class<?> getTargetClass(MethodInvocation invocation) {
+        return invocation.getThis().getClass();
     }
 
     /* (non-Javadoc)

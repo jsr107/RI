@@ -69,8 +69,8 @@ public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> 
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#getTarget(java.lang.Object)
      */
     @Override
-    protected Object getTarget(InvocationContext invocation) {
-        return invocation.getTarget();
+    protected Class<?> getTargetClass(InvocationContext invocation) {
+        return invocation.getMethod().getDeclaringClass();
     }
 
     /* (non-Javadoc)

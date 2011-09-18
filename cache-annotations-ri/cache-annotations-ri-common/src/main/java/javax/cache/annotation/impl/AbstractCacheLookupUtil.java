@@ -61,8 +61,8 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     @Override
     public InternalCacheKeyInvocationContext<? extends Annotation> getCacheKeyInvocationContext(I invocation) {
         final Method method = this.getMethod(invocation);
-        final Object target = this.getTarget(invocation);
-        final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, target.getClass());
+        final Class<?> targetClass = this.getTargetClass(invocation);
+        final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, targetClass);
         if (staticCacheInvocationContext == null) {
             throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method + 
                     " for intercepted invocation to be valid: " + invocation);
@@ -102,8 +102,8 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     @Override
     public InternalCacheInvocationContext<? extends Annotation> getCacheInvocationContext(I invocation) {
         final Method method = this.getMethod(invocation);
-        final Object target = this.getTarget(invocation);
-        final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, target.getClass());
+        final Class<?> targetClass = this.getTargetClass(invocation);
+        final StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext = this.getMethodDetails(method, targetClass);
         if (staticCacheInvocationContext == null) {
             throw new AnnotationFormatError("At least one cache related annotation must be specified on " + method + 
                     " for intercepted invocation to be valid: " + invocation);
@@ -275,7 +275,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     /**
      * @param invocation
      */
-    protected abstract Object getTarget(I invocation);
+    protected abstract Class<?> getTargetClass(I invocation);
 
     /**
      * @param invocation
@@ -508,7 +508,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         
         //A target was provided, that implies we should generate the cache name
         if (targetClass != null) {
-            final String fqClassName = targetClass.getName();
+            final String fqClassName = method.getDeclaringClass().getName();
             final StringBuilder generatedCacheNameBuilder = new StringBuilder(fqClassName);
             generatedCacheNameBuilder.append(".");
             generatedCacheNameBuilder.append(method.getName());
