@@ -50,6 +50,14 @@ import javax.cache.annotation.CacheValue;
 public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I> {
     private final ConcurrentMap<MethodKey, StaticCacheInvocationContext<? extends Annotation>> methodDetailsCache = 
             new ConcurrentHashMap<MethodKey, StaticCacheInvocationContext<? extends Annotation>>();
+    
+    /**
+     * Create lookup utility
+     */
+    public AbstractCacheLookupUtil() {
+        //Mark that annotations have been initialized
+        AnnotationProviderImpl.setAnnotationsInitialized();
+    }
 
     /**
      * Get the {@link AbstractInternalCacheKeyInvocationContext} for the CDI invocation
