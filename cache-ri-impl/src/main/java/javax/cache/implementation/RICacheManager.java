@@ -230,13 +230,7 @@ public class RICacheManager implements CacheManager {
     @Override
     public <T> T unwrap(java.lang.Class<T> cls) {
         if (cls.isAssignableFrom(this.getClass())) {
-            /*
-             * Just verified in the above if statement that a cast to T is valid, using a 
-             * local variable for the cast to allow for a minimal scoping of @SuppressWarnings 
-             */
-            @SuppressWarnings("unchecked")
-            final T unwrapped = (T)this;
-            return unwrapped;
+            return cls.cast(this);
         }
         
         throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
