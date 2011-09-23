@@ -70,9 +70,13 @@ public class CacheContextSourceImpl
         this.beanFactory = beanFactory;
     }
 
-    /* (non-Javadoc)
+    /* 
+     * Annoation type cannot be known at compile time so ignore the warning
+     * 
+     * (non-Javadoc)
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
             StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
@@ -80,9 +84,13 @@ public class CacheContextSourceImpl
         return new SpringCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
     }
 
-    /* (non-Javadoc)
+    /* 
+     * Annoation type cannot be known at compile time so ignore the warning
+     * 
+     * (non-Javadoc)
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
             StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, MethodInvocation invocation) {

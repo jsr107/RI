@@ -210,7 +210,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
             if (this == o) return true;
             if (o == null || !(o instanceof Binary)) return false;
 
-            Binary that = (Binary) o;
+            Binary<?> that = (Binary<?>) o;
 
             return searchObject.hashCode() == that.hashCode() && searchObject.equals(that.get());
         }

@@ -33,7 +33,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
     private static final long NANOSECONDS_IN_A_MILLISECOND = 1000000L;
 
 
-    private transient Cache cache;
+    private transient Cache<?, ?> cache;
 
     private final AtomicLong cacheRemovals = new AtomicLong();
     private final AtomicLong cacheExpiries = new AtomicLong();
@@ -53,7 +53,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * @param cache the associated cache
      * @param cacheManagerName the name of the cache manager
      */
-    public RICacheStatistics(Cache cache, String cacheManagerName) {
+    public RICacheStatistics(Cache<?, ?> cache, String cacheManagerName) {
         this.cache = cache;
     }
 
@@ -107,7 +107,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * @return the entry count
      */
     public long getEntryCount() {
-        return ((RICache) cache).getSize();
+        return ((RICache<?, ?>) cache).getSize();
     }
 
     /**

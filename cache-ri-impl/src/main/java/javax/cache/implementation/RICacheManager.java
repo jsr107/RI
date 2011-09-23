@@ -17,17 +17,6 @@
 
 package javax.cache.implementation;
 
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheException;
-import javax.cache.CacheLoader;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.CacheWriter;
-import javax.cache.OptionalFeature;
-import javax.cache.Status;
-import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +24,18 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.cache.Cache;
+import javax.cache.CacheBuilder;
+import javax.cache.CacheException;
+import javax.cache.CacheLoader;
+import javax.cache.CacheManager;
+import javax.cache.CacheWriter;
+import javax.cache.Caching;
+import javax.cache.OptionalFeature;
+import javax.cache.Status;
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.NotificationScope;
 
 /**
  * The reference implementation for JSR107.
@@ -45,8 +46,8 @@ import java.util.logging.Logger;
 public class RICacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
-    private final HashMap<String, Cache> caches = new HashMap<String, Cache>();
-    private final HashSet<Class> immutableClasses = new HashSet<Class>();
+    private final HashMap<String, Cache<?, ?>> caches = new HashMap<String, Cache<?, ?>>();
+    private final HashSet<Class<?>> immutableClasses = new HashSet<Class<?>>();
     private final String name;
     private final ClassLoader classLoader;
     private volatile Status status;
@@ -109,7 +110,13 @@ public class RICacheManager implements CacheManager {
             throw new IllegalStateException();
         }
         synchronized (caches) {
-            return (Cache<K, V>) caches.get(cacheName);
+            /*
+             * Can't really verify that the K/V cast is safe but it is required by the API, using a 
+             * local variable for the cast to allow for a minimal scoping of @SuppressWarnings 
+             */
+            @SuppressWarnings("unchecked")
+            final Cache<K, V> cache = (Cache<K, V>) caches.get(cacheName);
+            return cache;
         }
     }
 
@@ -121,14 +128,20 @@ public class RICacheManager implements CacheManager {
         synchronized (caches) {
             HashSet<Cache<K, V>> set = new HashSet<Cache<K, V>>();
             for (Cache<?, ?> cache : caches.values()) {
-                set.add((Cache<K, V>) cache);
+                /*
+                 * Can't really verify K/V cast but it is required by the API, using a 
+                 * local variable for the cast to allow for a minimal scoping of @SuppressWarnings 
+                 */
+                @SuppressWarnings("unchecked")
+                final Cache<K, V> castCache = (Cache<K, V>) cache;
+                set.add(castCache);
             }
             return Collections.unmodifiableSet(set);
         }
     }
 
     private void addCacheInternal(Cache<?, ?> cache) throws CacheException {
-        Cache oldCache;
+        Cache<?, ?> oldCache;
         synchronized (caches) {
             oldCache = caches.put(cache.getName(), cache);
         }
@@ -149,7 +162,7 @@ public class RICacheManager implements CacheManager {
         if (cacheName == null) {
             throw new NullPointerException();
         }
-        Cache oldCache;
+        Cache<?, ?> oldCache;
         synchronized (caches) {
             oldCache = caches.remove(cacheName);
         }
@@ -180,7 +193,7 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public void addImmutableClass(Class immutableClass) {
+    public void addImmutableClass(Class<?> immutableClass) {
         if (immutableClass == null) {
             throw new NullPointerException();
         }
@@ -199,12 +212,12 @@ public class RICacheManager implements CacheManager {
         synchronized (immutableClasses) {
             immutableClasses.clear();
         }
-        ArrayList<Cache> cacheList;
+        ArrayList<Cache<?, ?>> cacheList;
         synchronized (caches) {
-            cacheList = new ArrayList<Cache>(caches.values());
+            cacheList = new ArrayList<Cache<?, ?>>(caches.values());
             caches.clear();
         }
-        for (Cache cache : cacheList) {
+        for (Cache<?, ?> cache : cacheList) {
             try {
                 cache.stop();
             } catch (Exception e) {

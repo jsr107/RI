@@ -38,14 +38,14 @@ import java.util.Set;
  */
 public class RISerializer<T> implements Serializer<T> {
     private final SerializationHelper serializationHelper;
-    private final Set<Class> immutableClasses;
+    private final Set<Class<?>> immutableClasses;
 
     /**
      * Constructor
      * @param classLoader the class loader
      * @param immutableClasses the immutable classes
      */
-    public RISerializer(ClassLoader classLoader, Set<Class> immutableClasses) {
+    public RISerializer(ClassLoader classLoader, Set<Class<?>> immutableClasses) {
         assert classLoader != null;
         assert immutableClasses != null;
         this.serializationHelper = new SerializationHelper(classLoader);
@@ -88,7 +88,7 @@ public class RISerializer<T> implements Serializer<T> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Binary binary = (Binary) o;
+            Binary<?> binary = (Binary<?>) o;
 
             return hashCode() == binary.hashCode() && get().equals(binary.get());
         }
@@ -123,7 +123,12 @@ public class RISerializer<T> implements Serializer<T> {
         @Override
         public V get() {
             try {
-                return (V) serializationHelper.fromBytes(bytes);
+                /*
+                 * Only objects of type V can be set in constructor so the cast must be safe
+                 */
+                @SuppressWarnings("unchecked")
+                final V value = (V) serializationHelper.fromBytes(bytes);
+                return value;
             } catch (IOException e) {
                 throw new CacheException("Serializer: " + e.getMessage(), e);
             } catch (ClassNotFoundException e) {
@@ -137,12 +142,12 @@ public class RISerializer<T> implements Serializer<T> {
             if (o == null || getClass() != o.getClass()) return false;
 
             if (o instanceof RIBinary) {
-                RIBinary riBinary = (RIBinary) o;
+                RIBinary<?> riBinary = (RIBinary<?>) o;
 
                 return hashCode == riBinary.hashCode &&
                         (Arrays.equals(bytes, riBinary.bytes));
             } else {
-                Binary binary = (Binary) o;
+                Binary<?> binary = (Binary<?>) o;
                 return hashCode == binary.hashCode() &&
                         get().equals(binary.get());
             }
@@ -199,9 +204,9 @@ public class RISerializer<T> implements Serializer<T> {
         }
 
         public void validate(Object toStore) {
-            Class class1 = toStore.getClass();
+            Class<?> class1 = toStore.getClass();
             try {
-                Class class2 = classLoader.loadClass(class1.getName());
+                Class<?> class2 = classLoader.loadClass(class1.getName());
                 if (class1 !=  class2) {
                     throw new IllegalArgumentException("from different class loader: " + toStore);
                 }

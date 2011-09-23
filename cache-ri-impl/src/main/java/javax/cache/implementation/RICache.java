@@ -68,7 +68,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final CacheWriter<K, V> cacheWriter;
-    private final Set<ScopedListener> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener>();
+    private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
     private volatile RICacheStatistics statistics;
@@ -86,7 +86,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param listeners        the cache listeners
      */
     private RICache(String cacheName, String cacheManagerName,
-                    Set<Class> immutableClasses, ClassLoader classLoader,
+                    Set<Class<?>> immutableClasses, ClassLoader classLoader,
                     CacheConfiguration configuration,
                     CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter,
                     CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
@@ -129,6 +129,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public V get(Object key) throws CacheException {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
@@ -409,7 +410,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean registerCacheEntryListener(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
-        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, scope, synchronous);
+        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, scope, synchronous);
         return cacheEntryListeners.add(scopedListener);
     }
 
@@ -417,9 +418,14 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean unregisterCacheEntryListener(CacheEntryListener cacheEntryListener) {
+    public boolean unregisterCacheEntryListener(CacheEntryListener<?, ?> cacheEntryListener) {
+        /*
+         * Only listeners that can be added are typed so this cast should be safe
+         */
+        @SuppressWarnings("unchecked")
+        CacheEntryListener<K, V> castCacheEntryListener = (CacheEntryListener<K, V>)cacheEntryListener;
         //Only cacheEntryListener is checked for equality
-        ScopedListener scopedListener = new ScopedListener(cacheEntryListener, null, true);
+        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, null, true);
         return cacheEntryListeners.remove(scopedListener);
     }
 
@@ -481,18 +487,18 @@ public final class RICache<K, V> implements Cache<K, V> {
      *
      * @author Greg Luck
      */
-    private static final class ScopedListener {
-        private final CacheEntryListener listener;
+    private static final class ScopedListener<K, V> {
+        private final CacheEntryListener<K, V> listener;
         private final NotificationScope scope;
         private final boolean synchronous;
 
-        private ScopedListener(CacheEntryListener listener, NotificationScope scope, boolean synchronous) {
+        private ScopedListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
             this.listener = listener;
             this.scope = scope;
             this.synchronous = synchronous;
         }
 
-        private CacheEntryListener getListener() {
+        private CacheEntryListener<K, V> getListener() {
             return listener;
         }
 
@@ -526,7 +532,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            ScopedListener other = (ScopedListener) obj;
+            ScopedListener<?, ?> other = (ScopedListener<?, ?>) obj;
             if (listener == null) {
                 if (other.listener != null) {
                     return false;
@@ -578,7 +584,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            RIEntry e2 = (RIEntry) o;
+            RIEntry<?, ?> e2 = (RIEntry<?, ?>) o;
 
             return this.getKey().equals(e2.getKey()) &&
                     this.getValue().equals(e2.getValue());
@@ -700,7 +706,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final String cacheName;
         private final ClassLoader classLoader;
         private final String cacheManagerName;
-        private final Set<Class> immutableClasses;
+        private final Set<Class<?>> immutableClasses;
         private final RICacheConfiguration.Builder configurationBuilder = new RICacheConfiguration.Builder();
         private CacheLoader<K, V> cacheLoader;
         private CacheWriter<K, V> cacheWriter;
@@ -712,7 +718,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
          */
-        public Builder(String cacheName, String cacheManagerName, Set<Class> immutableClasses, ClassLoader classLoader) {
+        public Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
             }

@@ -45,9 +45,13 @@ public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> 
     private CacheResolverFactory defaultCacheResolverFactory = new DefaultCacheResolverFactory();
 
     
-    /* (non-Javadoc)
+    /*
+     * Annoation type cannot be known at compile time so ignore the warning
+     * 
+     * (non-Javadoc)
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
             StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
@@ -55,9 +59,13 @@ public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> 
         return new CdiCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
     }
 
-    /* (non-Javadoc)
+    /* 
+     * Annoation type cannot be known at compile time so ignore the warning
+     * 
+     * (non-Javadoc)
      * @see javax.cache.annotation.impl.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
             StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext,
