@@ -117,6 +117,26 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     @Override
+    public void setExpiry(CacheConfiguration.Duration timeToLive) throws InvalidConfigurationException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CacheConfiguration.Duration getExpiry() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setSize(CacheConfiguration.Size size) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CacheConfiguration.Size getSize() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CacheConfiguration)) return false;

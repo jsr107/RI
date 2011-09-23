@@ -18,6 +18,7 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
+import javax.cache.InvalidConfigurationException;
 
 /**
  * The reference implementation for JSR107.
@@ -110,6 +111,26 @@ class RIWrappedCacheConfiguration implements CacheConfiguration {
     @Override
     public boolean isTransactionEnabled() {
         return config.isTransactionEnabled();
+    }
+
+    @Override
+    public void setExpiry(CacheConfiguration.Duration timeToLive) throws InvalidConfigurationException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CacheConfiguration.Duration getExpiry() {
+        return config.getExpiry();
+    }
+
+    @Override
+    public void setSize(CacheConfiguration.Size size) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CacheConfiguration.Size getSize() {
+        return config.getSize();
     }
 
     @Override
