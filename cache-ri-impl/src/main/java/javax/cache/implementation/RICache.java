@@ -817,14 +817,20 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         @Override
         public CacheBuilder<K, V> setExpiry(CacheConfiguration.Duration timeToLive) {
-            //TODO: fixme
-            throw new UnsupportedOperationException();
+            if (timeToLive == null) {
+                throw new NullPointerException();
+            }
+            configurationBuilder.setExpiry(timeToLive);
+            return this;
         }
 
         @Override
         public CacheBuilder<K, V> setSize(CacheConfiguration.Size size) {
-            //TODO: fixme
-            throw new UnsupportedOperationException();
+            if (size == null) {
+                throw new NullPointerException();
+            }
+            configurationBuilder.setSize(size);
+            return this;
         }
     }
 

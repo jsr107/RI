@@ -38,18 +38,22 @@ public final class RICacheConfiguration implements CacheConfiguration {
     private final AtomicBoolean storeByValue;
     private final AtomicBoolean statisticsEnabled;
     private final AtomicBoolean transactionsEnabled;
+    private volatile Size size;
+    private volatile Duration timeToLive;
 
 
     private RICacheConfiguration(boolean readThrough,
                                  boolean writeThrough,
                                  boolean storeByValue,
                                  boolean statisticsEnabled,
-                                 boolean transactionsEnabled) {
+                                 boolean transactionsEnabled, Size size, Duration timeToLive) {
         this.readThrough = new AtomicBoolean(readThrough);
         this.writeThrough = new AtomicBoolean(writeThrough);
         this.storeByValue = new AtomicBoolean(storeByValue);
         this.statisticsEnabled = new AtomicBoolean(statisticsEnabled);
         this.transactionsEnabled = new AtomicBoolean(transactionsEnabled);
+        this.size = size;
+        this.timeToLive = timeToLive;
     }
 
     /**
@@ -105,7 +109,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
      */
     @Override
     public void setStatisticsEnabled(boolean enableStatistics) {
-        this.statisticsEnabled.set(enableStatistics);
+        statisticsEnabled.set(enableStatistics);
     }
 
     /**
@@ -118,22 +122,28 @@ public final class RICacheConfiguration implements CacheConfiguration {
 
     @Override
     public void setExpiry(CacheConfiguration.Duration timeToLive) throws InvalidConfigurationException {
-        throw new UnsupportedOperationException();
+        if (timeToLive == null) {
+            throw new NullPointerException();
+        }
+        this.timeToLive = timeToLive;
     }
 
     @Override
     public CacheConfiguration.Duration getExpiry() {
-        throw new UnsupportedOperationException();
+        return timeToLive;
     }
 
     @Override
     public void setSize(CacheConfiguration.Size size) {
-        throw new UnsupportedOperationException();
+        if (size == null) {
+            throw new NullPointerException();
+        }
+        this.size = size;
     }
 
     @Override
     public CacheConfiguration.Size getSize() {
-        throw new UnsupportedOperationException();
+        return size;
     }
 
     @Override
@@ -178,12 +188,16 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private static final boolean DEFAULT_STORE_BY_VALUE = true;
         private static final boolean DEFAULT_STATISTICS_ENABLED = false;
         private static final boolean DEFAULT_TRANSACTIONS_ENABLED = false;
+        private static final Duration DEFAULT_TIME_TO_LIVE = Duration.ETERNAL;
+        private static final Size DEFAULT_SIZE = Size.UNLIMITED;
 
         private boolean readThrough = DEFAULT_READ_THROUGH;
         private boolean writeThrough = DEFAULT_WRITE_THROUGH;
         private boolean storeByValue = DEFAULT_STORE_BY_VALUE;
         private boolean statisticsEnabled = DEFAULT_STATISTICS_ENABLED;
         private boolean transactionsEnabled = DEFAULT_TRANSACTIONS_ENABLED;
+        private Duration timeToLive = DEFAULT_TIME_TO_LIVE;
+        private Size size = DEFAULT_SIZE;
 
         /**
          * Set whether read through is active
@@ -232,6 +246,32 @@ public final class RICacheConfiguration implements CacheConfiguration {
         }
 
         /**
+         * Set expiry
+         * @param timeToLive time to live
+         * @return this Builder instance
+         */
+        public Builder setExpiry(Duration timeToLive) {
+            if (timeToLive == null) {
+                throw new NullPointerException();
+            }
+            this.timeToLive = timeToLive;
+            return this;
+        }
+
+        /**
+         * Set size
+         * @param size size
+         * @return this Builder instance
+         */
+        public Builder setSize(Size size) {
+            if (size == null) {
+                throw new NullPointerException();
+            }
+            this.size = size;
+            return this;
+        }
+
+        /**
          * Set whether transactions are enabled
          *
          * @param transactionsEnabled whether transactions are enabled
@@ -251,7 +291,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * @return a new RICacheConfiguration instance
          */
         public RICacheConfiguration build() {
-            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled, transactionsEnabled);
+            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled, transactionsEnabled, size, timeToLive);
         }
     }
 }
