@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
+import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
@@ -301,6 +302,18 @@ public class RICacheManager implements CacheManager {
         @Override
         public CacheBuilder<K, V> setWriteThrough(boolean writeThrough) {
             cacheBuilder.setWriteThrough(writeThrough);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setExpiry(CacheConfiguration.Duration timeToLive) {
+            cacheBuilder.setExpiry(timeToLive);
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setSize(CacheConfiguration.Size size) {
+            cacheBuilder.setSize(size);
             return this;
         }
     }

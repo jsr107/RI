@@ -814,6 +814,18 @@ public final class RICache<K, V> implements Cache<K, V> {
             configurationBuilder.setWriteThrough(writeThrough);
             return this;
         }
+
+        @Override
+        public CacheBuilder<K, V> setExpiry(CacheConfiguration.Duration timeToLive) {
+            //TODO: fixme
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public CacheBuilder<K, V> setSize(CacheConfiguration.Size size) {
+            //TODO: fixme
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
