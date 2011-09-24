@@ -475,6 +475,15 @@ public final class RICache<K, V> implements Cache<K, V> {
     public Status getStatus() {
         return status;
     }
+    
+    @Override
+    public <T> T unwrap(java.lang.Class<T> cls) {
+        if (cls.isAssignableFrom(this.getClass())) {
+            return cls.cast(this);
+        }
+        
+        throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
+    }
 
     private boolean statisticsEnabled() {
         return configuration.isStatisticsEnabled();
