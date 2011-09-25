@@ -141,11 +141,10 @@ public abstract class AbstractInternalCacheInvocationContext<I, A extends Annota
     /* (non-Javadoc)
      * @see javax.cache.annotation.CacheInvocationContext#unwrap(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T unwrap(Class<T> cls) {
         if (cls.isAssignableFrom(this.invocation.getClass())) {
-            return (T)this.invocation;
+            return cls.cast(this.invocation);
         }
         
         throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");

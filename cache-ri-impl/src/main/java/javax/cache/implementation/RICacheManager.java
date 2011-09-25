@@ -228,6 +228,15 @@ public class RICacheManager implements CacheManager {
         status = Status.STOPPED;
     }
 
+    @Override
+    public <T> T unwrap(java.lang.Class<T> cls) {
+        if (cls.isAssignableFrom(this.getClass())) {
+            return cls.cast(this);
+        }
+        
+        throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
+    }
+
     /**
      * Obtain the logger.
      *
