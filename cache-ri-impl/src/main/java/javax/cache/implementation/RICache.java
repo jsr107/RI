@@ -97,7 +97,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         assert immutableClasses != null;
         this.cacheName = cacheName;
         this.cacheManagerName = cacheManagerName;
-        this.configuration = new RIWrappedCacheConfiguration(configuration);
+        this.configuration = configuration;
         this.cacheLoader = cacheLoader;
         this.cacheWriter = cacheWriter;
         store = configuration.isStoreByValue() ?
@@ -482,7 +482,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             return cls.cast(this);
         }
         
-        throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
+        throw new IllegalArgumentException("Unwrapping to " + cls + " is not a supported by this implementation");
     }
 
     private boolean statisticsEnabled() {
