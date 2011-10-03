@@ -37,6 +37,7 @@ import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import javax.transaction.UserTransaction;
 
 /**
  * The reference implementation for JSR107.
@@ -178,7 +179,7 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public Object getUserTransaction() {
+    public UserTransaction getUserTransaction() {
         throw new UnsupportedOperationException();
     }
 
