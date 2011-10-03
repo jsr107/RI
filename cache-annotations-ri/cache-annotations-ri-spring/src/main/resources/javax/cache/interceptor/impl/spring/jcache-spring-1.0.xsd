@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright 2010-2011 Nicholas Blair, Eric Dalquist
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<xsd:schema xmlns="https=://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tool="http://www.springframework.org/schema/tool"
+        targetNamespace="https://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-2.5.xsd"/>
+
+    <xsd:annotation>
+        <xsd:documentation><![CDATA[
+    Defines the elements used in the jcache-spring-annotation project's declarative
+    caching infrastructure.
+        ]]></xsd:documentation>
+    </xsd:annotation>
+    
+    <xsd:element name="annotation-driven">
+        <xsd:complexType>
+            <xsd:attribute name="cache-manager" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation source="java:javax.cache.CacheManager"><![CDATA[
+The bean name of the CacheManager that is to be used to drive caching.
+
+This attribute is not required, and only needs to be specified
+explicitly if the bean name of the desired CacheManager
+is not 'cacheManager'.
+                    ]]></xsd:documentation>
+                    <xsd:appinfo>
+                        <tool:annotation kind="ref">
+                            <tool:expected-type type="javax.cache.CacheManager"/>
+                        </tool:annotation>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false">
+                <xsd:annotation>
+                    <xsd:documentation><![CDATA[
+Are class-based (CGLIB) proxies to be created? By default, standard
+Java interface-based proxies are created.
+
+Note: Class-based proxies require the @Transactional annotation to be
+defined on the concrete class. Annotations in interfaces will not work
+in that case (they will rather only work with interface-based proxies)!
+                    ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="order" type="xsd:int">
+                <xsd:annotation>
+                    <xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
+Controls the ordering of the execution of the transaction advisor
+when multiple advice executes at a specific joinpoint.
+                    ]]></xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>                
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
