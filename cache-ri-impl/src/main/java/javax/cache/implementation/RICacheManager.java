@@ -37,6 +37,8 @@ import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 import javax.transaction.UserTransaction;
 
 /**
@@ -292,8 +294,8 @@ public class RICacheManager implements CacheManager {
         }
 
         @Override
-        public CacheBuilder<K, V> setTransactionEnabled(boolean enableTransactions) {
-            cacheBuilder.setTransactionEnabled(enableTransactions);
+        public CacheBuilder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
+            cacheBuilder.setTransactionEnabled(isolationLevel, mode);
             return this;
         }
 

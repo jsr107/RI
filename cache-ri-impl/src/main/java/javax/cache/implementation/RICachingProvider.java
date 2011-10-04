@@ -53,14 +53,14 @@ public class RICachingProvider implements CachingProvider {
      *
      * The RI supports {@link OptionalFeature#ANNOTATIONS} and
      * {@link OptionalFeature#STORE_BY_REFERENCE}.
-     * It does not support {@link OptionalFeature#JTA}
+     * It does not support {@link OptionalFeature#TRANSACTIONS}
      */
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
         switch (optionalFeature) {
             case ANNOTATIONS:
                 return true;
-            case JTA:
+            case TRANSACTIONS:
                 return false;
             case STORE_BY_REFERENCE:
                 return true;

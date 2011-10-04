@@ -30,6 +30,8 @@ import javax.cache.InvalidConfigurationException;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -803,8 +805,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         @Override
-        public CacheBuilder<K, V> setTransactionEnabled(boolean enableTransactions) {
-            configurationBuilder.setTransactionEnabled(enableTransactions);
+        public CacheBuilder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
+            configurationBuilder.setTransactionEnabled(isolationLevel, mode);
             return this;
         }
 

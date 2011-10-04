@@ -22,6 +22,8 @@ import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
 import javax.cache.InvalidConfigurationException;
 import javax.cache.OptionalFeature;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -37,7 +39,8 @@ public final class RICacheConfiguration implements CacheConfiguration {
     private final AtomicBoolean writeThrough;
     private final AtomicBoolean storeByValue;
     private final AtomicBoolean statisticsEnabled;
-    private final AtomicBoolean transactionsEnabled;
+    private volatile IsolationLevel isolationLevel;
+    private volatile Mode transactionMode;
     private volatile Size size;
     private volatile Duration timeToLive;
 
@@ -46,12 +49,14 @@ public final class RICacheConfiguration implements CacheConfiguration {
                                  boolean writeThrough,
                                  boolean storeByValue,
                                  boolean statisticsEnabled,
-                                 boolean transactionsEnabled, Size size, Duration timeToLive) {
+                                 IsolationLevel isolationLevel, Mode transactionMode,
+                                 Size size, Duration timeToLive) {
         this.readThrough = new AtomicBoolean(readThrough);
         this.writeThrough = new AtomicBoolean(writeThrough);
         this.storeByValue = new AtomicBoolean(storeByValue);
         this.statisticsEnabled = new AtomicBoolean(statisticsEnabled);
-        this.transactionsEnabled = new AtomicBoolean(transactionsEnabled);
+        this.isolationLevel = isolationLevel;
+        this.transactionMode = transactionMode;
         this.size = size;
         this.timeToLive = timeToLive;
     }
@@ -117,7 +122,17 @@ public final class RICacheConfiguration implements CacheConfiguration {
      */
     @Override
     public boolean isTransactionEnabled() {
-        return transactionsEnabled.get();
+        return isolationLevel != null && transactionMode != null;
+    }
+
+    @Override
+    public IsolationLevel getTransactionIsolationLevel() {
+        return isolationLevel;
+    }
+
+    @Override
+    public Mode getTransactionMode() {
+        return transactionMode;
     }
 
     @Override
@@ -153,10 +168,13 @@ public final class RICacheConfiguration implements CacheConfiguration {
 
         CacheConfiguration that = (CacheConfiguration) o;
 
-        if (isReadThrough() != that.isReadThrough()) return false;
+        if (getTransactionIsolationLevel() != that.getTransactionIsolationLevel()) return false;
+        if (isReadThrough() != isReadThrough()) return false;
+        if (getSize() != that.getSize()) return false;
         if (isStatisticsEnabled() != that.isStatisticsEnabled()) return false;
-        if (isStoreByValue() != that.isStoreByValue()) return false;
-        if (isTransactionEnabled() != that.isTransactionEnabled()) return false;
+        if (isStoreByValue()  != that.isStoreByValue()) return false;
+        if (getExpiry() != that.getExpiry()) return false;
+        if (getTransactionMode() != that.getTransactionMode()) return false;
         if (isWriteThrough() != that.isWriteThrough()) return false;
 
         return true;
@@ -165,16 +183,17 @@ public final class RICacheConfiguration implements CacheConfiguration {
     @Override
     public int hashCode() {
         int result = readThrough.hashCode();
-        boolean b;
-
-        b = isWriteThrough();
+        Boolean b;
+        b = writeThrough.get();
         result = 31 * result + (b ? 1 : 0);
-        b = isStoreByValue();
+        b = storeByValue.get();
         result = 31 * result + (b ? 1 : 0);
-        b = isStatisticsEnabled();
+        b = statisticsEnabled.get();
         result = 31 * result + (b ? 1 : 0);
-        b = isTransactionEnabled();
-        result = 31 * result + (b ? 1 : 0);
+        result = 31 * result + (isolationLevel != null ? isolationLevel.hashCode() : 0);
+        result = 31 * result + (transactionMode != null ? transactionMode.hashCode() : 0);
+        result = 31 * result + size.hashCode();
+        result = 31 * result + timeToLive.hashCode();
         return result;
     }
 
@@ -187,15 +206,17 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private static final boolean DEFAULT_WRITE_THROUGH = false;
         private static final boolean DEFAULT_STORE_BY_VALUE = true;
         private static final boolean DEFAULT_STATISTICS_ENABLED = false;
-        private static final boolean DEFAULT_TRANSACTIONS_ENABLED = false;
         private static final Duration DEFAULT_TIME_TO_LIVE = Duration.ETERNAL;
         private static final Size DEFAULT_SIZE = Size.UNLIMITED;
+        private static final IsolationLevel DEFAULT_TRANSACTION_ISOLATION_LEVEL = null;
+        private static final Mode DEFAULT_TRANSACTION_MODE = null;
 
         private boolean readThrough = DEFAULT_READ_THROUGH;
         private boolean writeThrough = DEFAULT_WRITE_THROUGH;
         private boolean storeByValue = DEFAULT_STORE_BY_VALUE;
         private boolean statisticsEnabled = DEFAULT_STATISTICS_ENABLED;
-        private boolean transactionsEnabled = DEFAULT_TRANSACTIONS_ENABLED;
+        private IsolationLevel isolationLevel = DEFAULT_TRANSACTION_ISOLATION_LEVEL;
+        private Mode transactionMode = DEFAULT_TRANSACTION_MODE;
         private Duration timeToLive = DEFAULT_TIME_TO_LIVE;
         private Size size = DEFAULT_SIZE;
 
@@ -274,14 +295,16 @@ public final class RICacheConfiguration implements CacheConfiguration {
         /**
          * Set whether transactions are enabled
          *
-         * @param transactionsEnabled whether transactions are enabled
+         * @param isolationLevel isolation level
+         * @param mode the transactionMode
          * @return this Builder instance
          */
-        public Builder setTransactionEnabled(boolean transactionsEnabled) {
-            if (transactionsEnabled && !Caching.isSupported(OptionalFeature.JTA)) {
+        public Builder setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
+            if (!Caching.isSupported(OptionalFeature.TRANSACTIONS)) {
                 throw new InvalidConfigurationException("transactionsEnabled");
             }
-            this.transactionsEnabled = transactionsEnabled;
+            this.isolationLevel = isolationLevel;
+            this.transactionMode = mode;
             return this;
         }
 
@@ -291,7 +314,8 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * @return a new RICacheConfiguration instance
          */
         public RICacheConfiguration build() {
-            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled, transactionsEnabled, size, timeToLive);
+            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled,
+                    isolationLevel, transactionMode, size, timeToLive);
         }
     }
 }
