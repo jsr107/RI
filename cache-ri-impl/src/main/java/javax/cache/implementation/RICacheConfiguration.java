@@ -24,6 +24,7 @@ import javax.cache.InvalidConfigurationException;
 import javax.cache.OptionalFeature;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -42,7 +43,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     private volatile IsolationLevel isolationLevel;
     private volatile Mode transactionMode;
     private volatile Size size;
-    private volatile Duration timeToLive;
+    private final Duration[] timeToLive;
 
 
     private RICacheConfiguration(boolean readThrough,
@@ -50,7 +51,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
                                  boolean storeByValue,
                                  boolean statisticsEnabled,
                                  IsolationLevel isolationLevel, Mode transactionMode,
-                                 Size size, Duration timeToLive) {
+                                 Size size, Duration[] timeToLive) {
         this.readThrough = new AtomicBoolean(readThrough);
         this.writeThrough = new AtomicBoolean(writeThrough);
         this.storeByValue = new AtomicBoolean(storeByValue);
@@ -136,16 +137,16 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     @Override
-    public void setExpiry(CacheConfiguration.Duration timeToLive) throws InvalidConfigurationException {
+    public void setExpiry(Duration.TTLType type, Duration timeToLive) {
         if (timeToLive == null) {
             throw new NullPointerException();
         }
-        this.timeToLive = timeToLive;
+        this.timeToLive[type.ordinal()] = timeToLive;
     }
 
     @Override
-    public CacheConfiguration.Duration getExpiry() {
-        return timeToLive;
+    public Duration getExpiry(Duration.TTLType type) {
+        return timeToLive[type.ordinal()];
     }
 
     @Override
@@ -173,7 +174,9 @@ public final class RICacheConfiguration implements CacheConfiguration {
         if (getSize() != that.getSize()) return false;
         if (isStatisticsEnabled() != that.isStatisticsEnabled()) return false;
         if (isStoreByValue()  != that.isStoreByValue()) return false;
-        if (getExpiry() != that.getExpiry()) return false;
+        for (Duration.TTLType ttyType : Duration.TTLType.values()) {
+            if (getExpiry(ttyType) != that.getExpiry(ttyType)) return false;
+        }
         if (getTransactionMode() != that.getTransactionMode()) return false;
         if (isWriteThrough() != that.isWriteThrough()) return false;
 
@@ -193,7 +196,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
         result = 31 * result + (isolationLevel != null ? isolationLevel.hashCode() : 0);
         result = 31 * result + (transactionMode != null ? transactionMode.hashCode() : 0);
         result = 31 * result + size.hashCode();
-        result = 31 * result + timeToLive.hashCode();
+        result = 31 * result + Arrays.hashCode(timeToLive);
         return result;
     }
 
@@ -217,8 +220,18 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private boolean statisticsEnabled = DEFAULT_STATISTICS_ENABLED;
         private IsolationLevel isolationLevel = DEFAULT_TRANSACTION_ISOLATION_LEVEL;
         private Mode transactionMode = DEFAULT_TRANSACTION_MODE;
-        private Duration timeToLive = DEFAULT_TIME_TO_LIVE;
+        private final Duration[] timeToLive;
         private Size size = DEFAULT_SIZE;
+
+        /**
+         * Constructor
+         */
+        public Builder() {
+            timeToLive = new Duration[Duration.TTLType.values().length];
+            for (int i = 0; i < timeToLive.length; i++) {
+                timeToLive[i] = DEFAULT_TIME_TO_LIVE;
+            }
+        }
 
         /**
          * Set whether read through is active
@@ -268,14 +281,18 @@ public final class RICacheConfiguration implements CacheConfiguration {
 
         /**
          * Set expiry
+         * @param type ttl type
          * @param timeToLive time to live
          * @return this Builder instance
          */
-        public Builder setExpiry(Duration timeToLive) {
+        public Builder setExpiry(Duration.TTLType type, Duration timeToLive) {
+            if (type == null) {
+                throw new NullPointerException();
+            }
             if (timeToLive == null) {
                 throw new NullPointerException();
             }
-            this.timeToLive = timeToLive;
+            this.timeToLive[type.ordinal()] = timeToLive;
             return this;
         }
 
