@@ -829,7 +829,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         @Override
-        public CacheBuilder<K, V> setExpiry(CacheConfiguration.Duration.TTLType type, CacheConfiguration.Duration timeToLive) {
+        public CacheBuilder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration timeToLive) {
             if (type == null) {
                 throw new NullPointerException();
             }

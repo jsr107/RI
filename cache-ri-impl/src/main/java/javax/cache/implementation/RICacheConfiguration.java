@@ -137,15 +137,15 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     @Override
-    public void setExpiry(Duration.TTLType type, Duration timeToLive) {
-        if (timeToLive == null) {
+    public void setExpiry(ExpiryType type, Duration duration) {
+        if (duration == null) {
             throw new NullPointerException();
         }
-        this.timeToLive[type.ordinal()] = timeToLive;
+        this.timeToLive[type.ordinal()] = duration;
     }
 
     @Override
-    public Duration getExpiry(Duration.TTLType type) {
+    public Duration getExpiry(ExpiryType type) {
         return timeToLive[type.ordinal()];
     }
 
@@ -174,7 +174,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
         if (getSize() != that.getSize()) return false;
         if (isStatisticsEnabled() != that.isStatisticsEnabled()) return false;
         if (isStoreByValue()  != that.isStoreByValue()) return false;
-        for (Duration.TTLType ttyType : Duration.TTLType.values()) {
+        for (ExpiryType ttyType : ExpiryType.values()) {
             if (getExpiry(ttyType) != that.getExpiry(ttyType)) return false;
         }
         if (getTransactionMode() != that.getTransactionMode()) return false;
@@ -227,7 +227,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * Constructor
          */
         public Builder() {
-            timeToLive = new Duration[Duration.TTLType.values().length];
+            timeToLive = new Duration[ExpiryType.values().length];
             for (int i = 0; i < timeToLive.length; i++) {
                 timeToLive[i] = DEFAULT_TIME_TO_LIVE;
             }
@@ -285,7 +285,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          * @param timeToLive time to live
          * @return this Builder instance
          */
-        public Builder setExpiry(Duration.TTLType type, Duration timeToLive) {
+        public Builder setExpiry(ExpiryType type, Duration timeToLive) {
             if (type == null) {
                 throw new NullPointerException();
             }
