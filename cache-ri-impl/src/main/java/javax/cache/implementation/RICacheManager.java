@@ -212,7 +212,6 @@ public class RICacheManager implements CacheManager {
         if (status != Status.STARTED) {
             throw new IllegalStateException();
         }
-        status = Status.STOPPING;
         synchronized (immutableClasses) {
             immutableClasses.clear();
         }

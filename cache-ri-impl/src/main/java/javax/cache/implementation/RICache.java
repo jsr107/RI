@@ -453,7 +453,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void stop() throws CacheException {
-        status = Status.STOPPING;
         executorService.shutdown();
         try {
             executorService.awaitTermination(10, TimeUnit.SECONDS);
