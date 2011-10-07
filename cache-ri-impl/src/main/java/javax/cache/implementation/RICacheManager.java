@@ -322,11 +322,5 @@ public class RICacheManager implements CacheManager {
             cacheBuilder.setExpiry(type, timeToLive);
             return this;
         }
-
-        @Override
-        public CacheBuilder<K, V> setSize(CacheConfiguration.Size size) {
-            cacheBuilder.setSize(size);
-            return this;
-        }
     }
 }

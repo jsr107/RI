@@ -839,15 +839,6 @@ public final class RICache<K, V> implements Cache<K, V> {
             configurationBuilder.setExpiry(type, timeToLive);
             return this;
         }
-
-        @Override
-        public CacheBuilder<K, V> setSize(CacheConfiguration.Size size) {
-            if (size == null) {
-                throw new NullPointerException();
-            }
-            configurationBuilder.setSize(size);
-            return this;
-        }
     }
 
     /**

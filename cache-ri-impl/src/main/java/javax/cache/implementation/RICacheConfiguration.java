@@ -42,7 +42,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
     private final AtomicBoolean statisticsEnabled;
     private volatile IsolationLevel isolationLevel;
     private volatile Mode transactionMode;
-    private volatile Size size;
     private final Duration[] timeToLive;
 
 
@@ -51,14 +50,13 @@ public final class RICacheConfiguration implements CacheConfiguration {
                                  boolean storeByValue,
                                  boolean statisticsEnabled,
                                  IsolationLevel isolationLevel, Mode transactionMode,
-                                 Size size, Duration[] timeToLive) {
+                                 Duration[] timeToLive) {
         this.readThrough = new AtomicBoolean(readThrough);
         this.writeThrough = new AtomicBoolean(writeThrough);
         this.storeByValue = new AtomicBoolean(storeByValue);
         this.statisticsEnabled = new AtomicBoolean(statisticsEnabled);
         this.isolationLevel = isolationLevel;
         this.transactionMode = transactionMode;
-        this.size = size;
         this.timeToLive = timeToLive;
     }
 
@@ -150,19 +148,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     @Override
-    public void setSize(CacheConfiguration.Size size) {
-        if (size == null) {
-            throw new NullPointerException();
-        }
-        this.size = size;
-    }
-
-    @Override
-    public CacheConfiguration.Size getSize() {
-        return size;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CacheConfiguration)) return false;
@@ -171,7 +156,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
 
         if (getTransactionIsolationLevel() != that.getTransactionIsolationLevel()) return false;
         if (isReadThrough() != isReadThrough()) return false;
-        if (getSize() != that.getSize()) return false;
         if (isStatisticsEnabled() != that.isStatisticsEnabled()) return false;
         if (isStoreByValue()  != that.isStoreByValue()) return false;
         for (ExpiryType ttyType : ExpiryType.values()) {
@@ -195,7 +179,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
         result = 31 * result + (b ? 1 : 0);
         result = 31 * result + (isolationLevel != null ? isolationLevel.hashCode() : 0);
         result = 31 * result + (transactionMode != null ? transactionMode.hashCode() : 0);
-        result = 31 * result + size.hashCode();
         result = 31 * result + Arrays.hashCode(timeToLive);
         return result;
     }
@@ -210,7 +193,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private static final boolean DEFAULT_STORE_BY_VALUE = true;
         private static final boolean DEFAULT_STATISTICS_ENABLED = false;
         private static final Duration DEFAULT_TIME_TO_LIVE = Duration.ETERNAL;
-        private static final Size DEFAULT_SIZE = Size.UNLIMITED;
         private static final IsolationLevel DEFAULT_TRANSACTION_ISOLATION_LEVEL = null;
         private static final Mode DEFAULT_TRANSACTION_MODE = null;
 
@@ -221,7 +203,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private IsolationLevel isolationLevel = DEFAULT_TRANSACTION_ISOLATION_LEVEL;
         private Mode transactionMode = DEFAULT_TRANSACTION_MODE;
         private final Duration[] timeToLive;
-        private Size size = DEFAULT_SIZE;
 
         /**
          * Constructor
@@ -297,19 +278,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
         }
 
         /**
-         * Set size
-         * @param size size
-         * @return this Builder instance
-         */
-        public Builder setSize(Size size) {
-            if (size == null) {
-                throw new NullPointerException();
-            }
-            this.size = size;
-            return this;
-        }
-
-        /**
          * Set whether transactions are enabled
          *
          * @param isolationLevel isolation level
@@ -332,7 +300,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
          */
         public RICacheConfiguration build() {
             return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled,
-                    isolationLevel, transactionMode, size, timeToLive);
+                    isolationLevel, transactionMode, timeToLive);
         }
     }
 }
