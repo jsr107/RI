@@ -139,7 +139,8 @@ public final class RICacheConfiguration implements CacheConfiguration {
         if (duration == null) {
             throw new NullPointerException();
         }
-        this.timeToLive[type.ordinal()] = duration;
+        this.timeToLive[type.ordinal()] =
+                duration.getTimeToLive() == 0 ? Duration.ETERNAL : duration;
     }
 
     @Override
@@ -263,17 +264,18 @@ public final class RICacheConfiguration implements CacheConfiguration {
         /**
          * Set expiry
          * @param type ttl type
-         * @param timeToLive time to live
+         * @param duration time to live
          * @return this Builder instance
          */
-        public Builder setExpiry(ExpiryType type, Duration timeToLive) {
+        public Builder setExpiry(ExpiryType type, Duration duration) {
             if (type == null) {
                 throw new NullPointerException();
             }
-            if (timeToLive == null) {
+            if (duration == null) {
                 throw new NullPointerException();
             }
-            this.timeToLive[type.ordinal()] = timeToLive;
+            this.timeToLive[type.ordinal()] =
+                    duration.getTimeToLive() == 0 ? Duration.ETERNAL : duration;
             return this;
         }
 
