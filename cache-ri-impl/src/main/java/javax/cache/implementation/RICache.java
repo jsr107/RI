@@ -132,7 +132,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public V get(Object key) throws CacheException {
+    public V get(Object key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
         return getInternal(key);
@@ -233,7 +233,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public V getAndPut(K key, V value) throws CacheException {
+    public V getAndPut(K key, V value) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         V result = store.getAndPut(key, value);
@@ -295,7 +295,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean remove(Object key, V oldValue) throws CacheException {
+    public boolean remove(Object key, V oldValue) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result = store.remove(key, oldValue);
@@ -444,7 +444,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public void start() throws CacheException {
+    public void start() {
         status = Status.STARTED;
     }
 
@@ -452,7 +452,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public void stop() throws CacheException {
+    public void stop() {
         executorService.shutdown();
         try {
             executorService.awaitTermination(10, TimeUnit.SECONDS);

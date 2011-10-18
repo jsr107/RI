@@ -144,7 +144,7 @@ public class RICacheManager implements CacheManager {
         }
     }
 
-    private void addCacheInternal(Cache<?, ?> cache) throws CacheException {
+    private void addCacheInternal(Cache<?, ?> cache) {
         Cache<?, ?> oldCache;
         synchronized (caches) {
             oldCache = caches.put(cache.getName(), cache);

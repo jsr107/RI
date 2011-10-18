@@ -129,7 +129,7 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean remove(Object key, V oldValue) throws CacheException {
+    public boolean remove(Object key, V oldValue) {
         return store.remove(createSearchObject(key), createValueHolder(oldValue));
     }
 
