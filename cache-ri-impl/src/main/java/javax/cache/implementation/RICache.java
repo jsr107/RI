@@ -476,6 +476,20 @@ public final class RICache<K, V> implements Cache<K, V> {
     public Status getStatus() {
         return status;
     }
+
+    /**
+     * @return the cachewriter
+     */
+    CacheWriter<K, V> getCacheWriter() {
+        return cacheWriter;
+    }
+
+    /**
+     * @return the cacheloader
+     */
+    CacheLoader<K, V> getCacheLoader() {
+        return cacheLoader;
+    }
     
     @Override
     public <T> T unwrap(java.lang.Class<T> cls) {
@@ -756,15 +770,17 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public RICache<K, V> build() {
-            CacheConfiguration configuration = configurationBuilder.build();
+            RICacheConfiguration configuration = configurationBuilder.build();
             if (configuration.isReadThrough() && (cacheLoader == null)) {
                 throw new InvalidConfigurationException("cacheLoader");
             }
             if (configuration.isWriteThrough() && (cacheWriter == null)) {
                 throw new InvalidConfigurationException("cacheWriter");
             }
-            return new RICache<K, V>(cacheName, cacheManagerName, immutableClasses, classLoader,
+            RICache<K, V> riCache = new RICache<K, V>(cacheName, cacheManagerName, immutableClasses, classLoader,
                     configuration, cacheLoader, cacheWriter, listeners);
+            configuration.setRiCache(riCache);
+            return riCache;
         }
 
         /**

@@ -17,18 +17,9 @@
 
 package javax.cache.implementation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
-import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheWriter;
@@ -40,6 +31,13 @@ import javax.cache.event.NotificationScope;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 import javax.transaction.UserTransaction;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The reference implementation for JSR107.

@@ -19,6 +19,8 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
+import javax.cache.CacheLoader;
+import javax.cache.CacheWriter;
 import javax.cache.Caching;
 import javax.cache.InvalidConfigurationException;
 import javax.cache.OptionalFeature;
@@ -43,6 +45,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
     private volatile IsolationLevel isolationLevel;
     private volatile Mode transactionMode;
     private final Duration[] timeToLive;
+    private volatile RICache riCache;
 
 
     private RICacheConfiguration(boolean readThrough,
@@ -72,24 +75,8 @@ public final class RICacheConfiguration implements CacheConfiguration {
      * {@inheritDoc}
      */
     @Override
-    public void setReadThrough(boolean readThrough) {
-        this.readThrough.set(readThrough);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean isWriteThrough() {
         return writeThrough.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setWriteThrough(boolean writeThrough) {
-        this.writeThrough.set(writeThrough);
     }
 
     /**
@@ -132,6 +119,34 @@ public final class RICacheConfiguration implements CacheConfiguration {
     @Override
     public Mode getTransactionMode() {
         return transactionMode;
+    }
+
+    /**
+     * Set the backing cache to expose more configuration.
+     * @param riCache the backing cache.
+     */
+    void setRiCache(RICache riCache) {
+        this.riCache = riCache;
+    }
+
+    /**
+     * Gets the registered {@link javax.cache.CacheLoader}, if any.
+     *
+     * @return the {@link javax.cache.CacheLoader} or null if none has been set.
+     */
+    @Override
+    public CacheLoader getCacheLoader() {
+        return riCache.getCacheLoader();
+    }
+
+    /**
+     * Gets the registered {@link javax.cache.CacheWriter}, if any.
+     *
+     * @return
+     */
+    @Override
+    public CacheWriter getCacheWriter() {
+        return riCache.getCacheWriter();
     }
 
     @Override
