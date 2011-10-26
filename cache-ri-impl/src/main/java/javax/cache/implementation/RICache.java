@@ -844,14 +844,14 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         @Override
-        public CacheBuilder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration timeToLive) {
+        public CacheBuilder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration duration) {
             if (type == null) {
                 throw new NullPointerException();
             }
-            if (timeToLive == null) {
+            if (duration == null) {
                 throw new NullPointerException();
             }
-            configurationBuilder.setExpiry(type, timeToLive);
+            configurationBuilder.setExpiry(type, duration);
             return this;
         }
     }

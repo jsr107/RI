@@ -281,7 +281,7 @@ public final class RICacheConfiguration implements CacheConfiguration {
                 throw new NullPointerException();
             }
             this.timeToLive[type.ordinal()] =
-                    duration.getTimeToLive() == 0 ? Duration.ETERNAL : duration;
+                    duration.getDurationAmount() == 0 ? Duration.ETERNAL : duration;
             return this;
         }
 
