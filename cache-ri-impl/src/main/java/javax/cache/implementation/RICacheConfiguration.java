@@ -150,15 +150,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     @Override
-    public void setExpiry(ExpiryType type, Duration duration) {
-        if (duration == null) {
-            throw new NullPointerException();
-        }
-        this.timeToLive[type.ordinal()] =
-                duration.getTimeToLive() == 0 ? Duration.ETERNAL : duration;
-    }
-
-    @Override
     public Duration getExpiry(ExpiryType type) {
         return timeToLive[type.ordinal()];
     }
