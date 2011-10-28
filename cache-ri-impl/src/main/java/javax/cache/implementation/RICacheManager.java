@@ -20,6 +20,7 @@ package javax.cache.implementation;
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
+import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheWriter;
@@ -58,7 +59,7 @@ public class RICacheManager implements CacheManager {
      * Constructs a new RICacheManager with the specified name.
      *
      * @param classLoader the ClassLoader that should be used in converting values into Java Objects.
-     * @param name the name of this cache manager
+     * @param name        the name of this cache manager
      * @throws NullPointerException if classLoader or name is null.
      */
     public RICacheManager(String name, ClassLoader classLoader) {
@@ -100,6 +101,10 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName) {
+
+        if (caches.get(cacheName) != null) {
+            throw new CacheException("Cache " + cacheName + " already exists");
+        }
         return new RICacheBuilder<K, V>(cacheName);
     }
 
@@ -143,14 +148,13 @@ public class RICacheManager implements CacheManager {
     }
 
     private void addCacheInternal(Cache<?, ?> cache) {
-        Cache<?, ?> oldCache;
         synchronized (caches) {
-            oldCache = caches.put(cache.getName(), cache);
+            if (caches.get(cache.getName()) != null) {
+                throw new CacheException("Cache " + cache.getName() + " already exists");
+            }
+            caches.put(cache.getName(), cache);
         }
         cache.start();
-        if (oldCache != null) {
-            oldCache.stop();
-        }
     }
 
     /**
@@ -233,7 +237,7 @@ public class RICacheManager implements CacheManager {
         if (cls.isAssignableFrom(this.getClass())) {
             return cls.cast(this);
         }
-        
+
         throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
     }
 
