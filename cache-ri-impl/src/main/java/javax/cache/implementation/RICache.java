@@ -134,7 +134,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public V get(K key) {
         checkStatusStarted();
-        //noinspection SuspiciousMethodCalls
         return getInternal(key);
     }
 
@@ -874,7 +873,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
     }
 
-    private V getInternal(Object key) {
+    private V getInternal(K key) {
         //noinspection SuspiciousMethodCalls
         long start = statisticsEnabled() ? System.nanoTime() : 0;
 
@@ -899,7 +898,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
     }
 
-    private V getFromLoader(Object key) {
+    private V getFromLoader(K key) {
         Cache.Entry<K, V> entry = cacheLoader.load(key);
         if (entry != null) {
             store.put(entry.getKey(), entry.getValue());
