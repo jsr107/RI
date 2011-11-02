@@ -280,7 +280,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean remove(Object key) {
+    public boolean remove(K key) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result = store.remove(key);
