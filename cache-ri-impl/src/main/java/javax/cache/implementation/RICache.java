@@ -132,7 +132,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public V get(Object key) {
+    public V get(K key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
         return getInternal(key);
