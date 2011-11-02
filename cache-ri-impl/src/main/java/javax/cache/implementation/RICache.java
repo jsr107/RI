@@ -159,7 +159,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean containsKey(Object key) {
+    public boolean containsKey(K key) {
         checkStatusStarted();
         //noinspection SuspiciousMethodCalls
         return store.containsKey(key);
