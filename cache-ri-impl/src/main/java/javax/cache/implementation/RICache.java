@@ -310,7 +310,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public V getAndRemove(Object key) {
+    public V getAndRemove(K key) {
         checkStatusStarted();
         V result = store.getAndRemove(key);
         if (statisticsEnabled()) {
