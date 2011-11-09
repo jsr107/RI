@@ -197,7 +197,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * @return the time in milliseconds
      */
     @Override
-    public long getAverageGetMillis() {
+    public float getAverageGetMillis() {
         return (cacheGetTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
     }
 
@@ -207,7 +207,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * @return the time in milliseconds
      */
     @Override
-    public long getAveragePutMillis() {
+    public float getAveragePutMillis() {
         return (cachePutTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
     }
 
@@ -217,7 +217,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * @return the time in milliseconds
      */
     @Override
-    public long getAverageRemoveMillis() {
+    public float getAverageRemoveMillis() {
         return (cacheRemoveTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
     }
 
