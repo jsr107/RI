@@ -19,6 +19,7 @@ package javax.cache.implementation;
 
 import javax.cache.Cache;
 import javax.cache.CacheStatistics;
+import javax.cache.Status;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
@@ -69,8 +70,8 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public String getStatus() {
-        return cache.getStatus().toString();
+    public Status getStatus() {
+        return cache.getStatus();
     }
 
     /**
