@@ -410,7 +410,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean registerCacheEntryListener(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
+    public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V>
+        cacheEntryListener, NotificationScope scope, boolean synchronous) {
         ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, scope, synchronous);
         return cacheEntryListeners.add(scopedListener);
     }
@@ -511,17 +512,17 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @author Greg Luck
      */
     private static final class ScopedListener<K, V> {
-        private final CacheEntryListener<K, V> listener;
+        private final CacheEntryListener<? super K, ? super V> listener;
         private final NotificationScope scope;
         private final boolean synchronous;
 
-        private ScopedListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
+        private ScopedListener(CacheEntryListener<? super K, ? super V> listener, NotificationScope scope, boolean synchronous) {
             this.listener = listener;
             this.scope = scope;
             this.synchronous = synchronous;
         }
 
-        private CacheEntryListener<K, V> getListener() {
+        private CacheEntryListener<? super K, ? super V> getListener() {
             return listener;
         }
 
