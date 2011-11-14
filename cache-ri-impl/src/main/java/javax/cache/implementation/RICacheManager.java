@@ -39,6 +39,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The reference implementation for JSR107.
@@ -260,6 +262,16 @@ public class RICacheManager implements CacheManager {
         private final RICache.Builder<K, V> cacheBuilder;
 
         public RICacheBuilder(String cacheName) {
+            if (cacheName == null) {
+                throw new NullPointerException("A cache name must must not be null.");
+            }
+
+            Pattern searchPattern = Pattern.compile("\\S+");
+            Matcher matcher = searchPattern.matcher(cacheName);
+            if (!matcher.find()) {
+                throw new IllegalArgumentException("A cache name must contain one or more non-whitespace characters");
+            }
+
             cacheBuilder = new RICache.Builder<K, V>(cacheName, name, immutableClasses, classLoader);
         }
 
