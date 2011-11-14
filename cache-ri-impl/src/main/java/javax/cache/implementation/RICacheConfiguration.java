@@ -219,6 +219,9 @@ public final class RICacheConfiguration implements CacheConfiguration {
             for (int i = 0; i < timeToLive.length; i++) {
                 timeToLive[i] = DEFAULT_TIME_TO_LIVE;
             }
+            //The defaults for non-transactional caches, if not set
+            isolationLevel = IsolationLevel.NONE;
+            transactionMode = Mode.NONE;
         }
 
         /**

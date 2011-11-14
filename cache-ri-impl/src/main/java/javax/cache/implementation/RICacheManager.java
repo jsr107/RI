@@ -184,7 +184,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public UserTransaction getUserTransaction() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Transactions are not supported.");
     }
 
     /**
