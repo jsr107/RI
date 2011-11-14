@@ -131,17 +131,11 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public <K, V> Set<Cache<K, V>> getCaches() {
+    public Iterable<Cache<?, ?>> getCaches() {
         synchronized (caches) {
-            HashSet<Cache<K, V>> set = new HashSet<Cache<K, V>>();
+            HashSet<Cache<?, ?>> set = new HashSet<Cache<?, ?>>();
             for (Cache<?, ?> cache : caches.values()) {
-                /*
-                 * Can't really verify K/V cast but it is required by the API, using a 
-                 * local variable for the cast to allow for a minimal scoping of @SuppressWarnings 
-                 */
-                @SuppressWarnings("unchecked")
-                final Cache<K, V> castCache = (Cache<K, V>) cache;
-                set.add(castCache);
+                set.add(cache);
             }
             return Collections.unmodifiableSet(set);
         }
