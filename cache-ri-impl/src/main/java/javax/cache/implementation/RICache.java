@@ -152,7 +152,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         // will throw NPE if keys=null
         HashMap<K, V> map = new HashMap<K, V>(keys.size());
         for (K key : keys) {
-            map.put(key, getInternal(key));
+            V value = getInternal(key);
+            if (value != null) {
+                map.put(key, value);
+            }
         }
         return map;
     }
