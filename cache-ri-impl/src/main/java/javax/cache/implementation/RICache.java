@@ -67,6 +67,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final RISimpleCache<K, V> store;
     private final String cacheName;
     private final String cacheManagerName;
+    private final ClassLoader classLoader;
     private final CacheConfiguration configuration;
     private final CacheLoader<K, V> cacheLoader;
     private final CacheWriter<K, V> cacheWriter;
@@ -97,11 +98,13 @@ public final class RICache<K, V> implements Cache<K, V> {
         assert cacheName != null;
         assert cacheManagerName != null;
         assert immutableClasses != null;
+        assert classLoader != null;
         this.cacheName = cacheName;
         this.cacheManagerName = cacheManagerName;
         this.configuration = configuration;
         this.cacheLoader = cacheLoader;
         this.cacheWriter = cacheWriter;
+        this.classLoader = classLoader;
         store = configuration.isStoreByValue() ?
                 new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader, immutableClasses),
                         new RISerializer<V>(classLoader, immutableClasses)) :
@@ -125,7 +128,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public CacheManager getCacheManager() {
-        return Caching.getCacheManager(cacheManagerName);
+        return Caching.getCacheManager(classLoader, cacheManagerName);
     }
 
     /**
