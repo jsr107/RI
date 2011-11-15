@@ -200,8 +200,8 @@ public final class RICacheConfiguration implements CacheConfiguration {
         private static final boolean DEFAULT_STORE_BY_VALUE = true;
         private static final boolean DEFAULT_STATISTICS_ENABLED = false;
         private static final Duration DEFAULT_TIME_TO_LIVE = Duration.ETERNAL;
-        private static final IsolationLevel DEFAULT_TRANSACTION_ISOLATION_LEVEL = null;
-        private static final Mode DEFAULT_TRANSACTION_MODE = null;
+        private static final IsolationLevel DEFAULT_TRANSACTION_ISOLATION_LEVEL = IsolationLevel.NONE;
+        private static final Mode DEFAULT_TRANSACTION_MODE = Mode.NONE;
 
         private boolean readThrough = DEFAULT_READ_THROUGH;
         private boolean writeThrough = DEFAULT_WRITE_THROUGH;
@@ -219,9 +219,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
             for (int i = 0; i < timeToLive.length; i++) {
                 timeToLive[i] = DEFAULT_TIME_TO_LIVE;
             }
-            //The defaults for non-transactional caches, if not set
-            isolationLevel = IsolationLevel.NONE;
-            transactionMode = Mode.NONE;
         }
 
         /**
