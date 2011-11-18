@@ -394,7 +394,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
             
             //Create parameter details object
             final CacheParameterDetails cacheParameterDetails = new CacheParameterDetails(
-                    rawType.getGenericSuperclass(), rawType, Collections.unmodifiableSet(annotations), pIdx);
+                    rawType, Collections.unmodifiableSet(annotations), pIdx);
             
             //Add parameter details to List and to key list if it is marked as a cache key parameter
             allParameters.add(cacheParameterDetails);

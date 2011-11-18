@@ -17,7 +17,6 @@
 package javax.cache.annotation.impl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Set;
 
 /**
@@ -25,7 +24,6 @@ import java.util.Set;
  * @version $Revision$
  */
 public class CacheParameterDetails {
-    private final Type baseType;
     private final Class<?> rawType;
     private final Set<Annotation> annotations;
     private final int parameterPosition;
@@ -33,24 +31,16 @@ public class CacheParameterDetails {
     /**
      * Create new cache parameter details
      * 
-     * @param baseType The base generic type of the parameter
      * @param rawType The declared class of the parameter
      * @param annotations All annotations on the parameter
      * @param parameterPosition The position of the parameter in the original parameter array
      */
-    public CacheParameterDetails(Type baseType, Class<?> rawType, Set<Annotation> annotations, int parameterPosition) {
-        this.baseType = baseType;
+    public CacheParameterDetails(Class<?> rawType, Set<Annotation> annotations, int parameterPosition) {
         this.rawType = rawType;
         this.annotations = annotations;
         this.parameterPosition = parameterPosition;
     }
     
-    /**
-     * @see javax.cache.annotation.CacheInvocationParameter#getBaseType()
-     */
-    public Type getBaseType() {
-        return this.baseType;
-    }
     /**
      * @see javax.cache.annotation.CacheInvocationParameter#getRawType()
      */

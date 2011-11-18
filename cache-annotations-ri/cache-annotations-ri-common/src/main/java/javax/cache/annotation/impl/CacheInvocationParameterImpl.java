@@ -17,7 +17,6 @@
 package javax.cache.annotation.impl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.cache.annotation.CacheInvocationParameter;
@@ -41,14 +40,6 @@ public class CacheInvocationParameterImpl implements CacheInvocationParameter {
     public CacheInvocationParameterImpl(CacheParameterDetails cacheParameterDetails, Object value) {
         this.cacheParameterDetails = cacheParameterDetails;
         this.value = value;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheInvocationParameter#getBaseType()
-     */
-    @Override
-    public Type getBaseType() {
-        return this.cacheParameterDetails.getBaseType();
     }
 
     /* (non-Javadoc)
