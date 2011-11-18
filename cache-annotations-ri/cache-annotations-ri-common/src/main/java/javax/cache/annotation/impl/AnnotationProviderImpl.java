@@ -16,7 +16,6 @@
  */
 package javax.cache.annotation.impl;
 
-import javax.cache.OptionalFeature;
 import javax.cache.spi.AnnotationProvider;
 
 /**
@@ -35,20 +34,9 @@ public class AnnotationProviderImpl implements AnnotationProvider {
         annotationsInitialized = true;
     }
 
-    /* (non-Javadoc)
-     * @see javax.cache.spi.AnnotationProvider#isSupported(javax.cache.OptionalFeature)
-     */
     @Override
-    public boolean isSupported(OptionalFeature optionalFeature) {
-        switch (optionalFeature) {
-            case ANNOTATIONS: {
-                return annotationsInitialized;
-            }
-            default: {
-                throw new IllegalArgumentException("AnnotationProvider only knows about " + OptionalFeature.ANNOTATIONS + 
-                        ", requested OptionalFeature." + optionalFeature + " is invalid for this method.");
-            }
-        }
+    public boolean isSupported() {
+        return annotationsInitialized;
     }
 
 }
