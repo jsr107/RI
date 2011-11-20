@@ -19,18 +19,11 @@ package javax.cache.implementation;
 
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
-import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
-import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
-import javax.cache.CacheWriter;
 import javax.cache.Caching;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
-import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
 import javax.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,6 +85,17 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
         if (caches.get(cacheName) != null) {
             throw new CacheException("Cache " + cacheName + " already exists");
         }
+
+        //TODO: where did these naming constraints come from?
+        if (cacheName == null) {
+            throw new NullPointerException("A cache name must must not be null.");
+        }
+        Pattern searchPattern = Pattern.compile("\\S+");
+        Matcher matcher = searchPattern.matcher(cacheName);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("A cache name must contain one or more non-whitespace characters");
+        }
+
         return new RICacheBuilder<K, V>(cacheName);
     }
 
@@ -224,82 +228,16 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
      * @param <K> the key type
      * @param <V> the value type
      */
-    private class RICacheBuilder<K, V> implements CacheBuilder<K, V> {
-        private final RICache.Builder<K, V> cacheBuilder;
-
+    private class RICacheBuilder<K, V> extends AbstractCacheBuilder<K, V> {
         public RICacheBuilder(String cacheName) {
-            if (cacheName == null) {
-                throw new NullPointerException("A cache name must must not be null.");
-            }
-
-            Pattern searchPattern = Pattern.compile("\\S+");
-            Matcher matcher = searchPattern.matcher(cacheName);
-            if (!matcher.find()) {
-                throw new IllegalArgumentException("A cache name must contain one or more non-whitespace characters");
-            }
-
-            cacheBuilder = new RICache.Builder<K, V>(cacheName, getName(), getImmutableClasses(), getClassLoader());
+            super(new RICache.Builder<K, V>(cacheName, getName(), getImmutableClasses(), getClassLoader()));
         }
 
         @Override
         public Cache<K, V> build() {
-            Cache<K, V> cache = cacheBuilder.build();
+            Cache<K, V>  cache = super.build();
             addCacheInternal(cache);
             return cache;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
-            cacheBuilder.setCacheLoader(cacheLoader);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
-            cacheBuilder.setCacheWriter(cacheWriter);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
-            cacheBuilder.registerCacheEntryListener(listener, scope, synchronous);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setStoreByValue(boolean storeByValue) {
-            cacheBuilder.setStoreByValue(storeByValue);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
-            cacheBuilder.setTransactionEnabled(isolationLevel, mode);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setStatisticsEnabled(boolean enableStatistics) {
-            cacheBuilder.setStatisticsEnabled(enableStatistics);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setReadThrough(boolean readThrough) {
-            cacheBuilder.setReadThrough(readThrough);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setWriteThrough(boolean writeThrough) {
-            cacheBuilder.setWriteThrough(writeThrough);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration duration) {
-            cacheBuilder.setExpiry(type, duration);
-            return this;
         }
     }
 }

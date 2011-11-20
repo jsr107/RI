@@ -24,7 +24,7 @@ import java.util.Set;
  * Abstract class to help implementers
  * @author Yannis Cosmadopoulos
  */
-abstract class AbstractCacheManager implements CacheManager {
+public abstract class AbstractCacheManager implements CacheManager {
     private final HashSet<Class<?>> immutableClasses = new HashSet<Class<?>>();
     private final String name;
     private final ClassLoader classLoader;
@@ -34,7 +34,7 @@ abstract class AbstractCacheManager implements CacheManager {
      * @param name the name
      * @param classLoader the classLoader
      */
-    AbstractCacheManager(String name, ClassLoader classLoader) {
+    public AbstractCacheManager(String name, ClassLoader classLoader) {
         this.name = name;
         this.classLoader = classLoader;
     }
