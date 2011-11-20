@@ -47,13 +47,10 @@ import java.util.regex.Pattern;
  *
  * @author Yannis Cosmadopoulos
  */
-public class RICacheManager implements CacheManager {
+public class RICacheManager extends AbstractCacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final HashMap<String, Cache<?, ?>> caches = new HashMap<String, Cache<?, ?>>();
-    private final HashSet<Class<?>> immutableClasses = new HashSet<Class<?>>();
-    private final String name;
-    private final ClassLoader classLoader;
     private volatile Status status;
 
     /**
@@ -64,6 +61,7 @@ public class RICacheManager implements CacheManager {
      * @throws NullPointerException if classLoader or name is null.
      */
     public RICacheManager(String name, ClassLoader classLoader) {
+        super(name, classLoader);
         status = Status.UNINITIALISED;
         if (classLoader == null) {
             throw new NullPointerException("No classLoader specified");
@@ -71,19 +69,7 @@ public class RICacheManager implements CacheManager {
         if (name == null) {
             throw new NullPointerException("No name specified");
         }
-        this.classLoader = classLoader;
-        this.name = name;
         status = Status.STARTED;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p/>
-     * The name returned will be that passed in to the constructor {@link #RICacheManager(String, ClassLoader)}
-     */
-    @Override
-    public String getName() {
-        return name;
     }
 
     /**
@@ -194,24 +180,11 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public void registerImmutableClass(Class<?> immutableClass) {
-        if (immutableClass == null) {
-            throw new NullPointerException();
-        }
-        immutableClasses.add(immutableClass);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void shutdown() {
         if (status != Status.STARTED) {
             throw new IllegalStateException();
         }
-        synchronized (immutableClasses) {
-            immutableClasses.clear();
-        }
+        super.shutdown();
         ArrayList<Cache<?, ?>> cacheList;
         synchronized (caches) {
             cacheList = new ArrayList<Cache<?, ?>>(caches.values());
@@ -265,7 +238,7 @@ public class RICacheManager implements CacheManager {
                 throw new IllegalArgumentException("A cache name must contain one or more non-whitespace characters");
             }
 
-            cacheBuilder = new RICache.Builder<K, V>(cacheName, name, immutableClasses, classLoader);
+            cacheBuilder = new RICache.Builder<K, V>(cacheName, getName(), getImmutableClasses(), getClassLoader());
         }
 
         @Override

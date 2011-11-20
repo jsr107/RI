@@ -20,10 +20,7 @@ package javax.cache.implementation;
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
-import javax.cache.CacheException;
 import javax.cache.CacheLoader;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.InvalidConfigurationException;
@@ -40,11 +37,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The reference implementation for JSR107.
@@ -61,18 +55,9 @@ import java.util.concurrent.TimeUnit;
  * @author Greg Luck
  * @author Yannis Cosmadopoulos
  */
-public final class RICache<K, V> implements Cache<K, V> {
-    private static final int CACHE_LOADER_THREADS = 2;
-
+public final class RICache<K, V> extends AbstractCache<K, V> {
     private final RISimpleCache<K, V> store;
-    private final String cacheName;
-    private final String cacheManagerName;
-    private final ClassLoader classLoader;
-    private final CacheConfiguration configuration;
-    private final CacheLoader<K, V> cacheLoader;
-    private final CacheWriter<K, V> cacheWriter;
     private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
-    private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
     private volatile Status status;
     private volatile RICacheStatistics statistics;
 
@@ -93,18 +78,8 @@ public final class RICache<K, V> implements Cache<K, V> {
                     CacheConfiguration configuration,
                     CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter,
                     CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
+        super(cacheName, cacheManagerName, immutableClasses, classLoader, configuration, cacheLoader, cacheWriter);
         status = Status.UNINITIALISED;
-        assert configuration != null;
-        assert cacheName != null;
-        assert cacheManagerName != null;
-        assert immutableClasses != null;
-        assert classLoader != null;
-        this.cacheName = cacheName;
-        this.cacheManagerName = cacheManagerName;
-        this.configuration = configuration;
-        this.cacheLoader = cacheLoader;
-        this.cacheWriter = cacheWriter;
-        this.classLoader = classLoader;
         store = configuration.isStoreByValue() ?
                 new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader, immutableClasses),
                         new RISerializer<V>(classLoader, immutableClasses)) :
@@ -113,22 +88,6 @@ public final class RICache<K, V> implements Cache<K, V> {
         for (ListenerRegistration<K, V> listener : listeners) {
             registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getName() {
-        return cacheName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public CacheManager getCacheManager() {
-        return Caching.getCacheManager(classLoader, cacheManagerName);
     }
 
     /**
@@ -179,14 +138,14 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (key == null) {
             throw new NullPointerException("key");
         }
-        if (cacheLoader == null) {
+        if (getCacheLoader() == null) {
             return null;
         }
         if (containsKey(key)) {
             return null;
         }
-        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, cacheLoader, key));
-        executorService.submit(task);
+        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, getCacheLoader(), key));
+        submit(task);
         return task;
     }
 
@@ -199,14 +158,14 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (keys == null) {
             throw new NullPointerException("keys");
         }
-        if (cacheLoader == null) {
+        if (getCacheLoader() == null) {
             return null;
         }
         if (keys.contains(null)) {
             throw new NullPointerException("key");
         }
-        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, cacheLoader, keys));
-        executorService.submit(task);
+        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, getCacheLoader(), keys));
+        submit(task);
         return task;
     }
 
@@ -408,14 +367,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V>
         cacheEntryListener, NotificationScope scope, boolean synchronous) {
         ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, scope, synchronous);
@@ -459,12 +410,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void stop() {
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new CacheException(e);
-        }
+        super.stop();
         store.removeAll();
         status = Status.STOPPED;
     }
@@ -483,20 +429,6 @@ public final class RICache<K, V> implements Cache<K, V> {
         return status;
     }
 
-    /**
-     * @return the cachewriter
-     */
-    CacheWriter<K, V> getCacheWriter() {
-        return cacheWriter;
-    }
-
-    /**
-     * @return the cacheloader
-     */
-    CacheLoader<K, V> getCacheLoader() {
-        return cacheLoader;
-    }
-    
     @Override
     public <T> T unwrap(java.lang.Class<T> cls) {
         if (cls.isAssignableFrom(this.getClass())) {
@@ -507,7 +439,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private boolean statisticsEnabled() {
-        return configuration.isStatisticsEnabled();
+        return getConfiguration().isStatisticsEnabled();
     }
 
     /**
@@ -892,7 +824,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (statisticsEnabled()) {
                 statistics.increaseCacheMisses(1);
             }
-            if (cacheLoader != null) {
+            if (getCacheLoader() != null) {
                 return getFromLoader(key);
             } else {
                 return null;
@@ -906,7 +838,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     private V getFromLoader(K key) {
-        Cache.Entry<K, V> entry = cacheLoader.load(key);
+        Cache.Entry<K, V> entry = getCacheLoader().load(key);
         if (entry != null) {
             store.put(entry.getKey(), entry.getValue());
             return entry.getValue();
