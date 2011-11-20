@@ -15,7 +15,6 @@
  *  limitations under the License.
  */
 
-
 package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
@@ -26,7 +25,6 @@ import javax.cache.InvalidConfigurationException;
 import javax.cache.OptionalFeature;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -36,15 +34,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Yannis Cosmadopoulos
  * @author Greg Luck
  */
-public final class RICacheConfiguration implements CacheConfiguration {
+public final class RICacheConfiguration extends AbstractCacheConfiguration {
 
-    private final AtomicBoolean readThrough;
-    private final AtomicBoolean writeThrough;
     private final AtomicBoolean storeByValue;
-    private final AtomicBoolean statisticsEnabled;
     private volatile IsolationLevel isolationLevel;
     private volatile Mode transactionMode;
-    private final Duration[] timeToLive;
     private volatile RICache riCache;
 
 
@@ -54,29 +48,10 @@ public final class RICacheConfiguration implements CacheConfiguration {
                                  boolean statisticsEnabled,
                                  IsolationLevel isolationLevel, Mode transactionMode,
                                  Duration[] timeToLive) {
-        this.readThrough = new AtomicBoolean(readThrough);
-        this.writeThrough = new AtomicBoolean(writeThrough);
+        super(writeThrough, readThrough, statisticsEnabled, timeToLive);
         this.storeByValue = new AtomicBoolean(storeByValue);
-        this.statisticsEnabled = new AtomicBoolean(statisticsEnabled);
         this.isolationLevel = isolationLevel;
         this.transactionMode = transactionMode;
-        this.timeToLive = timeToLive;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isReadThrough() {
-        return readThrough.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isWriteThrough() {
-        return writeThrough.get();
     }
 
     /**
@@ -85,22 +60,6 @@ public final class RICacheConfiguration implements CacheConfiguration {
     @Override
     public boolean isStoreByValue() {
         return storeByValue.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isStatisticsEnabled() {
-        return statisticsEnabled.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setStatisticsEnabled(boolean enableStatistics) {
-        statisticsEnabled.set(enableStatistics);
     }
 
     /**
@@ -150,43 +109,26 @@ public final class RICacheConfiguration implements CacheConfiguration {
     }
 
     @Override
-    public Duration getExpiry(ExpiryType type) {
-        return timeToLive[type.ordinal()];
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CacheConfiguration)) return false;
 
         CacheConfiguration that = (CacheConfiguration) o;
 
+        if (!super.equals(o)) return false;
         if (getTransactionIsolationLevel() != that.getTransactionIsolationLevel()) return false;
-        if (isReadThrough() != isReadThrough()) return false;
-        if (isStatisticsEnabled() != that.isStatisticsEnabled()) return false;
-        if (isStoreByValue()  != that.isStoreByValue()) return false;
-        for (ExpiryType ttyType : ExpiryType.values()) {
-            if (getExpiry(ttyType) != that.getExpiry(ttyType)) return false;
-        }
+        if (isStoreByValue() != isStoreByValue()) return false;
         if (getTransactionMode() != that.getTransactionMode()) return false;
-        if (isWriteThrough() != that.isWriteThrough()) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = readThrough.hashCode();
-        Boolean b;
-        b = writeThrough.get();
-        result = 31 * result + (b ? 1 : 0);
-        b = storeByValue.get();
-        result = 31 * result + (b ? 1 : 0);
-        b = statisticsEnabled.get();
-        result = 31 * result + (b ? 1 : 0);
+        int result = super.hashCode();
+        result = 31 * result + (storeByValue.get() ? 1 : 0);
         result = 31 * result + (isolationLevel != null ? isolationLevel.hashCode() : 0);
         result = 31 * result + (transactionMode != null ? transactionMode.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(timeToLive);
         return result;
     }
 

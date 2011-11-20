@@ -17,6 +17,7 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
+import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
@@ -140,5 +141,83 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
      */
     protected void submit(FutureTask<?> task) {
         executorService.submit(task);
+    }
+
+    /**
+     * Builder
+     *
+     * @param <K>
+     * @param <V>
+     * @author Yannis Cosmadopoulos
+     */
+    public abstract static class Builder<K, V> implements CacheBuilder<K, V> {
+        /**
+         * cache name
+         */
+        protected final String cacheName;
+        /**
+         * cache manager name
+         */
+        protected final String cacheManagerName;
+        /**
+         * class loader
+         */
+        protected final ClassLoader classLoader;
+        /**
+         * immutables
+         */
+        protected final Set<Class<?>> immutableClasses;
+        /**
+         * cache loader
+         */
+        protected CacheLoader<K, V> cacheLoader;
+        /**
+         * cache writer
+         */
+        protected CacheWriter<K, V> cacheWriter;
+
+        /**
+         * builder
+         * @param cacheName
+         * @param cacheManagerName
+         * @param immutableClasses
+         * @param classLoader
+         */
+        public Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader) {
+            if (cacheName == null) {
+                throw new NullPointerException("cacheName");
+            }
+            this.cacheName = cacheName;
+            if (classLoader == null) {
+                throw new NullPointerException("cacheLoader");
+            }
+            this.classLoader = classLoader;
+            if (cacheManagerName == null) {
+                throw new NullPointerException("cacheManagerName");
+            }
+            this.cacheManagerName = cacheManagerName;
+            if (immutableClasses == null) {
+                throw new NullPointerException("immutableClasses");
+            }
+            this.immutableClasses = immutableClasses;
+        }
+
+        @Override
+        public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
+            if (cacheLoader == null) {
+                throw new NullPointerException("cacheLoader");
+            }
+            this.cacheLoader = cacheLoader;
+            return this;
+        }
+
+        @Override
+        public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
+            if (cacheWriter == null) {
+                throw new NullPointerException("cacheWriter");
+            }
+            this.cacheWriter = cacheWriter;
+            return this;
+        }
     }
 }

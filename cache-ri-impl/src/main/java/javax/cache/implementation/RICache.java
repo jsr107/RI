@@ -664,14 +664,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @param <V>
      * @author Yannis Cosmadopoulos
      */
-    public static class Builder<K, V> implements CacheBuilder<K, V> {
-        private final String cacheName;
-        private final ClassLoader classLoader;
-        private final String cacheManagerName;
-        private final Set<Class<?>> immutableClasses;
+    public static class Builder<K, V> extends AbstractCache.Builder<K, V> {
         private final RICacheConfiguration.Builder configurationBuilder = new RICacheConfiguration.Builder();
-        private CacheLoader<K, V> cacheLoader;
-        private CacheWriter<K, V> cacheWriter;
         private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
         /**
@@ -683,22 +677,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          * @param classLoader the class loader
          */
         public Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader) {
-            if (cacheName == null) {
-                throw new NullPointerException("cacheName");
-            }
-            this.cacheName = cacheName;
-            if (classLoader == null) {
-                throw new NullPointerException("cacheLoader");
-            }
-            this.classLoader = classLoader;
-            if (cacheManagerName == null) {
-                throw new NullPointerException("cacheManagerName");
-            }
-            this.cacheManagerName = cacheManagerName;
-            if (immutableClasses == null) {
-                throw new NullPointerException("immutableClasses");
-            }
-            this.immutableClasses = immutableClasses;
+            super(cacheName, cacheManagerName, immutableClasses, classLoader);
         }
 
         /**
@@ -719,30 +698,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     configuration, cacheLoader, cacheWriter, listeners);
             configuration.setRiCache(riCache);
             return riCache;
-        }
-
-        /**
-         * Set the cache loader.
-         *
-         * @param cacheLoader the CacheLoader
-         * @return the builder
-         */
-        @Override
-        public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
-            if (cacheLoader == null) {
-                throw new NullPointerException("cacheLoader");
-            }
-            this.cacheLoader = cacheLoader;
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
-            if (cacheWriter == null) {
-                throw new NullPointerException("cacheWriter");
-            }
-            this.cacheWriter = cacheWriter;
-            return this;
         }
 
         @Override
