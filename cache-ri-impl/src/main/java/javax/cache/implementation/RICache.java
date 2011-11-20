@@ -18,7 +18,6 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
-import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
@@ -125,7 +124,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public boolean containsKey(K key) {
         checkStatusStarted();
-        //noinspection SuspiciousMethodCalls
         return store.containsKey(key);
     }
 
@@ -665,7 +663,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder<K, V> extends AbstractCache.Builder<K, V> {
-        private final RICacheConfiguration.Builder configurationBuilder = new RICacheConfiguration.Builder();
+        private final RICacheConfiguration.Builder configurationBuilder;
         private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
         /**
@@ -677,7 +675,13 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          * @param classLoader the class loader
          */
         public Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader) {
-            super(cacheName, cacheManagerName, immutableClasses, classLoader);
+            this(cacheName, cacheManagerName, immutableClasses, classLoader, new RICacheConfiguration.Builder());
+        }
+
+        private Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
+                        RICacheConfiguration.Builder configurationBuilder) {
+            super(cacheName, cacheManagerName, immutableClasses, classLoader, configurationBuilder);
+            this.configurationBuilder = configurationBuilder;
         }
 
         /**
@@ -701,50 +705,20 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         }
 
         @Override
-        public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
+        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
             listeners.add(new ListenerRegistration<K, V>(listener, scope, synchronous));
             return this;
         }
 
         @Override
-        public CacheBuilder<K, V> setStoreByValue(boolean storeByValue) {
+        public Builder<K, V> setStoreByValue(boolean storeByValue) {
             configurationBuilder.setStoreByValue(storeByValue);
             return this;
         }
 
         @Override
-        public CacheBuilder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
+        public Builder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
             configurationBuilder.setTransactionEnabled(isolationLevel, mode);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setStatisticsEnabled(boolean enableStatistics) {
-            configurationBuilder.setStatisticsEnabled(enableStatistics);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setReadThrough(boolean readThrough) {
-            configurationBuilder.setReadThrough(readThrough);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setWriteThrough(boolean writeThrough) {
-            configurationBuilder.setWriteThrough(writeThrough);
-            return this;
-        }
-
-        @Override
-        public CacheBuilder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration duration) {
-            if (type == null) {
-                throw new NullPointerException();
-            }
-            if (duration == null) {
-                throw new NullPointerException();
-            }
-            configurationBuilder.setExpiry(type, duration);
             return this;
         }
     }

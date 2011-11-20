@@ -176,6 +176,9 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
          */
         protected CacheWriter<K, V> cacheWriter;
 
+
+        private final AbstractCacheConfiguration.Builder configurationBuilder;
+
         /**
          * builder
          * @param cacheName
@@ -183,7 +186,9 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
          * @param immutableClasses
          * @param classLoader
          */
-        public Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader) {
+        public Builder(String cacheName, String cacheManagerName,
+                       Set<Class<?>> immutableClasses, ClassLoader classLoader,
+                       AbstractCacheConfiguration.Builder configurationBuilder) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
             }
@@ -200,6 +205,10 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("immutableClasses");
             }
             this.immutableClasses = immutableClasses;
+            if (configurationBuilder == null) {
+                throw new NullPointerException("configurationBuilder");
+            }
+            this.configurationBuilder = configurationBuilder;
         }
 
         @Override
@@ -212,11 +221,41 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
         }
 
         @Override
-        public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
+        public Builder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
             if (cacheWriter == null) {
                 throw new NullPointerException("cacheWriter");
             }
             this.cacheWriter = cacheWriter;
+            return this;
+        }
+
+        @Override
+        public Builder<K, V> setStatisticsEnabled(boolean enableStatistics) {
+            configurationBuilder.setStatisticsEnabled(enableStatistics);
+            return this;
+        }
+
+        @Override
+        public Builder<K, V> setReadThrough(boolean readThrough) {
+            configurationBuilder.setReadThrough(readThrough);
+            return this;
+        }
+
+        @Override
+        public Builder<K, V> setWriteThrough(boolean writeThrough) {
+            configurationBuilder.setWriteThrough(writeThrough);
+            return this;
+        }
+
+        @Override
+        public Builder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration duration) {
+            if (type == null) {
+                throw new NullPointerException();
+            }
+            if (duration == null) {
+                throw new NullPointerException();
+            }
+            configurationBuilder.setExpiry(type, duration);
             return this;
         }
     }
