@@ -139,6 +139,14 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
 
     /**
+     * Getter
+     * @return class loader
+     */
+    protected ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    /**
      * Submit tast to executor
      * @param task task
      */
