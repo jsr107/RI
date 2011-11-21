@@ -6,21 +6,15 @@
         <artifactId>cache-ri</artifactId>
         <version>0.5-SNAPSHOT</version>
     </parent>
-    <artifactId>cache-ri-impl</artifactId>
+    <artifactId>cache-ri-common</artifactId>
     <packaging>jar</packaging>
 
-    <name>JSR107 Cache RI</name>
+    <name>JSR107 Cache RI common</name>
 
     <dependencies>
         <dependency>
             <groupId>javax.cache</groupId>
             <artifactId>cache-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.cache.implementation</groupId>
-            <artifactId>cache-ri-common</artifactId>
-            <version>0.5-SNAPSHOT</version>
         </dependency>
 
         <dependency>

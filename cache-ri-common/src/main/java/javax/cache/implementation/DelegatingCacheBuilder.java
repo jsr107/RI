@@ -27,19 +27,19 @@ import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
 /**
- * Abstract class to help implementers
+ * Class to help implementers
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
  */
-public class AbstractCacheBuilder<K, V> implements CacheBuilder<K, V> {
+public class DelegatingCacheBuilder<K, V> implements CacheBuilder<K, V> {
     private final AbstractCache.Builder<K, V> cacheBuilder;
 
     /**
      * Constructor
      * @param cacheBuilder
      */
-    public AbstractCacheBuilder(AbstractCache.Builder<K, V> cacheBuilder) {
+    public DelegatingCacheBuilder(AbstractCache.Builder<K, V> cacheBuilder) {
         this.cacheBuilder = cacheBuilder;
     }
 

@@ -228,7 +228,7 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
      * @param <K> the key type
      * @param <V> the value type
      */
-    private class RICacheBuilder<K, V> extends AbstractCacheBuilder<K, V> {
+    private class RICacheBuilder<K, V> extends DelegatingCacheBuilder<K, V> {
         public RICacheBuilder(String cacheName) {
             super(new RICache.Builder<K, V>(cacheName, getName(), getImmutableClasses(), getClassLoader()));
         }
