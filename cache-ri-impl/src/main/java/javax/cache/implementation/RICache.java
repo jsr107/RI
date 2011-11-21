@@ -80,7 +80,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader, immutableClasses),
                         new RISerializer<V>(classLoader, immutableClasses)) :
                 new RIByReferenceSimpleCache<K, V>();
-        statistics = new RICacheStatistics(this, cacheManagerName);
+        statistics = new RICacheStatistics(this);
         for (ListenerRegistration<K, V> listener : listeners) {
             registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
         }

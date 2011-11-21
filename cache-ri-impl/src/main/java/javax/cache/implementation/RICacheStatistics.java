@@ -52,9 +52,8 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * Constructs a cache statistics object
      *
      * @param cache the associated cache
-     * @param cacheManagerName the name of the cache manager
      */
-    public RICacheStatistics(Cache<?, ?> cache, String cacheManagerName) {
+    public RICacheStatistics(Cache<?, ?> cache) {
         this.cache = cache;
     }
 
