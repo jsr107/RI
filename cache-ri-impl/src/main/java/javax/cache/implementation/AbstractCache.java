@@ -24,6 +24,9 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheWriter;
 import javax.cache.Caching;
+import javax.cache.InvalidConfigurationException;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
  */
-abstract class AbstractCache<K, V> implements Cache<K, V> {
+public abstract class AbstractCache<K, V> implements Cache<K, V> {
     private static final int CACHE_LOADER_THREADS = 2;
 
     private final String cacheName;
@@ -60,7 +63,7 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param cacheLoader      the cache loader
      * @param cacheWriter      the cache writer
      */
-    AbstractCache(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
+    public AbstractCache(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
                   CacheConfiguration configuration,
                   CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter) {
         assert configuration != null;
@@ -257,6 +260,33 @@ abstract class AbstractCache<K, V> implements Cache<K, V> {
             }
             configurationBuilder.setExpiry(type, duration);
             return this;
+        }
+
+        @Override
+        public Builder<K, V> setStoreByValue(boolean storeByValue) {
+            configurationBuilder.setStoreByValue(storeByValue);
+            return this;
+        }
+
+        @Override
+        public Builder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
+            configurationBuilder.setTransactionEnabled(isolationLevel, mode);
+            return this;
+        }
+
+        /**
+         * create configuration
+         * @return a CacheConfiguration
+         */
+        protected CacheConfiguration createCacheConfiguration() {
+            CacheConfiguration configuration = configurationBuilder.build();
+            if (configuration.isReadThrough() && (cacheLoader == null)) {
+                throw new InvalidConfigurationException("cacheLoader");
+            }
+            if (configuration.isWriteThrough() && (cacheWriter == null)) {
+                throw new InvalidConfigurationException("cacheWriter");
+            }
+            return configuration;
         }
     }
 }

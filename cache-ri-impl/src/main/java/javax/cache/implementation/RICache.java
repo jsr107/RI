@@ -22,12 +22,9 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
-import javax.cache.InvalidConfigurationException;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -663,7 +660,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder<K, V> extends AbstractCache.Builder<K, V> {
-        private final RICacheConfiguration.Builder configurationBuilder;
         private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
         /**
@@ -681,7 +677,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         private Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
                         RICacheConfiguration.Builder configurationBuilder) {
             super(cacheName, cacheManagerName, immutableClasses, classLoader, configurationBuilder);
-            this.configurationBuilder = configurationBuilder;
         }
 
         /**
@@ -691,34 +686,17 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          */
         @Override
         public RICache<K, V> build() {
-            RICacheConfiguration configuration = configurationBuilder.build();
-            if (configuration.isReadThrough() && (cacheLoader == null)) {
-                throw new InvalidConfigurationException("cacheLoader");
-            }
-            if (configuration.isWriteThrough() && (cacheWriter == null)) {
-                throw new InvalidConfigurationException("cacheWriter");
-            }
-            RICache<K, V> riCache = new RICache<K, V>(cacheName, cacheManagerName, immutableClasses, classLoader,
-                    configuration, cacheLoader, cacheWriter, listeners);
-            configuration.setRiCache(riCache);
+            CacheConfiguration configuration = createCacheConfiguration();
+            RICache<K, V> riCache = new RICache<K, V>(cacheName, cacheManagerName,
+                immutableClasses, classLoader, configuration,
+                cacheLoader, cacheWriter, listeners);
+            ((RICacheConfiguration) configuration).setRiCache(riCache);
             return riCache;
         }
 
         @Override
         public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
             listeners.add(new ListenerRegistration<K, V>(listener, scope, synchronous));
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setStoreByValue(boolean storeByValue) {
-            configurationBuilder.setStoreByValue(storeByValue);
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
-            configurationBuilder.setTransactionEnabled(isolationLevel, mode);
             return this;
         }
     }

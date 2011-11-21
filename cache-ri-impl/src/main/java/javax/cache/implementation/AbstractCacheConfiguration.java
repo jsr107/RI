@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Yannis Cosmadopoulos
  */
-abstract class AbstractCacheConfiguration implements CacheConfiguration {
+public abstract class AbstractCacheConfiguration implements CacheConfiguration {
     private final boolean readThrough;
     private final boolean writeThrough;
     private final boolean storeByValue;
@@ -47,14 +47,12 @@ abstract class AbstractCacheConfiguration implements CacheConfiguration {
      * @param statisticsEnabled
      * @param timeToLive
      */
-    AbstractCacheConfiguration(boolean writeThrough,
-                               boolean readThrough,
-                               boolean storeByValue,
-                               boolean statisticsEnabled,
-                               IsolationLevel isolationLevel, Mode transactionMode,
-                               CacheConfiguration.Duration[] timeToLive) {
-        this.writeThrough = writeThrough;
+    public AbstractCacheConfiguration(boolean readThrough, boolean writeThrough,
+                                      boolean storeByValue, boolean statisticsEnabled,
+                                      IsolationLevel isolationLevel, Mode transactionMode,
+                                      Duration[] timeToLive) {
         this.readThrough = readThrough;
+        this.writeThrough = writeThrough;
         this.storeByValue = storeByValue;
         this.statisticsEnabled = new AtomicBoolean(statisticsEnabled);
         this.isolationLevel = isolationLevel;
@@ -162,7 +160,7 @@ abstract class AbstractCacheConfiguration implements CacheConfiguration {
      * Builds the config
      * @author Yannis Cosmadopoulos
      */
-    public static class Builder {
+    public abstract static class Builder {
         private static final boolean DEFAULT_READ_THROUGH = false;
         private static final boolean DEFAULT_WRITE_THROUGH = false;
         private static final boolean DEFAULT_STATISTICS_ENABLED = false;
@@ -212,6 +210,12 @@ abstract class AbstractCacheConfiguration implements CacheConfiguration {
                 timeToLive[i] = DEFAULT_TIME_TO_LIVE;
             }
         }
+
+        /**
+         * the build method
+         * @return a configuration
+         */
+        public abstract CacheConfiguration build();
 
         /**
          * Set whether read through is active

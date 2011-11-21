@@ -30,9 +30,7 @@ import javax.cache.transaction.Mode;
  * @author Greg Luck
  */
 public final class RICacheConfiguration extends AbstractCacheConfiguration {
-
     private volatile RICache riCache;
-
 
     private RICacheConfiguration(boolean readThrough,
                                  boolean writeThrough,
@@ -40,7 +38,7 @@ public final class RICacheConfiguration extends AbstractCacheConfiguration {
                                  boolean statisticsEnabled,
                                  IsolationLevel isolationLevel, Mode transactionMode,
                                  Duration[] timeToLive) {
-        super(writeThrough, readThrough, storeByValue, statisticsEnabled, isolationLevel, transactionMode, timeToLive);
+        super(readThrough, writeThrough, storeByValue, statisticsEnabled, isolationLevel, transactionMode, timeToLive);
     }
 
     /**
@@ -93,8 +91,10 @@ public final class RICacheConfiguration extends AbstractCacheConfiguration {
          * @return a new RICacheConfiguration instance
          */
         public RICacheConfiguration build() {
-            return new RICacheConfiguration(readThrough, writeThrough, storeByValue, statisticsEnabled,
-                    isolationLevel, transactionMode, timeToLive);
+            return new RICacheConfiguration(readThrough, writeThrough,
+                storeByValue, statisticsEnabled,
+                isolationLevel, transactionMode,
+                timeToLive);
         }
     }
 }
