@@ -55,7 +55,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     private final RISimpleCache<K, V> store;
     private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
     private volatile Status status;
-    private volatile RICacheStatistics statistics;
+    private final RICacheStatistics statistics;
 
     /**
      * Constructs a cache.
