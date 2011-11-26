@@ -387,7 +387,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Object invokeAtomicOperation(K key, AtomicOperation atomicOperation) {
+    public Object invokeEntryProcessor(K key, EntryProcessor entryProcessor) {
         throw new UnsupportedOperationException();
     }
 
