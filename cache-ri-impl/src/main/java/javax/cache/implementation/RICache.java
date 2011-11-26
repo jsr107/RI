@@ -22,6 +22,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
+import javax.cache.EntryProcessor;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
@@ -381,6 +382,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         //Only cacheEntryListener is checked for equality
         ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, null, true);
         return cacheEntryListeners.remove(scopedListener);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object invokeEntryProcessor(K key, EntryProcessor entryProcessor) {
+        throw new UnsupportedOperationException();
     }
 
     /**
