@@ -391,6 +391,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor) {
+        checkStatusStarted();
         if (key == null) {
             throw new NullPointerException();
         }
