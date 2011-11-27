@@ -58,6 +58,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
     private volatile Status status;
     private final RICacheStatistics statistics;
+    private final LockManager<K> lockManager = new LockManager<K>();
 
     /**
      * Constructs a cache.
@@ -389,8 +390,23 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Object invokeEntryProcessor(K key, EntryProcessor entryProcessor) {
-        throw new UnsupportedOperationException();
+    public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor) {
+        if (key == null) {
+            throw new NullPointerException();
+        }
+        if (key == entryProcessor) {
+            throw new NullPointerException();
+        }
+        Object result = null;
+        try {
+            lockManager.lock(key);
+            RIMutableEntry<K, V> entry = new RIMutableEntry<K, V>(key, store);
+            result = entryProcessor.process(entry);
+            entry.commit();
+        } finally {
+            lockManager.unLock(key);
+        }
+        return result;
     }
 
     /**
@@ -841,6 +857,63 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * A mutable entry
+     * @param <K>
+     * @param <V>
+     */
+    private static class RIMutableEntry<K, V> implements MutableEntry<K, V> {
+        private final K key;
+        private V value;
+        private final RISimpleCache<K, V> store;
+        private boolean exists;
+        private boolean remove;
+
+        RIMutableEntry(K key, RISimpleCache<K, V> store) {
+            this.key = key;
+            this.store = store;
+            exists = store.containsKey(key);
+        }
+
+        private void commit() {
+            if (remove) {
+                store.remove(key);
+            } else if (value != null) {
+                store.put(key, value);
+            }
+        }
+
+        @Override
+        public boolean exists() {
+            return exists;
+        }
+
+        @Override
+        public void remove() {
+            remove = true;
+        }
+
+        @Override
+        public void setValue(V value) {
+            if (value == null) {
+                throw new NullPointerException();
+            }
+            exists = true;
+            remove = false;
+            this.value = value;
+        }
+
+        @Override
+        public K getKey() {
+            return key;
+        }
+
+        @Override
+        public V getValue() {
+            return value != null ? value : store.get(key);
         }
     }
 }
