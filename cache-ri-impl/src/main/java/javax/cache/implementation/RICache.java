@@ -816,7 +816,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 oldLock.lock();
                 // now we have it. Because of possibility that someone had it for remove,
                 // we don't re-use directly
-                lockFactory.release(lock);
+                lockFactory.release(oldLock);
             }
         }
 
@@ -826,7 +826,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          */
         private void unLock(K key) {
             ReentrantLock lock = locks.remove(key);
-            assert lock != null && lock.isLocked() && lock.isHeldByCurrentThread();
             lockFactory.release(lock);
         }
 
@@ -895,6 +894,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         @Override
         public void remove() {
             remove = true;
+            exists = false;
+            value = null;
         }
 
         @Override
