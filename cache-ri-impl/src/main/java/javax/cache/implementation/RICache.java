@@ -95,7 +95,15 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public V get(K key) {
         checkStatusStarted();
-        return getInternal(key);
+        if (key == null) {
+            throw new NullPointerException();
+        }
+        lockManager.lock(key);
+        try {
+            return getInternal(key);
+        } finally {
+            lockManager.unLock(key);
+        }
     }
 
     /**
@@ -399,8 +407,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             throw new NullPointerException();
         }
         Object result = null;
+        lockManager.lock(key);
         try {
-            lockManager.lock(key);
             RIMutableEntry<K, V> entry = new RIMutableEntry<K, V>(key, store);
             result = entryProcessor.process(entry);
             entry.commit();
