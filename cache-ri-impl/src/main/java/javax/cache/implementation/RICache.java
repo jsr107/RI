@@ -249,7 +249,17 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (map.containsKey(null)) {
             throw new NullPointerException("key");
         }
-        store.putAll(map);
+        //store.putAll(map);
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+            K key = entry.getKey();
+            LockManager<K> lockManager = getLockManager();
+            lockManager.lock(key);
+            try {
+                store.put(key, entry.getValue());
+            } finally {
+                lockManager.unLock(key);
+            }
+        }
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(map.size());
             statistics.addPutTimeNano(System.nanoTime() - start);
@@ -263,7 +273,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public boolean putIfAbsent(K key, V value) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        boolean result = store.putIfAbsent(key, value);
+        boolean result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.putIfAbsent(key, value);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
             statistics.addPutTimeNano(System.nanoTime() - start);
@@ -278,7 +295,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public boolean remove(K key) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        boolean result = store.remove(key);
+        boolean result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.remove(key);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (result && statisticsEnabled()) {
             statistics.increaseCacheRemovals(1);
             statistics.addRemoveTimeNano(System.nanoTime() - start);
@@ -293,7 +317,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public boolean remove(K key, V oldValue) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        boolean result = store.remove(key, oldValue);
+        boolean result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.remove(key, oldValue);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (result && statisticsEnabled()) {
             statistics.increaseCacheRemovals(1);
             statistics.addRemoveTimeNano(System.nanoTime() - start);
@@ -307,7 +338,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public V getAndRemove(K key) {
         checkStatusStarted();
-        V result = store.getAndRemove(key);
+        V result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.getAndRemove(key);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
@@ -325,14 +363,18 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
-        if (store.replace(key, oldValue, newValue)) {
-            if (statisticsEnabled()) {
-                statistics.increaseCachePuts(1);
-            }
-            return true;
-        } else {
-            return false;
+        boolean result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.replace(key, oldValue, newValue);
+        } finally {
+            lockManager.unLock(key);
         }
+        if (result && statisticsEnabled()) {
+            statistics.increaseCachePuts(1);
+        }
+        return result;
     }
 
     /**
@@ -341,8 +383,15 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public boolean replace(K key, V value) {
         checkStatusStarted();
-        boolean result = store.replace(key, value);
-        if (statisticsEnabled()) {
+        boolean result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.replace(key, value);
+        } finally {
+            lockManager.unLock(key);
+        }
+        if (result && statisticsEnabled()) {
             statistics.increaseCachePuts(1);
         }
         return result;
@@ -354,7 +403,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
-        V result = store.getAndReplace(key, value);
+        V result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.getAndReplace(key, value);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (statisticsEnabled()) {
             if (result != null) {
                 statistics.increaseCacheHits(1);
