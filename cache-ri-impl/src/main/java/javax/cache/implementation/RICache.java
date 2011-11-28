@@ -58,7 +58,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
     private volatile Status status;
     private final RICacheStatistics statistics;
-    private final LockManager<K> lockManager = new LockManager<K>();
+    private LockManager<K> lockManager1 = new LockManager<K>();
 
     /**
      * Constructs a cache.
@@ -98,12 +98,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (key == null) {
             throw new NullPointerException();
         }
-        lockManager.lock(key);
-        try {
-            return getInternal(key);
-        } finally {
-            lockManager.unLock(key);
-        }
+        return getInternal(key);
     }
 
     /**
@@ -132,7 +127,24 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public boolean containsKey(K key) {
         checkStatusStarted();
-        return store.containsKey(key);
+        if (key == null) {
+            throw new NullPointerException();
+        }
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            return store.containsKey(key);
+        } finally {
+            lockManager.unLock(key);
+        }
+    }
+
+    private synchronized LockManager<K> getLockManager() {
+        return lockManager1;
+    }
+
+    private synchronized void newLockManager() {
+        lockManager1 = new LockManager<K>();
     }
 
     /**
@@ -195,7 +207,13 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public void put(K key, V value) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        store.put(key, value);
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            store.put(key, value);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
             statistics.addPutTimeNano(System.nanoTime() - start);
@@ -206,7 +224,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public V getAndPut(K key, V value) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        V result = store.getAndPut(key, value);
+        V result;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            result = store.getAndPut(key, value);
+        } finally {
+            lockManager.unLock(key);
+        }
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
             statistics.addPutTimeNano(System.nanoTime() - start);
@@ -407,6 +432,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             throw new NullPointerException();
         }
         Object result = null;
+        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             RIMutableEntry<K, V> entry = new RIMutableEntry<K, V>(key, store);
@@ -470,6 +496,56 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
     private boolean statisticsEnabled() {
         return getConfiguration().isStatisticsEnabled();
+    }
+
+    private V getInternal(K key) {
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
+
+        V value = null;
+        LockManager<K> lockManager = getLockManager();
+        lockManager.lock(key);
+        try {
+            value = store.get(key);
+        } finally {
+            lockManager.unLock(key);
+        }
+        if (statisticsEnabled()) {
+            statistics.addGetTimeNano(System.nanoTime() - start);
+        }
+        if (value == null) {
+            if (statisticsEnabled()) {
+                statistics.increaseCacheMisses(1);
+            }
+            if (getCacheLoader() != null) {
+                return getFromLoader(key);
+            } else {
+                return null;
+            }
+        } else {
+            if (statisticsEnabled()) {
+                statistics.increaseCacheHits(1);
+            }
+            return value;
+        }
+    }
+
+    private V getFromLoader(K key) {
+        Cache.Entry<K, V> entry = getCacheLoader().load(key);
+        if (entry != null) {
+            store.put(entry.getKey(), entry.getValue());
+            return entry.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the size of the cache.
+     *
+     * @return the size in entries of the cache
+     */
+    long getSize() {
+        return store.size();
     }
 
     /**
@@ -741,6 +817,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      *
      * @param <K>
      * @param <V>
+     * @author Greg Luck
      */
     private static final class ListenerRegistration<K, V> {
         private final CacheEntryListener<K, V> cacheEntryListener;
@@ -752,50 +829,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             this.scope = scope;
             this.synchronous = synchronous;
         }
-    }
-
-    private V getInternal(K key) {
-        //noinspection SuspiciousMethodCalls
-        long start = statisticsEnabled() ? System.nanoTime() : 0;
-
-        V value = store.get(key);
-        if (statisticsEnabled()) {
-            statistics.addGetTimeNano(System.nanoTime() - start);
-        }
-        if (value == null) {
-            if (statisticsEnabled()) {
-                statistics.increaseCacheMisses(1);
-            }
-            if (getCacheLoader() != null) {
-                return getFromLoader(key);
-            } else {
-                return null;
-            }
-        } else {
-            if (statisticsEnabled()) {
-                statistics.increaseCacheHits(1);
-            }
-            return value;
-        }
-    }
-
-    private V getFromLoader(K key) {
-        Cache.Entry<K, V> entry = getCacheLoader().load(key);
-        if (entry != null) {
-            store.put(entry.getKey(), entry.getValue());
-            return entry.getValue();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns the size of the cache.
-     *
-     * @return the size in entries of the cache
-     */
-    long getSize() {
-        return store.size();
     }
 
     /**
@@ -839,6 +872,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
         /**
          * Factory/pool
+         * @author Yannis Cosmadopoulos
+         * @since 1.0
          */
         private static class LockFactory {
             private static final int CAPACITY = 100;
@@ -872,6 +907,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * A mutable entry
      * @param <K>
      * @param <V>
+     * @author Yannis Cosmadopoulos
+     * @since 1.0
      */
     private static class RIMutableEntry<K, V> implements MutableEntry<K, V> {
         private final K key;
