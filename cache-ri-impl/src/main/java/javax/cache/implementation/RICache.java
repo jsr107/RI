@@ -58,7 +58,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
     private volatile Status status;
     private final RICacheStatistics statistics;
-    private LockManager<K> lockManager1 = new LockManager<K>();
+    private final LockManager<K> lockManager = new LockManager<K>();
 
     /**
      * Constructs a cache.
@@ -130,21 +130,12 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (key == null) {
             throw new NullPointerException();
         }
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             return store.containsKey(key);
         } finally {
             lockManager.unLock(key);
         }
-    }
-
-    private synchronized LockManager<K> getLockManager() {
-        return lockManager1;
-    }
-
-    private synchronized void newLockManager() {
-        lockManager1 = new LockManager<K>();
     }
 
     /**
@@ -207,7 +198,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public void put(K key, V value) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             store.put(key, value);
@@ -225,7 +215,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         V result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.getAndPut(key, value);
@@ -252,7 +241,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         //store.putAll(map);
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             K key = entry.getKey();
-            LockManager<K> lockManager = getLockManager();
             lockManager.lock(key);
             try {
                 store.put(key, entry.getValue());
@@ -274,7 +262,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.putIfAbsent(key, value);
@@ -296,7 +283,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.remove(key);
@@ -318,7 +304,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         boolean result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.remove(key, oldValue);
@@ -339,7 +324,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public V getAndRemove(K key) {
         checkStatusStarted();
         V result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.getAndRemove(key);
@@ -364,7 +348,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public boolean replace(K key, V oldValue, V newValue) {
         checkStatusStarted();
         boolean result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.replace(key, oldValue, newValue);
@@ -384,7 +367,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public boolean replace(K key, V value) {
         checkStatusStarted();
         boolean result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.replace(key, value);
@@ -404,7 +386,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public V getAndReplace(K key, V value) {
         checkStatusStarted();
         V result;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             result = store.getAndReplace(key, value);
@@ -429,7 +410,12 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public void removeAll(Collection<? extends K> keys) {
         checkStatusStarted();
         for (K key : keys) {
-            store.remove(key);
+            lockManager.lock(key);
+            try {
+                store.remove(key);
+            } finally {
+                lockManager.unLock(key);
+            }
         }
         if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(keys.size());
@@ -443,8 +429,19 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public void removeAll() {
         checkStatusStarted();
         int size = (statisticsEnabled()) ? store.size() : 0;
+        //store.removeAll();
+        Iterator<Map.Entry<K, V>> iterator = store.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<K, V> entry = iterator.next();
+            K key = entry.getKey();
+            lockManager.lock(key);
+            try {
+                iterator.remove();
+            } finally {
+                lockManager.unLock(key);
+            }
+        }
         //possible race here but it is only stats
-        store.removeAll();
         if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(size);
         }
@@ -488,7 +485,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             throw new NullPointerException();
         }
         Object result = null;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             RIMutableEntry<K, V> entry = new RIMutableEntry<K, V>(key, store);
@@ -506,7 +502,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public Iterator<Entry<K, V>> iterator() {
         checkStatusStarted();
-        return new RIEntryIterator<K, V>(store.iterator());
+        return new RIEntryIterator<K, V>(store.iterator(), lockManager);
     }
 
     /**
@@ -558,7 +554,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         long start = statisticsEnabled() ? System.nanoTime() : 0;
 
         V value = null;
-        LockManager<K> lockManager = getLockManager();
         lockManager.lock(key);
         try {
             value = store.get(key);
@@ -725,16 +720,19 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
     /**
      * {@inheritDoc}
+     * TODO: not obvious how iterator should behave with locking.
+     * TODO: in the impl below, by the time we get the lock, value may be stale
      *
      * @author Yannis Cosmadopoulos
      */
     private static final class RIEntryIterator<K, V> implements Iterator<Entry<K, V>> {
         private final Iterator<Map.Entry<K, V>> mapIterator;
+        private final LockManager<K> lockManager;
 
-        private RIEntryIterator(Iterator<Map.Entry<K, V>> mapIterator) {
+        private RIEntryIterator(Iterator<Map.Entry<K, V>> mapIterator, LockManager<K> lockManager) {
             this.mapIterator = mapIterator;
+            this.lockManager = lockManager;
         }
-
         /**
          * {@inheritDoc}
          */
@@ -749,7 +747,13 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         @Override
         public Entry<K, V> next() {
             Map.Entry<K, V> mapEntry = mapIterator.next();
-            return new RIEntry<K, V>(mapEntry.getKey(), mapEntry.getValue());
+            K key = mapEntry.getKey();
+            lockManager.lock(key);
+            try {
+                return new RIEntry<K, V>(key, mapEntry.getValue());
+            } finally {
+                lockManager.unLock(key);
+            }
         }
 
         /**
