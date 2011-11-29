@@ -49,13 +49,13 @@ public class DelegatingCacheBuilder<K, V> implements CacheBuilder<K, V> {
     }
 
     @Override
-    public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
+    public CacheBuilder<K, V> setCacheLoader(CacheLoader<K, ? extends V> cacheLoader) {
         cacheBuilder.setCacheLoader(cacheLoader);
         return this;
     }
 
     @Override
-    public CacheBuilder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
+    public CacheBuilder<K, V> setCacheWriter(CacheWriter<? super K, ? super V> cacheWriter) {
         cacheBuilder.setCacheWriter(cacheWriter);
         return this;
     }

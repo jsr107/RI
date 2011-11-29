@@ -46,8 +46,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     private final String cacheManagerName;
     private final ClassLoader classLoader;
     private final CacheConfiguration configuration;
-    private final CacheLoader<K, V> cacheLoader;
-    private final CacheWriter<K, V> cacheWriter;
+    private final CacheLoader<K, ? extends V> cacheLoader;
+    private final CacheWriter<? super K, ? super V> cacheWriter;
     private final Set<Class<?>> immutableClasses;
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
 
@@ -56,16 +56,16 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * Constructs a cache.
      *
      * @param cacheName        the cache name
-     * @param classLoader      the class loader
      * @param cacheManagerName the cache manager name
      * @param immutableClasses the set of immutable classes
+     * @param classLoader      the class loader
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
      * @param cacheWriter      the cache writer
      */
     public AbstractCache(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
                   CacheConfiguration configuration,
-                  CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter) {
+                  CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter) {
         assert configuration != null;
         this.configuration = configuration;
 
@@ -126,7 +126,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * Getter
      * @return the cache loader
      */
-    protected CacheLoader<K, V> getCacheLoader() {
+    protected CacheLoader<K, ? extends V> getCacheLoader() {
         return cacheLoader;
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * Getter
      * @return the cache writer
      */
-    protected CacheWriter<K, V> getCacheWriter() {
+    protected CacheWriter<? super K, ? super V> getCacheWriter() {
         return cacheWriter;
     }
 
@@ -181,11 +181,11 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
         /**
          * cache loader
          */
-        protected CacheLoader<K, V> cacheLoader;
+        protected CacheLoader<K, ? extends V> cacheLoader;
         /**
          * cache writer
          */
-        protected CacheWriter<K, V> cacheWriter;
+        protected CacheWriter<? super K, ? super V> cacheWriter;
 
 
         private final AbstractCacheConfiguration.Builder configurationBuilder;
@@ -223,7 +223,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
         }
 
         @Override
-        public Builder<K, V> setCacheLoader(CacheLoader<K, V> cacheLoader) {
+        public Builder<K, V> setCacheLoader(CacheLoader<K, ? extends V> cacheLoader) {
             if (cacheLoader == null) {
                 throw new NullPointerException("cacheLoader");
             }
@@ -232,7 +232,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
         }
 
         @Override
-        public Builder<K, V> setCacheWriter(CacheWriter<K, V> cacheWriter) {
+        public Builder<K, V> setCacheWriter(CacheWriter<? super K, ? super V> cacheWriter) {
             if (cacheWriter == null) {
                 throw new NullPointerException("cacheWriter");
             }

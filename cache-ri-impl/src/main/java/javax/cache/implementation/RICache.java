@@ -17,7 +17,6 @@
 
 package javax.cache.implementation;
 
-import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
@@ -64,9 +63,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * Constructs a cache.
      *
      * @param cacheName        the cache name
-     * @param classLoader      the class loader
      * @param cacheManagerName the cache manager name
      * @param immutableClasses the set of immutable classes
+     * @param classLoader      the class loader
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
      * @param cacheWriter      the cache writer
@@ -75,7 +74,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     private RICache(String cacheName, String cacheManagerName,
                     Set<Class<?>> immutableClasses, ClassLoader classLoader,
                     CacheConfiguration configuration,
-                    CacheLoader<K, V> cacheLoader, CacheWriter<K, V> cacheWriter,
+                    CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter,
                     CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         super(cacheName, cacheManagerName, immutableClasses, classLoader, configuration, cacheLoader, cacheWriter);
         status = Status.UNINITIALISED;
@@ -162,6 +161,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Future<Map<K, V>> loadAll(Collection<? extends K> keys) {
         checkStatusStarted();
         if (keys == null) {
@@ -173,7 +173,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (keys.contains(null)) {
             throw new NullPointerException("key");
         }
-        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable<K, V>(this, getCacheLoader(), keys));
+        //todo figure out the generics for this
+        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable(this, getCacheLoader(), keys));
         submit(task);
         return task;
     }
@@ -581,7 +582,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     }
 
     private V getFromLoader(K key) {
-        Cache.Entry<K, V> entry = getCacheLoader().load(key);
+        Entry<K, ? extends V> entry = getCacheLoader().load(key);
         if (entry != null) {
             store.put(entry.getKey(), entry.getValue());
             return entry.getValue();
@@ -774,10 +775,10 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     private static class RICacheLoaderLoadCallable<K, V> implements Callable<V> {
         private final RICache<K, V> cache;
-        private final CacheLoader<K, V> cacheLoader;
+        private final CacheLoader<K, ? extends V> cacheLoader;
         private final K key;
 
-        RICacheLoaderLoadCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, K key) {
+        RICacheLoaderLoadCallable(RICache<K, V> cache, CacheLoader<K, ? extends V> cacheLoader, K key) {
             this.cache = cache;
             this.cacheLoader = cacheLoader;
             this.key = key;
@@ -785,7 +786,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
         @Override
         public V call() throws Exception {
-            Entry<K, V> entry = cacheLoader.load(key);
+            Entry<K, ? extends V> entry = cacheLoader.load(key);
             cache.put(entry.getKey(), entry.getValue());
             return entry.getValue();
         }
@@ -798,26 +799,26 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @param <V> the type of the value
      * @author Yannis Cosmadopoulos
      */
-    private static class RICacheLoaderLoadAllCallable<K, V> implements Callable<Map<K, V>> {
+    private static class RICacheLoaderLoadAllCallable<K, V> implements Callable<Map<K, ? extends V>> {
         private final RICache<K, V> cache;
-        private final CacheLoader<K, V> cacheLoader;
+        private final CacheLoader<K, ? extends V> cacheLoader;
         private final Collection<? extends K> keys;
 
-        RICacheLoaderLoadAllCallable(RICache<K, V> cache, CacheLoader<K, V> cacheLoader, Collection<? extends K> keys) {
+        RICacheLoaderLoadAllCallable(RICache<K, V> cache, CacheLoader<K, ? extends V> cacheLoader, Collection<? extends K> keys) {
             this.cache = cache;
             this.cacheLoader = cacheLoader;
             this.keys = keys;
         }
 
         @Override
-        public Map<K, V> call() throws Exception {
+        public Map<K, ? extends V> call() throws Exception {
             ArrayList<K> keysNotInStore = new ArrayList<K>();
             for (K key : keys) {
                 if (!cache.containsKey(key)) {
                     keysNotInStore.add(key);
                 }
             }
-            Map<K, V> value = cacheLoader.loadAll(keysNotInStore);
+            Map<K, ? extends V> value = cacheLoader.loadAll(keysNotInStore);
             cache.putAll(value);
             return value;
         }
