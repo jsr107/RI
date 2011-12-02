@@ -162,7 +162,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Future<Map<K, V>> loadAll(Collection<? extends K> keys) {
+    public Future<Map<K, ? extends V>> loadAll(Collection<? extends K> keys) {
         checkStatusStarted();
         if (keys == null) {
             throw new NullPointerException("keys");
@@ -173,8 +173,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (keys.contains(null)) {
             throw new NullPointerException("key");
         }
-        //todo figure out the generics for this
-        FutureTask<Map<K, V>> task = new FutureTask<Map<K, V>>(new RICacheLoaderLoadAllCallable(this, getCacheLoader(), keys));
+        Callable<Map<K, ? extends V>> callable = new RICacheLoaderLoadAllCallable<K, V>(this, getCacheLoader(), keys);
+        FutureTask<Map<K, ? extends V>> task = new FutureTask<Map<K, ? extends V>>(callable);
         submit(task);
         return task;
     }
