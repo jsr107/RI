@@ -28,6 +28,7 @@ import javax.cache.transaction.Mode;
 
 /**
  * Class to help implementers
+ *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
@@ -37,6 +38,7 @@ public class DelegatingCacheBuilder<K, V> implements CacheBuilder<K, V> {
 
     /**
      * Constructor
+     *
      * @param cacheBuilder
      */
     public DelegatingCacheBuilder(AbstractCache.Builder<K, V> cacheBuilder) {
@@ -74,6 +76,15 @@ public class DelegatingCacheBuilder<K, V> implements CacheBuilder<K, V> {
 
     @Override
     public CacheBuilder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
+
+        //Validate
+        if (IsolationLevel.NONE.equals(isolationLevel)) {
+            throw new IllegalArgumentException("The none isolation level is not permitted.");
+        }
+        if (Mode.NONE.equals(mode)) {
+            throw new IllegalArgumentException("The none Mode is not permitted.");
+        }
+
         cacheBuilder.setTransactionEnabled(isolationLevel, mode);
         return this;
     }
