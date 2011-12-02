@@ -45,7 +45,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     private final String cacheName;
     private final String cacheManagerName;
     private final ClassLoader classLoader;
-    private final CacheConfiguration configuration;
+    private final CacheConfiguration<K, V> configuration;
     private final CacheLoader<K, ? extends V> cacheLoader;
     private final CacheWriter<? super K, ? super V> cacheWriter;
     private final Set<Class<?>> immutableClasses;
@@ -64,7 +64,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param cacheWriter      the cache writer
      */
     public AbstractCache(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
-                  CacheConfiguration configuration,
+                  CacheConfiguration<K, V> configuration,
                   CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter) {
         assert configuration != null;
         this.configuration = configuration;
@@ -105,7 +105,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheConfiguration getConfiguration() {
+    public CacheConfiguration<K, V> getConfiguration() {
         return configuration;
     }
 

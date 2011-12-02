@@ -26,11 +26,13 @@ import javax.cache.transaction.Mode;
  * The reference implementation for JSR107.
  * <p/>
  *
+ * @param <K> the type of keys maintained by this cache
+ * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
  * @author Greg Luck
  */
-public final class RICacheConfiguration extends AbstractCacheConfiguration {
-    private volatile RICache riCache;
+public final class RICacheConfiguration<K, V> extends AbstractCacheConfiguration {
+    private volatile RICache<K, V> riCache;
 
     private RICacheConfiguration(boolean readThrough,
                                  boolean writeThrough,
@@ -45,7 +47,7 @@ public final class RICacheConfiguration extends AbstractCacheConfiguration {
      * Set the backing cache to expose more configuration.
      * @param riCache the backing cache.
      */
-    void setRiCache(RICache riCache) {
+    void setRiCache(RICache<K, V> riCache) {
         this.riCache = riCache;
     }
 
@@ -55,7 +57,7 @@ public final class RICacheConfiguration extends AbstractCacheConfiguration {
      * @return the {@link javax.cache.CacheLoader} or null if none has been set.
      */
     @Override
-    public CacheLoader getCacheLoader() {
+    public CacheLoader<K, ? extends V> getCacheLoader() {
         return riCache.getCacheLoader();
     }
 
@@ -65,7 +67,7 @@ public final class RICacheConfiguration extends AbstractCacheConfiguration {
      * @return
      */
     @Override
-    public CacheWriter getCacheWriter() {
+    public CacheWriter<? super K, ? super V> getCacheWriter() {
         return riCache.getCacheWriter();
     }
 
