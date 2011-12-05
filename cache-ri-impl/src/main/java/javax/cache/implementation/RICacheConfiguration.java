@@ -19,6 +19,7 @@ package javax.cache.implementation;
 
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
+import javax.cache.experimental.CacheBuilder;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -69,6 +70,11 @@ public final class RICacheConfiguration<K, V> extends AbstractCacheConfiguration
     @Override
     public CacheWriter<? super K, ? super V> getCacheWriter() {
         return riCache.getCacheWriter();
+    }
+
+    @Override
+    public CacheBuilder createBuilderEXPERIMENTAL() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -24,6 +24,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
+import javax.cache.experimental.ConfigurationBuilder;
 import javax.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -211,6 +212,16 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
         }
 
         throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
+    }
+
+    @Override
+    public <K, V> ConfigurationBuilder<K, V> createConfigurationBuilderEXPERIMENTAL() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <K, V> javax.cache.experimental.CacheBuilder<K, V> getCacheBuilderEXPERIMENTAL() {
+        throw new UnsupportedOperationException();
     }
 
     /**
