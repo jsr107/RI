@@ -27,7 +27,6 @@ import javax.cache.Caching;
 import javax.cache.InvalidConfigurationException;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -48,7 +47,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     private final CacheConfiguration<K, V> configuration;
     private final CacheLoader<K, ? extends V> cacheLoader;
     private final CacheWriter<? super K, ? super V> cacheWriter;
-    private final Set<Class<?>> immutableClasses;
     private final ExecutorService executorService = Executors.newFixedThreadPool(CACHE_LOADER_THREADS);
 
 
@@ -57,13 +55,12 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      *
      * @param cacheName        the cache name
      * @param cacheManagerName the cache manager name
-     * @param immutableClasses the set of immutable classes
      * @param classLoader      the class loader
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
      * @param cacheWriter      the cache writer
      */
-    public AbstractCache(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
+    public AbstractCache(String cacheName, String cacheManagerName, ClassLoader classLoader,
                   CacheConfiguration<K, V> configuration,
                   CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter) {
         assert configuration != null;
@@ -74,9 +71,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
         assert cacheManagerName != null;
         this.cacheManagerName = cacheManagerName;
-
-        assert immutableClasses != null;
-        this.immutableClasses = immutableClasses;
 
         assert classLoader != null;
         this.classLoader = classLoader;
@@ -175,10 +169,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
          */
         protected final ClassLoader classLoader;
         /**
-         * immutables
-         */
-        protected final Set<Class<?>> immutableClasses;
-        /**
          * cache loader
          */
         protected CacheLoader<K, ? extends V> cacheLoader;
@@ -194,11 +184,10 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
          * builder
          * @param cacheName
          * @param cacheManagerName
-         * @param immutableClasses
          * @param classLoader
          */
         public Builder(String cacheName, String cacheManagerName,
-                       Set<Class<?>> immutableClasses, ClassLoader classLoader,
+                       ClassLoader classLoader,
                        AbstractCacheConfiguration.Builder configurationBuilder) {
             if (cacheName == null) {
                 throw new NullPointerException("cacheName");
@@ -212,10 +201,6 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
                 throw new NullPointerException("cacheManagerName");
             }
             this.cacheManagerName = cacheManagerName;
-            if (immutableClasses == null) {
-                throw new NullPointerException("immutableClasses");
-            }
-            this.immutableClasses = immutableClasses;
             if (configurationBuilder == null) {
                 throw new NullPointerException("configurationBuilder");
             }

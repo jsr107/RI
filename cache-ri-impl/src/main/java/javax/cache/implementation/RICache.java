@@ -64,7 +64,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      *
      * @param cacheName        the cache name
      * @param cacheManagerName the cache manager name
-     * @param immutableClasses the set of immutable classes
      * @param classLoader      the class loader
      * @param configuration    the configuration
      * @param cacheLoader      the cache loader
@@ -72,15 +71,15 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @param listeners        the cache listeners
      */
     private RICache(String cacheName, String cacheManagerName,
-                    Set<Class<?>> immutableClasses, ClassLoader classLoader,
+                    ClassLoader classLoader,
                     CacheConfiguration configuration,
                     CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter,
                     CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
-        super(cacheName, cacheManagerName, immutableClasses, classLoader, configuration, cacheLoader, cacheWriter);
+        super(cacheName, cacheManagerName, classLoader, configuration, cacheLoader, cacheWriter);
         status = Status.UNINITIALISED;
         store = configuration.isStoreByValue() ?
-                new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader, immutableClasses),
-                        new RISerializer<V>(classLoader, immutableClasses)) :
+                new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader),
+                        new RISerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this);
         for (ListenerRegistration<K, V> listener : listeners) {
@@ -839,16 +838,15 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          *
          * @param cacheName        the name of the cache to be built
          * @param cacheManagerName the name of the cache manager
-         * @param immutableClasses the immutable classes
          * @param classLoader the class loader
          */
-        public Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader) {
-            this(cacheName, cacheManagerName, immutableClasses, classLoader, new RICacheConfiguration.Builder());
+        public Builder(String cacheName, String cacheManagerName, ClassLoader classLoader) {
+            this(cacheName, cacheManagerName, classLoader, new RICacheConfiguration.Builder());
         }
 
-        private Builder(String cacheName, String cacheManagerName, Set<Class<?>> immutableClasses, ClassLoader classLoader,
+        private Builder(String cacheName, String cacheManagerName, ClassLoader classLoader,
                         RICacheConfiguration.Builder configurationBuilder) {
-            super(cacheName, cacheManagerName, immutableClasses, classLoader, configurationBuilder);
+            super(cacheName, cacheManagerName, classLoader, configurationBuilder);
         }
 
         /**
@@ -860,7 +858,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         public RICache<K, V> build() {
             CacheConfiguration configuration = createCacheConfiguration();
             RICache<K, V> riCache = new RICache<K, V>(cacheName, cacheManagerName,
-                immutableClasses, classLoader, configuration,
+                classLoader, configuration,
                 cacheLoader, cacheWriter, listeners);
             ((RICacheConfiguration) configuration).setRiCache(riCache);
             return riCache;

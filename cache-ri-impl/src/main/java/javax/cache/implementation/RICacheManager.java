@@ -241,7 +241,7 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
      */
     private class RICacheBuilder<K, V> extends DelegatingCacheBuilder<K, V> {
         public RICacheBuilder(String cacheName) {
-            super(new RICache.Builder<K, V>(cacheName, getName(), getImmutableClasses(), getClassLoader()));
+            super(new RICache.Builder<K, V>(cacheName, getName(), getClassLoader()));
         }
 
         @Override

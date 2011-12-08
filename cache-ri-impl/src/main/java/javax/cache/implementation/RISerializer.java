@@ -25,7 +25,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * The reference implementation for JSR107.
@@ -38,18 +37,14 @@ import java.util.Set;
  */
 public class RISerializer<T> implements Serializer<T> {
     private final SerializationHelper serializationHelper;
-    private final Set<Class<?>> immutableClasses;
 
     /**
      * Constructor
      * @param classLoader the class loader
-     * @param immutableClasses the immutable classes
      */
-    public RISerializer(ClassLoader classLoader, Set<Class<?>> immutableClasses) {
+    public RISerializer(ClassLoader classLoader) {
         assert classLoader != null;
-        assert immutableClasses != null;
         this.serializationHelper = new SerializationHelper(classLoader);
-        this.immutableClasses = immutableClasses;
     }
 
     /**
@@ -62,9 +57,7 @@ public class RISerializer<T> implements Serializer<T> {
         }
         //TODO: do we want to validate?
         //serializationHelper.validate(value);
-        return immutableClasses.contains(value.getClass()) ?
-                new RIByReferenceBinary<T>(value) :
-                new RIBinary<T>(value, serializationHelper);
+        return new RIBinary<T>(value, serializationHelper);
     }
 
     /**

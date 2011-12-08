@@ -17,15 +17,12 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheManager;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Abstract class to help implementers
  * @author Yannis Cosmadopoulos
  */
 public abstract class AbstractCacheManager implements CacheManager {
-    private final HashSet<Class<?>> immutableClasses = new HashSet<Class<?>>();
     private final String name;
     private final ClassLoader classLoader;
 
@@ -51,29 +48,7 @@ public abstract class AbstractCacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public void registerImmutableClass(Class<?> immutableClass) {
-        if (immutableClass == null) {
-            throw new NullPointerException();
-        }
-        immutableClasses.add(immutableClass);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void shutdown() {
-        synchronized (immutableClasses) {
-            immutableClasses.clear();
-        }
-    }
-
-    /**
-     * Getter
-     * @return the immutable classes
-     */
-    protected Set<Class<?>> getImmutableClasses() {
-        return immutableClasses;
     }
 
     /**
