@@ -15,5 +15,6 @@
         <module>cache-annotations-ri-cdi</module>
         <module>cache-annotations-ri-common</module>
         <module>cache-annotations-ri-spring</module>
+        <module>cache-annotations-ri-guice</module>
     </modules>
 </project>
