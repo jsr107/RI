@@ -103,7 +103,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Map<K, V> getAll(Collection<? extends K> keys) {
+    public Map<K, V> getAll(Set<? extends K> keys) {
         checkStatusStarted();
         if (keys.contains(null)) {
             throw new NullPointerException("key");
