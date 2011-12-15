@@ -161,7 +161,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Future<Map<K, ? extends V>> loadAll(Collection<? extends K> keys) {
+    public Future<Map<K, ? extends V>> loadAll(Set<? extends K> keys) {
         checkStatusStarted();
         if (keys == null) {
             throw new NullPointerException("keys");
