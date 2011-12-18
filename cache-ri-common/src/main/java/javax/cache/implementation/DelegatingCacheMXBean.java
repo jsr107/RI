@@ -17,12 +17,8 @@
 package javax.cache.implementation;
 
 import javax.cache.Cache;
-import javax.cache.CacheException;
-import javax.cache.mbeans.CacheMXBean;
 import javax.cache.Status;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.util.Date;
+import javax.cache.mbeans.CacheMXBean;
 
 /**
  * Class to help implementers
@@ -31,7 +27,7 @@ import java.util.Date;
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
  */
-public class DelegatingCacheMXBean<K, V> implements CacheMXBean {
+public class DelegatingCacheMXBean<K, V> extends DelegatingCacheStatisticsMXBean implements CacheMXBean {
     private final Cache<K, V> cache;
 
     /**
@@ -39,6 +35,7 @@ public class DelegatingCacheMXBean<K, V> implements CacheMXBean {
      * @param cache the cache
      */
     public DelegatingCacheMXBean(Cache<K, V> cache) {
+        super(cache);
         this.cache = cache;
     }
 
@@ -50,82 +47,6 @@ public class DelegatingCacheMXBean<K, V> implements CacheMXBean {
     @Override
     public Status getStatus() {
         return cache.getStatus();
-    }
-
-    @Override
-    public ObjectName getObjectName() {
-        try {
-            return new ObjectName("javax.cache:type=Cache" +
-                    ",CacheManager=" + mbeanSafe(cache.getCacheManager().getName()) +
-                    ",name=" + mbeanSafe(cache.getName()));
-        } catch (MalformedObjectNameException e) {
-            throw new CacheException(e);
-        }
-    }
-
-    @Override
-    public void clearStatistics() {
-        cache.getStatistics().clearStatistics();
-    }
-
-    @Override
-    public Date statsAccumulatingFrom() {
-        return cache.getStatistics().statsAccumulatingFrom();
-    }
-
-    @Override
-    public long getCacheHits() {
-        return cache.getStatistics().getCacheHits();
-    }
-
-    @Override
-    public float getCacheHitPercentage() {
-        return cache.getStatistics().getCacheHitPercentage();
-    }
-
-    @Override
-    public long getCacheMisses() {
-        return cache.getStatistics().getCacheMisses();
-    }
-
-    @Override
-    public float getCacheMissPercentage() {
-        return cache.getStatistics().getCacheMissPercentage();
-    }
-
-    @Override
-    public long getCacheGets() {
-        return cache.getStatistics().getCacheGets();
-    }
-
-    @Override
-    public long getCachePuts() {
-        return cache.getStatistics().getCachePuts();
-    }
-
-    @Override
-    public long getCacheRemovals() {
-        return cache.getStatistics().getCacheRemovals();
-    }
-
-    @Override
-    public long getCacheEvictions() {
-        return cache.getStatistics().getCacheEvictions();
-    }
-
-    @Override
-    public float getAverageGetMillis() {
-        return cache.getStatistics().getAverageGetMillis();
-    }
-
-    @Override
-    public float getAveragePutMillis() {
-        return cache.getStatistics().getAveragePutMillis();
-    }
-
-    @Override
-    public float getAverageRemoveMillis() {
-        return cache.getStatistics().getAverageRemoveMillis();
     }
 
     private String mbeanSafe(String string) {

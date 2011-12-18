@@ -82,7 +82,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * @return the date statistics started being accumulated
      */
     @Override
-    public Date statsAccumulatingFrom() {
+    public Date getStartAccumulationDate() {
         return lastCollectionStartDate;
     }
 
