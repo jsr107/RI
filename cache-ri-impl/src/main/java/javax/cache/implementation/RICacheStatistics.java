@@ -56,22 +56,6 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
         this.cache = cache;
     }
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    public String getName() {
-//        return cache.getName();
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    public Status getStatus() {
-//        return cache.getStatus();
-//    }
-
     /**
      * {@inheritDoc}
      * <p/>

@@ -84,7 +84,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                         new RISerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this);
-        mBean = new DelegatingCacheMXBean(this);
+        mBean = new DelegatingCacheMXBean<K, V>(this);
         for (ListenerRegistration<K, V> listener : listeners) {
             registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
         }
