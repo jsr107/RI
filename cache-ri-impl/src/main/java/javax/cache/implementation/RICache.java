@@ -19,6 +19,7 @@ package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
+import javax.cache.mbeans.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.Status;
@@ -57,6 +58,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
     private volatile Status status;
     private final RICacheStatistics statistics;
+    private final CacheMXBean mBean;
     private final LockManager<K> lockManager = new LockManager<K>();
 
     /**
@@ -82,6 +84,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                         new RISerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this);
+        mBean = new DelegatingCacheMXBean(this);
         for (ListenerRegistration<K, V> listener : listeners) {
             registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
         }
@@ -503,6 +506,11 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     public Iterator<Entry<K, V>> iterator() {
         checkStatusStarted();
         return new RIEntryIterator<K, V>(store.iterator(), lockManager);
+    }
+
+    @Override
+    public CacheMXBean getMBean() {
+        return mBean;
     }
 
     /**
