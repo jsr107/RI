@@ -24,7 +24,6 @@ import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,7 +73,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     private RICache(String cacheName, String cacheManagerName,
                     ClassLoader classLoader,
-                    CacheConfiguration configuration,
+                    CacheConfiguration<K, V> configuration,
                     CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter,
                     CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
         super(cacheName, cacheManagerName, classLoader, configuration, cacheLoader, cacheWriter);
@@ -86,7 +85,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         statistics = new RICacheStatistics(this);
         mBean = new DelegatingCacheMXBean<K, V>(this);
         for (ListenerRegistration<K, V> listener : listeners) {
-            registerCacheEntryListener(listener.cacheEntryListener, listener.scope, listener.synchronous);
+            registerCacheEntryListener(listener.cacheEntryListener, listener.synchronous);
         }
     }
 
@@ -455,8 +454,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V>
-        cacheEntryListener, NotificationScope scope, boolean synchronous) {
-        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, scope, synchronous);
+        cacheEntryListener, boolean synchronous) {
+        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, synchronous);
         return cacheEntryListeners.add(scopedListener);
     }
 
@@ -471,7 +470,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         @SuppressWarnings("unchecked")
         CacheEntryListener<K, V> castCacheEntryListener = (CacheEntryListener<K, V>)cacheEntryListener;
         //Only cacheEntryListener is checked for equality
-        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, null, true);
+        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, true);
         return cacheEntryListeners.remove(scopedListener);
     }
 
@@ -616,21 +615,15 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     private static final class ScopedListener<K, V> {
         private final CacheEntryListener<? super K, ? super V> listener;
-        private final NotificationScope scope;
         private final boolean synchronous;
 
-        private ScopedListener(CacheEntryListener<? super K, ? super V> listener, NotificationScope scope, boolean synchronous) {
+        private ScopedListener(CacheEntryListener<? super K, ? super V> listener, boolean synchronous) {
             this.listener = listener;
-            this.scope = scope;
             this.synchronous = synchronous;
         }
 
         private CacheEntryListener<? super K, ? super V> getListener() {
             return listener;
-        }
-
-        private NotificationScope getScope() {
-            return scope;
         }
 
         /**
@@ -864,7 +857,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          */
         @Override
         public RICache<K, V> build() {
-            CacheConfiguration configuration = createCacheConfiguration();
+            CacheConfiguration<K, V> configuration = createCacheConfiguration();
             RICache<K, V> riCache = new RICache<K, V>(cacheName, cacheManagerName,
                 classLoader, configuration,
                 cacheLoader, cacheWriter, listeners);
@@ -873,8 +866,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         }
 
         @Override
-        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, NotificationScope scope, boolean synchronous) {
-            listeners.add(new ListenerRegistration<K, V>(listener, scope, synchronous));
+        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, boolean synchronous) {
+            listeners.add(new ListenerRegistration<K, V>(listener, synchronous));
             return this;
         }
     }
@@ -888,12 +881,10 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     private static final class ListenerRegistration<K, V> {
         private final CacheEntryListener<K, V> cacheEntryListener;
-        private final NotificationScope scope;
         private final boolean synchronous;
 
-        private ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, NotificationScope scope, boolean synchronous) {
+        private ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, boolean synchronous) {
             this.cacheEntryListener = cacheEntryListener;
-            this.scope = scope;
             this.synchronous = synchronous;
         }
     }

@@ -271,8 +271,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
          * create configuration
          * @return a CacheConfiguration
          */
-        protected CacheConfiguration createCacheConfiguration() {
-            CacheConfiguration configuration = configurationBuilder.build();
+        protected CacheConfiguration<K, V> createCacheConfiguration() {
+            CacheConfiguration<K, V> configuration = configurationBuilder.build();
             if (configuration.isReadThrough() && (cacheLoader == null)) {
                 throw new InvalidConfigurationException("cacheLoader");
             }
