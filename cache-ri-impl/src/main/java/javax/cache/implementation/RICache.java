@@ -895,9 +895,12 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @author Yannis Cosmadopoulos
      * @since 1.0
      */
-    private static class LockManager<K> {
+    private static final class LockManager<K> {
         private final ConcurrentHashMap<K, ReentrantLock> locks = new ConcurrentHashMap<K, ReentrantLock>();
         private final LockFactory lockFactory = new LockFactory();
+
+        private LockManager() {
+        }
 
         /**
          * Lock the object
@@ -933,9 +936,12 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          * @author Yannis Cosmadopoulos
          * @since 1.0
          */
-        private static class LockFactory {
+        private static final class LockFactory {
             private static final int CAPACITY = 100;
             private static final ArrayList<ReentrantLock> LOCKS = new ArrayList<ReentrantLock>(CAPACITY);
+
+            private LockFactory() {
+            }
 
             private ReentrantLock getLock() {
                 ReentrantLock qLock = null;

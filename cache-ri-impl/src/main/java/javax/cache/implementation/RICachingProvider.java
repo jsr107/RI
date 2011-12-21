@@ -18,7 +18,6 @@ package javax.cache.implementation;
 
 import javax.cache.CacheManager;
 import javax.cache.OptionalFeature;
-import javax.cache.spi.CachingProvider;
 
 /**
  * The reference implementation for JSR107.
@@ -26,7 +25,7 @@ import javax.cache.spi.CachingProvider;
  *
  * @author Yannis Cosmadopoulos
  */
-public class RICachingProvider implements CachingProvider {
+public class RICachingProvider extends AbstractCachingProvider {
     /**
      * {@inheritDoc}
      */
@@ -41,18 +40,7 @@ public class RICachingProvider implements CachingProvider {
     /**
      * {@inheritDoc}
      *
-     * The RI implementation uses the thread's context ClassLoader.
-     */
-    @Override
-    public ClassLoader getDefaultClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * The RI supports {@link OptionalFeature#ANNOTATIONS} and
-     * {@link OptionalFeature#STORE_BY_REFERENCE}.
+     * The RI supports {@link OptionalFeature#STORE_BY_REFERENCE}.
      * It does not support {@link OptionalFeature#TRANSACTIONS}
      */
     @Override
