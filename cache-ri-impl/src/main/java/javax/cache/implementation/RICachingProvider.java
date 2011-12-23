@@ -16,25 +16,21 @@
  */
 package javax.cache.implementation;
 
-import javax.cache.CacheManager;
 import javax.cache.OptionalFeature;
+import javax.cache.spi.CacheManagerFactory;
+import javax.cache.spi.CachingProvider;
 
 /**
  * The reference implementation for JSR107.
  * <p/>
  *
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
-public class RICachingProvider extends AbstractCachingProvider {
-    /**
-     * {@inheritDoc}
-     */
+public class RICachingProvider implements CachingProvider {
     @Override
-    public CacheManager createCacheManager(ClassLoader classLoader, String name) {
-        if (name == null) {
-            throw new NullPointerException("CacheManager name not specified");
-        }
-        return new RICacheManager(name, classLoader);
+    public CacheManagerFactory getCacheManagerFactory() {
+        return RICacheManagerFactory.getInstance();
     }
 
     /**

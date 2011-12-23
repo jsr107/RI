@@ -18,8 +18,7 @@ package javax.cache.implementation;
 
 import javax.cache.CacheManager;
 import javax.cache.CachingShutdownException;
-import javax.cache.OptionalFeature;
-import javax.cache.spi.CachingProvider;
+import javax.cache.spi.CacheManagerFactory;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -29,8 +28,16 @@ import java.util.Map;
  * @author ycosmado
  * @since 1.0
  */
-public abstract class AbstractCachingProvider implements CachingProvider {
+public abstract class AbstractCacheManagerFactory implements CacheManagerFactory {
     private final Map<ClassLoader, Map<String, CacheManager>> cacheManagers = new HashMap<ClassLoader, Map<String, CacheManager>>();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CacheManager getCacheManager(String name) {
+        return getCacheManager(getDefaultClassLoader(), name);
+    }
 
     /**
      * {@inheritDoc}
@@ -57,6 +64,20 @@ public abstract class AbstractCachingProvider implements CachingProvider {
             return cacheManager;
         }
     }
+
+    /**
+     * Create CacheManager instance
+     * @param classLoader the class loader
+     * @param name the name
+     * @return a CacheManager
+     */
+    protected abstract CacheManager createCacheManager(ClassLoader classLoader, String name);
+
+    /**
+     * Get the classloader
+     * @return the classloader
+     */
+    protected abstract ClassLoader getDefaultClassLoader();
 
     /**
      * {@inheritDoc}
@@ -115,26 +136,6 @@ public abstract class AbstractCachingProvider implements CachingProvider {
             cacheManager.shutdown();
             return true;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Uses the thread's context ClassLoader.
-     */
-    @Override
-    public ClassLoader getDefaultClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * No optional features supported
-     */
-    @Override
-    public boolean isSupported(OptionalFeature optionalFeature) {
-        return false;
     }
 
     private void shutdown(Map<String, CacheManager> cacheManagerMap) throws CachingShutdownException {
