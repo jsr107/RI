@@ -29,7 +29,11 @@ import javax.cache.annotation.CacheResult;
  * @author Eric Dalquist
  * @since 1.0
  */
-public class CacheResultMethodDetails extends StaticCacheKeyInvocationContext<CacheResult> {
+public class CacheResultMethodDetails extends StaticCacheKeyInvocationContext<CacheResult>
+        implements StaticCacheResultInvocationContext {
+    
+    private final CacheResolver exceptionCacheResolver;
+    
     /**
      * @param cacheMethodDetails
      * @param cacheResolver
@@ -38,10 +42,17 @@ public class CacheResultMethodDetails extends StaticCacheKeyInvocationContext<Ca
      * @param keyParameters Parameter details to use for key generation
      */
     public CacheResultMethodDetails(CacheMethodDetails<CacheResult> cacheMethodDetails, CacheResolver cacheResolver,
-            CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
+            CacheResolver exceptionCacheResolver, CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
             List<CacheParameterDetails> keyParameters) {
-
+        
         super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
+        
+        this.exceptionCacheResolver = exceptionCacheResolver;
+    }
+
+    @Override
+    public CacheResolver getExceptionCacheResolver() {
+        return this.exceptionCacheResolver;
     }
 
     /* (non-Javadoc)

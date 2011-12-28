@@ -46,19 +46,33 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
      * @throws Throwable if {@link #proceed(Object)} threw
      */
     public final Object cacheResult(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
+        //Load details about the annotated method
         final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext = 
                 cacheContextSource.getCacheKeyInvocationContext(invocation);
         final CacheResultMethodDetails methodDetails = 
                 this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_RESULT);
         
+        //Resolve primary cache
         final CacheResolver cacheResolver = methodDetails.getCacheResolver();
         final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
+        
+        //Resolve exception cache
+        final Cache<Object, Throwable> exceptionCache; 
+        final CacheResolver exceptionCacheResolver = methodDetails.getExceptionCacheResolver();
+        if (exceptionCacheResolver != null) {
+            exceptionCache = exceptionCacheResolver.resolveCache(cacheKeyInvocationContext);
+        }
+        else {
+            exceptionCache = null;
+        }
 
+        //Generate the cache key
         final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
         final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
         
         final CacheResult cacheResultAnnotation = methodDetails.getCacheAnnotation();
         
+        //If skip-get is false check for a cached result or a cached exception
         Object result;
         if (!cacheResultAnnotation.skipGet()) {
             //Look in cache for existing data
@@ -67,17 +81,41 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
                 //Cache hit, return result
                 return result;
             }
+            
+            //Look for a cached exception
+            if (exceptionCache != null) {
+                final Throwable throwable = exceptionCache.get(cacheKey);
+                if (throwable != null) {
+                    //Found exception, re-throw
+                    throw throwable;
+                }
+            }
         }
         
-        //Call the annotated method
-        result = this.proceed(invocation);
+        try {
+            //Call the annotated method
+            result = this.proceed(invocation);
         
-        //Cache non-null result
-        if (result != null) {
-            cache.put(cacheKey, result);
-        }
-        
-        return result;
-    }
+            //Cache non-null result
+            if (result != null) {
+                cache.put(cacheKey, result);
+            }
 
+            return result;
+        }
+        catch (Throwable t) {
+            //If exception caching is enabled check if the throwable passes the include/exclude filters and then cache it
+            if (exceptionCache != null) {
+                final Class<? extends Throwable>[] cachedExceptions = cacheResultAnnotation.cachedExceptions();
+                final Class<? extends Throwable>[] nonCachedExceptions = cacheResultAnnotation.nonCachedExceptions();
+                final boolean included = ClassFilter.isIncluded(t, cachedExceptions, nonCachedExceptions, true);
+                if (included) {
+                    //Cache the exception for future rethrow
+                    exceptionCache.put(cacheKey, t);
+                }
+            }
+
+            throw t;
+        }
+    }
 }

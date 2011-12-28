@@ -60,8 +60,28 @@ public abstract class AbstractCachePutInterceptor<I> extends AbstractKeyedCacheI
             cacheValue(cacheKeyInvocationContext, methodDetails, value);
         }
         
-        //Call the annotated method
-        final Object result = this.proceed(invocation);
+        final Object result;
+        try {
+            //Call the annotated method
+            result = this.proceed(invocation);
+        }
+        catch (Throwable t) {
+            if (afterInvocation) {
+                //If after invocation is true and if the throwable passes the include/exclude filters and then call put
+                final Class<? extends Throwable>[] cacheFor = cachePutAnnotation.cacheFor();
+                final Class<? extends Throwable>[] noCacheFor = cachePutAnnotation.noCacheFor();
+                
+                //Check for empty/null here since isIncluded returns true for those cases
+                final boolean cache = ClassFilter.isIncluded(t, cacheFor, noCacheFor, false);
+                
+                //Exception is included
+                if (cache) {
+                    cacheValue(cacheKeyInvocationContext, methodDetails, value);
+                }
+            }
+
+            throw t;
+        }
         
         if (afterInvocation) {
             cacheValue(cacheKeyInvocationContext, methodDetails, value);

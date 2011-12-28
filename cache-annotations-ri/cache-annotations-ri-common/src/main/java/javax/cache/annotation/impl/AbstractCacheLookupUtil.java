@@ -258,16 +258,20 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         //Create immutable Set of all annotations on the method
         final Set<Annotation> methodAnotations = Collections.unmodifiableSet(new LinkedHashSet<Annotation>(Arrays.asList(method.getAnnotations())));
         
+        //TODO now have per-annotation type method details impls
         //Create the method details instance
         final CacheMethodDetails<? extends Annotation> cacheMethodDetails = 
                 new CacheMethodDetailsImpl<Annotation>(method, methodAnotations, cacheAnnotation, cacheName);
         
         //Get the cache resolver to use for the method
         final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
+
+        //TODO
+        final CacheResolver exceptionCacheResolver = cacheResolverFactory.getExceptionCacheResolver(cacheResultMethodDetails);
         
         //Create the static invocation context information from the method details and resolver
         staticCacheInvocationContext = 
-                createStaticCacheInvocationContext(cacheMethodDetails, cacheResolver, cacheKeyGenerator, parameterDetails);
+                createStaticCacheInvocationContext(cacheMethodDetails, cacheResolver, exceptionCacheResolver, cacheKeyGenerator, parameterDetails);
         
         //Cache the resolved information
         final StaticCacheInvocationContext<? extends Annotation> existingMethodDetails = 
@@ -296,6 +300,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
      * 
      * @param cacheMethodDetails The method details to wrap, must not be null
      * @param cacheResolver The cache resolver to use for the annotated method, must not be null
+     * @param exceptionCacheResolver The exception cache resolver to use for the annotated method, may only be not-null for {@link CacheResult}
      * @param cacheKeyGenerator The key generator to use, may be null only if {@link CacheMethodDetails#getCacheAnnotation()} is {@link CacheRemoveAll}
      * @param parameterDetails Details about the method parameters, may be null only if {@link CacheMethodDetails#getCacheAnnotation()} is {@link CacheRemoveAll}
      * @return A AbstractStaticCacheInvocationContext implementation
@@ -303,15 +308,16 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     @SuppressWarnings("unchecked")
     protected final StaticCacheInvocationContext<? extends Annotation> createStaticCacheInvocationContext(
             final CacheMethodDetails<? extends Annotation> cacheMethodDetails,
-            final CacheResolver cacheResolver, final CacheKeyGenerator cacheKeyGenerator,
-            final ParameterDetails parameterDetails) {
+            final CacheResolver cacheResolver, final CacheResolver exceptionCacheResolver,
+            final CacheKeyGenerator cacheKeyGenerator, final ParameterDetails parameterDetails) {
 
         final Annotation cacheAnnotation = cacheMethodDetails.getCacheAnnotation();
         
         //Create the appropriate AbstractStaticCacheInvocationContext impl based on the annotation type
         if (cacheAnnotation instanceof CacheResult) {
             return new CacheResultMethodDetails((CacheMethodDetails<CacheResult>)cacheMethodDetails, 
-                    cacheResolver, cacheKeyGenerator, parameterDetails.allParameters, parameterDetails.keyParameters);
+                    cacheResolver, exceptionCacheResolver, cacheKeyGenerator, parameterDetails.allParameters,
+                    parameterDetails.keyParameters);
         } else if (cacheAnnotation instanceof CachePut) {
             return new CachePutMethodDetails((CacheMethodDetails<CachePut>)cacheMethodDetails, 
                     cacheResolver, cacheKeyGenerator, parameterDetails.allParameters, parameterDetails.keyParameters,

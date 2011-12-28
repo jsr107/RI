@@ -55,8 +55,28 @@ public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCache
             removeAll(cacheInvocationContext, methodDetails);
         }
         
-        //Call the annotated method
-        final Object result = this.proceed(invocation);
+        final Object result;
+        try {
+            //Call the annotated method
+            result = this.proceed(invocation);
+        }
+        catch (Throwable t) {
+            if (afterInvocation) {
+                //If after invocation is true and if the throwable passes the include/exclude filters and then call removeAll
+                final Class<? extends Throwable>[] evictFor = cacheRemoveAllAnnotation.evictFor();
+                final Class<? extends Throwable>[] noEvictFor = cacheRemoveAllAnnotation.noEvictFor();
+                
+                //Check for empty/null here since isIncluded returns true for those cases
+                final boolean cache = ClassFilter.isIncluded(t, evictFor, noEvictFor, false);
+                
+                //Exception is included
+                if (cache) {
+                    removeAll(cacheInvocationContext, methodDetails);
+                }
+            }
+
+            throw t;
+        }
         
         //If post-invocation - remove all entries
         if (afterInvocation) {
