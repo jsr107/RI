@@ -409,7 +409,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public void removeAll(Collection<? extends K> keys) {
+    public void removeAll(Set<? extends K> keys) {
         checkStatusStarted();
         for (K key : keys) {
             lockManager.lock(key);
