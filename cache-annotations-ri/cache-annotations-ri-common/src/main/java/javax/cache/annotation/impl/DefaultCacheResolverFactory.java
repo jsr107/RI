@@ -27,7 +27,7 @@ import javax.cache.Caching;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
-import javax.cache.annotation.CacheResultMethodDetails;
+import javax.cache.annotation.CacheResult;
 
 /**
  * Default {@link CacheResolverFactory} that uses the default {@link CacheManager} and finds the {@link Cache}
@@ -75,14 +75,20 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         
         return new DefaultCacheResolver(cache);
     }
-
+    
     @Override
-    public CacheResolver getExceptionCacheResolver(CacheResultMethodDetails cacheResultMethodDetails) {
-        final String exceptionCacheName = cacheResultMethodDetails.getExceptionCacheName();
+    public CacheResolver getExceptionCacheResolver(CacheMethodDetails<CacheResult> cacheMethodDetails) {
+        final CacheResult cacheResultAnnotation = cacheMethodDetails.getCacheAnnotation();
+        final String exceptionCacheName = cacheResultAnnotation.exceptionCacheName();
+        if (exceptionCacheName == null || exceptionCacheName.trim().length() == 0) {
+            throw new IllegalArgumentException("Can only be called when CacheResult.exceptionCacheName() is specified");
+        }
+        
         Cache<Object, Object> cache = this.cacheManager.getCache(exceptionCacheName);
         
         if (cache == null) {
-            this.logger.warning("No Cache named '" + exceptionCacheName + "' was found in the CacheManager, a copy of the default cache will be created.");
+            this.logger.warning("No Cache named '" + exceptionCacheName + 
+                    "' was found in the CacheManager, a copy of the default cache will be created.");
             final CacheBuilder<Object, Object> cacheBuilder = this.cacheManager.<Object, Object>createCacheBuilder(exceptionCacheName);
             cache = cacheBuilder.build();
         }

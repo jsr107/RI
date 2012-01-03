@@ -57,14 +57,7 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
         final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
         
         //Resolve exception cache
-        final Cache<Object, Throwable> exceptionCache; 
-        final CacheResolver exceptionCacheResolver = methodDetails.getExceptionCacheResolver();
-        if (exceptionCacheResolver != null) {
-            exceptionCache = exceptionCacheResolver.resolveCache(cacheKeyInvocationContext);
-        }
-        else {
-            exceptionCache = null;
-        }
+        final Cache<Object, Throwable> exceptionCache = getExceptionCache(cacheKeyInvocationContext, methodDetails);
 
         //Generate the cache key
         final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
@@ -83,13 +76,7 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
             }
             
             //Look for a cached exception
-            if (exceptionCache != null) {
-                final Throwable throwable = exceptionCache.get(cacheKey);
-                if (throwable != null) {
-                    //Found exception, re-throw
-                    throw throwable;
-                }
-            }
+            checkForCachedException(exceptionCache, cacheKey);
         }
         
         try {
@@ -102,20 +89,73 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
             }
 
             return result;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             //If exception caching is enabled check if the throwable passes the include/exclude filters and then cache it
-            if (exceptionCache != null) {
-                final Class<? extends Throwable>[] cachedExceptions = cacheResultAnnotation.cachedExceptions();
-                final Class<? extends Throwable>[] nonCachedExceptions = cacheResultAnnotation.nonCachedExceptions();
-                final boolean included = ClassFilter.isIncluded(t, cachedExceptions, nonCachedExceptions, true);
-                if (included) {
-                    //Cache the exception for future rethrow
-                    exceptionCache.put(cacheKey, t);
-                }
-            }
+            cacheException(exceptionCache, cacheKey, cacheResultAnnotation, t);
 
             throw t;
         }
+    }
+
+    /**
+     * Check to see if there is a cached exception that needs to be re-thrown
+     * 
+     * @param exceptionCache The exception cache, may be null if no exception caching is being done
+     * @param cacheKey The cache key
+     * @throws Throwable The cached exception
+     */
+    protected void checkForCachedException(final Cache<Object, Throwable> exceptionCache, final CacheKey cacheKey)
+            throws Throwable {
+        if (exceptionCache == null) {
+            return;
+        }
+        
+        final Throwable throwable = exceptionCache.get(cacheKey);
+        if (throwable != null) {
+            //Found exception, re-throw
+            throw throwable;
+        }
+    }
+
+    /**
+     * Cache the exception if exception caching is enabled. 
+     * 
+     * @param exceptionCache The exception cache, may be null if no exception caching is being done
+     * @param cacheKey The cache key
+     * @param cacheResultAnnotation The cache result annotation
+     * @param t The exception to cache
+     */
+    protected void cacheException(final Cache<Object, Throwable> exceptionCache, final CacheKey cacheKey,
+            final CacheResult cacheResultAnnotation, Throwable t) {
+        if (exceptionCache == null) {
+            return;
+        }
+        
+        final Class<? extends Throwable>[] cachedExceptions = cacheResultAnnotation.cachedExceptions();
+        final Class<? extends Throwable>[] nonCachedExceptions = cacheResultAnnotation.nonCachedExceptions();
+        final boolean included = ClassFilter.isIncluded(t, cachedExceptions, nonCachedExceptions, true);
+        if (included) {
+            //Cache the exception for future rethrow
+            exceptionCache.put(cacheKey, t);
+        }
+    }
+
+    /**
+     * Get the exception cache if one is configured
+     * 
+     * @param cacheKeyInvocationContext The invocation details
+     * @param methodDetails The method details
+     * @return The exception cache, null if exception caching is disabled.
+     */
+    protected Cache<Object, Throwable> getExceptionCache(
+            final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
+            final CacheResultMethodDetails methodDetails) {
+
+        final CacheResolver exceptionCacheResolver = methodDetails.getExceptionCacheResolver();
+        if (exceptionCacheResolver != null) {
+            return exceptionCacheResolver.resolveCache(cacheKeyInvocationContext);
+        }
+
+        return null;
     }
 }

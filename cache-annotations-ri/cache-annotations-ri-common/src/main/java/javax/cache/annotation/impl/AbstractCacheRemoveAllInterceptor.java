@@ -59,8 +59,7 @@ public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCache
         try {
             //Call the annotated method
             result = this.proceed(invocation);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             if (afterInvocation) {
                 //If after invocation is true and if the throwable passes the include/exclude filters and then call removeAll
                 final Class<? extends Throwable>[] evictFor = cacheRemoveAllAnnotation.evictFor();

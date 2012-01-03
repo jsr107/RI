@@ -170,13 +170,6 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         final CacheRemoveEntry cacheRemoveEntryAnnotation = getAnnotation(CacheRemoveEntry.class, method, targetClass);
         final CacheRemoveAll cacheRemoveAllAnnotation = getAnnotation(CacheRemoveAll.class, method, targetClass);
         
-        //Data resolved based on the type of caching annotation present
-        final Annotation cacheAnnotation;
-        final String cacheName;
-        final CacheResolverFactory cacheResolverFactory;
-        final CacheKeyGenerator cacheKeyGenerator;
-        final ParameterDetails parameterDetails;
-        
         if (cacheResultAnnotation == null && cachePutAnnotation == null && cacheRemoveEntryAnnotation == null && cacheRemoveAllAnnotation == null) {
             //Check for no annotations, just ignore the method
             return null;
@@ -186,93 +179,22 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
             throw new AnnotationFormatError(
                     "Multiple cache annotations were found on " + method + " only one cache annotation per method is allowed");
         } else if (cacheResultAnnotation != null) {
-            cacheAnnotation = cacheResultAnnotation;
-            
-            //Find the cache resolver factory
-            final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheResultAnnotation.cacheResolverFactory();
-            cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
-            
-            //Determine the name of the cache
-            final String methodCacheName = cacheResultAnnotation.cacheName();
-            cacheName = this.resolveCacheName(methodCacheName, cacheDefaultsAnnotation, method, targetClass);
-            
-            //Find the key generator
-            final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheResultAnnotation.cacheKeyGenerator();
-            cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
-            
-            //Load parameter data, CacheValue is not allowed for CacheResult
-            parameterDetails = getParameterDetails(method, false);
+            staticCacheInvocationContext = 
+                    this.createCacheResultMethodDetails(cacheResultAnnotation, cacheDefaultsAnnotation, method, targetClass);
         } else if (cachePutAnnotation != null) {
-            cacheAnnotation = cachePutAnnotation;
-            
-            //Find the cache resolver factory
-            final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cachePutAnnotation.cacheResolverFactory();
-            cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
-            
-            //Determine the name of the cache
-            final String methodCacheName = cachePutAnnotation.cacheName();
-            cacheName = this.resolveCacheName(methodCacheName, cacheDefaultsAnnotation, method, targetClass);
-            
-            //Find the key generator
-            final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cachePutAnnotation.cacheKeyGenerator();
-            cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
-            
-            //Load parameter data, CacheValue is not allowed for CacheResult
-            parameterDetails = getParameterDetails(method, false);
+            staticCacheInvocationContext = 
+                    this.createCachePutMethodDetails(cachePutAnnotation, cacheDefaultsAnnotation, method, targetClass);
         } else if (cacheRemoveEntryAnnotation != null) {
-            cacheAnnotation = cacheRemoveEntryAnnotation;
-            
-            //Find the cache resolver factory
-            final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheRemoveEntryAnnotation.cacheResolverFactory();
-            cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
-            
-            //Determine the name of the cache
-            final String methodCacheName = cacheRemoveEntryAnnotation.cacheName();
-            cacheName = this.resolveCacheName(methodCacheName, cacheDefaultsAnnotation, method, targetClass);
-            
-            //Find the key generator
-            final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheRemoveEntryAnnotation.cacheKeyGenerator();
-            cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
-            
-            //Load parameter data, CacheValue is not allowed for CacheResult
-            parameterDetails = getParameterDetails(method, false);
+            staticCacheInvocationContext = 
+                    this.createCacheRemoveEntryMethodDetails(cacheRemoveEntryAnnotation, cacheDefaultsAnnotation, method, targetClass);
         } else if (cacheRemoveAllAnnotation != null) {
-            cacheAnnotation = cacheRemoveAllAnnotation;
-            
-            //Find the cache resolver factory
-            final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheRemoveAllAnnotation.cacheResolverFactory();
-            cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
-            
-            //Determine the name of the cache
-            final String methodCacheName = cacheRemoveAllAnnotation.cacheName();
-            cacheName = this.resolveCacheName(methodCacheName, cacheDefaultsAnnotation, method, targetClass);
-            
-            parameterDetails = getParameterDetails(method, false);
-            
-            //CacheRemoveAll doesn't have key generation
-            cacheKeyGenerator = null;
+            staticCacheInvocationContext = 
+                    this.createCacheRemoveAllMethodDetails(cacheRemoveAllAnnotation, cacheDefaultsAnnotation, method, targetClass);
         } else {
+            //This should not be possible
             return null;
         }
 
-        //Create immutable Set of all annotations on the method
-        final Set<Annotation> methodAnotations = Collections.unmodifiableSet(new LinkedHashSet<Annotation>(Arrays.asList(method.getAnnotations())));
-        
-        //TODO now have per-annotation type method details impls
-        //Create the method details instance
-        final CacheMethodDetails<? extends Annotation> cacheMethodDetails = 
-                new CacheMethodDetailsImpl<Annotation>(method, methodAnotations, cacheAnnotation, cacheName);
-        
-        //Get the cache resolver to use for the method
-        final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
-
-        //TODO
-        final CacheResolver exceptionCacheResolver = cacheResolverFactory.getExceptionCacheResolver(cacheResultMethodDetails);
-        
-        //Create the static invocation context information from the method details and resolver
-        staticCacheInvocationContext = 
-                createStaticCacheInvocationContext(cacheMethodDetails, cacheResolver, exceptionCacheResolver, cacheKeyGenerator, parameterDetails);
-        
         //Cache the resolved information
         final StaticCacheInvocationContext<? extends Annotation> existingMethodDetails = 
                 this.methodDetailsCache.putIfAbsent(methodKey, staticCacheInvocationContext);
@@ -296,43 +218,193 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     protected abstract Method getMethod(I invocation);
 
     /**
-     * Create a AbstractStaticCacheInvocationContext implementation to wrap the CacheMethodDetails.
+     * Create CacheMethodDetails to describe the annotated method
      * 
-     * @param cacheMethodDetails The method details to wrap, must not be null
-     * @param cacheResolver The cache resolver to use for the annotated method, must not be null
-     * @param exceptionCacheResolver The exception cache resolver to use for the annotated method, may only be not-null for {@link CacheResult}
-     * @param cacheKeyGenerator The key generator to use, may be null only if {@link CacheMethodDetails#getCacheAnnotation()} is {@link CacheRemoveAll}
-     * @param parameterDetails Details about the method parameters, may be null only if {@link CacheMethodDetails#getCacheAnnotation()} is {@link CacheRemoveAll}
-     * @return A AbstractStaticCacheInvocationContext implementation
+     * @param cacheAnnotation The annotation
+     * @param cacheDefaultsAnnotation The class level defaults annotation
+     * @param method The annotated method
+     * @param targetClass The intercepted class
+     * @return The cache method details
      */
-    @SuppressWarnings("unchecked")
-    protected final StaticCacheInvocationContext<? extends Annotation> createStaticCacheInvocationContext(
-            final CacheMethodDetails<? extends Annotation> cacheMethodDetails,
-            final CacheResolver cacheResolver, final CacheResolver exceptionCacheResolver,
-            final CacheKeyGenerator cacheKeyGenerator, final ParameterDetails parameterDetails) {
+    protected <A extends Annotation> CacheMethodDetails<A> createCacheMethodDetails(
+            A cacheAnnotation, CacheDefaults cacheDefaultsAnnotation, 
+            String methodCacheName, Method method, Class<? extends Object> targetClass) {
+        final String cacheName = this.resolveCacheName(methodCacheName, cacheDefaultsAnnotation, method, targetClass);
 
-        final Annotation cacheAnnotation = cacheMethodDetails.getCacheAnnotation();
+        //Create immutable Set of all annotations on the method
+        final Set<Annotation> methodAnotations = this.getMethodAnnotations(method);
         
-        //Create the appropriate AbstractStaticCacheInvocationContext impl based on the annotation type
-        if (cacheAnnotation instanceof CacheResult) {
-            return new CacheResultMethodDetails((CacheMethodDetails<CacheResult>)cacheMethodDetails, 
-                    cacheResolver, exceptionCacheResolver, cacheKeyGenerator, parameterDetails.allParameters,
-                    parameterDetails.keyParameters);
-        } else if (cacheAnnotation instanceof CachePut) {
-            return new CachePutMethodDetails((CacheMethodDetails<CachePut>)cacheMethodDetails, 
-                    cacheResolver, cacheKeyGenerator, parameterDetails.allParameters, parameterDetails.keyParameters,
-                    parameterDetails.cacheValueParameter);
-        } else if (cacheAnnotation instanceof CacheRemoveEntry) {
-            return new CacheRemoveEntryMethodDetails((CacheMethodDetails<CacheRemoveEntry>)cacheMethodDetails, 
-                    cacheResolver, cacheKeyGenerator, parameterDetails.allParameters, parameterDetails.keyParameters);
-        } else if (cacheAnnotation instanceof CacheRemoveAll) {
-            return new CacheRemoveAllMethodDetails((CacheMethodDetails<CacheRemoveAll>)cacheMethodDetails, 
-                    cacheResolver, parameterDetails.allParameters);
-        }
-
-        throw new AnnotationFormatError("Could not create AbstractStaticCacheInvocationContext for unknown cache annotation: " + cacheAnnotation);
+        //Create the method details instance
+        return new CacheMethodDetailsImpl<A>(method, methodAnotations, cacheAnnotation, cacheName);
     }
     
+    /**
+     * Create a StaticCacheInvocationContext implementation specific to the {@link CacheResult} annotated method
+     * 
+     * @param cacheResultAnnotation The annotation on the method
+     * @param cacheDefaultsAnnotation The defaults annotation for the class, if it exists
+     * @param method The annotated method
+     * @param targetClass The intercepted class
+     * @return Details on the annotated method
+     */
+    protected CacheResultMethodDetails createCacheResultMethodDetails(
+            CacheResult cacheResultAnnotation, CacheDefaults cacheDefaultsAnnotation,
+            Method method, Class<? extends Object> targetClass) {
+        
+        final String methodCacheName = cacheResultAnnotation.cacheName();
+        
+        //Determine the name of the cache
+        final CacheMethodDetails<CacheResult> cacheMethodDetails = 
+                createCacheMethodDetails(cacheResultAnnotation, cacheDefaultsAnnotation, methodCacheName, method, targetClass);
+        
+        //Find the cache resolver factory
+        final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheResultAnnotation.cacheResolverFactory();
+        final CacheResolverFactory cacheResolverFactory = 
+                this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
+        
+        //Find the key generator
+        final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheResultAnnotation.cacheKeyGenerator();
+        final CacheKeyGenerator cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
+        
+        //Load parameter data, CacheValue is not allowed for CacheResult
+        final ParameterDetails parameterDetails = this.getParameterDetails(method, false);
+
+        //Get the cache resolver to use for the method
+        final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
+
+        //Get the exception cache resolver to use for the method, if an exceptionCacheName is set
+        final CacheResolver exceptionCacheResolver;
+        final String exceptionCacheName = cacheResultAnnotation.exceptionCacheName();
+        if (exceptionCacheName != null && exceptionCacheName.trim().length() != 0) {
+            exceptionCacheResolver = cacheResolverFactory.getExceptionCacheResolver(cacheMethodDetails);
+        } else {
+            exceptionCacheResolver = null;
+        }
+        
+        return new CacheResultMethodDetails(cacheMethodDetails, 
+                cacheResolver, exceptionCacheResolver, 
+                cacheKeyGenerator, 
+                parameterDetails.allParameters, parameterDetails.keyParameters);
+    }
+    
+    /**
+     * Create a StaticCacheInvocationContext implementation specific to the {@link CachePut} annotated method
+     * 
+     * @param cachePutAnnotation The annotation on the method
+     * @param cacheDefaultsAnnotation The defaults annotation for the class, if it exists
+     * @param method The annotated method
+     * @param targetClass The intercepted class
+     * @return Details on the annotated method
+     */
+    protected CachePutMethodDetails createCachePutMethodDetails(
+            CachePut cachePutAnnotation, CacheDefaults cacheDefaultsAnnotation,
+            Method method, Class<? extends Object> targetClass) {
+        
+        //Determine the name of the cache
+        final String methodCacheName = cachePutAnnotation.cacheName();
+        
+        //Create the method details instance
+        final CacheMethodDetails<CachePut> cacheMethodDetails = 
+                createCacheMethodDetails(cachePutAnnotation, cacheDefaultsAnnotation, methodCacheName, method, targetClass);
+        
+        //Find the cache resolver factory
+        final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cachePutAnnotation.cacheResolverFactory();
+        final CacheResolverFactory cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
+        
+        //Find the key generator
+        final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cachePutAnnotation.cacheKeyGenerator();
+        final CacheKeyGenerator cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
+        
+        //Load parameter data, CacheValue is not allowed for CacheResult
+        final ParameterDetails parameterDetails = getParameterDetails(method, false);
+
+        //Get the cache resolver to use for the method
+        final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
+        
+        return new CachePutMethodDetails(cacheMethodDetails, 
+                cacheResolver, cacheKeyGenerator, 
+                parameterDetails.allParameters, parameterDetails.keyParameters,
+                parameterDetails.cacheValueParameter);
+    }
+    
+    /**
+     * Create a StaticCacheInvocationContext implementation specific to the {@link CacheRemoveEntry} annotated method
+     * 
+     * @param cacheRemoveEntryAnnotation The annotation on the method
+     * @param cacheDefaultsAnnotation The defaults annotation for the class, if it exists
+     * @param method The annotated method
+     * @param targetClass The intercepted class
+     * @return Details on the annotated method
+     */
+    protected CacheRemoveEntryMethodDetails createCacheRemoveEntryMethodDetails(
+            CacheRemoveEntry cacheRemoveEntryAnnotation, CacheDefaults cacheDefaultsAnnotation,
+            Method method, Class<? extends Object> targetClass) {
+        
+        //Determine the name of the cache
+        final String methodCacheName = cacheRemoveEntryAnnotation.cacheName();
+        
+        //Create the method details instance
+        final CacheMethodDetails<CacheRemoveEntry> cacheMethodDetails = 
+                createCacheMethodDetails(cacheRemoveEntryAnnotation, cacheDefaultsAnnotation, methodCacheName, method, targetClass);
+        
+        //Find the cache resolver factory
+        final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheRemoveEntryAnnotation.cacheResolverFactory();
+        final CacheResolverFactory cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
+        
+        //Find the key generator
+        final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheRemoveEntryAnnotation.cacheKeyGenerator();
+        final CacheKeyGenerator cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
+        
+        //Load parameter data, CacheValue is not allowed for CacheResult
+        final ParameterDetails parameterDetails = getParameterDetails(method, false);
+
+        //Get the cache resolver to use for the method
+        final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
+        
+        return new CacheRemoveEntryMethodDetails(cacheMethodDetails, 
+                cacheResolver, cacheKeyGenerator, 
+                parameterDetails.allParameters, parameterDetails.keyParameters);
+    }
+    
+    /**
+     * Create a StaticCacheInvocationContext implementation specific to the {@link CacheRemoveAll} annotated method
+     * 
+     * @param cacheRemoveAllAnnotation The annotation on the method
+     * @param cacheDefaultsAnnotation The defaults annotation for the class, if it exists
+     * @param method The annotated method
+     * @param targetClass The intercepted class
+     * @return Details on the annotated method
+     */
+    protected CacheRemoveAllMethodDetails createCacheRemoveAllMethodDetails(
+            CacheRemoveAll cacheRemoveAllAnnotation, CacheDefaults cacheDefaultsAnnotation,
+            Method method, Class<? extends Object> targetClass) {
+        
+        //Determine the name of the cache
+        final String methodCacheName = cacheRemoveAllAnnotation.cacheName();
+        
+        //Create the method details instance
+        final CacheMethodDetails<CacheRemoveAll> cacheMethodDetails = 
+                createCacheMethodDetails(cacheRemoveAllAnnotation, cacheDefaultsAnnotation, methodCacheName, method, targetClass);
+
+        //Find the cache resolver factory
+        final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheRemoveAllAnnotation.cacheResolverFactory();
+        final CacheResolverFactory cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
+        
+        final ParameterDetails parameterDetails = getParameterDetails(method, false);
+
+        //Get the cache resolver to use for the method
+        final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
+        
+        return new CacheRemoveAllMethodDetails(cacheMethodDetails, 
+                cacheResolver, parameterDetails.allParameters);
+    }
+
+    /**
+     * Get an immutable set of all annotations on the method
+     */
+    protected Set<Annotation> getMethodAnnotations(Method method) {
+        return Collections.unmodifiableSet(new LinkedHashSet<Annotation>(Arrays.asList(method.getAnnotations())));
+    }
     
     /**
      * Used to generated parameter details data out of {@link AbstractCacheLookupUtil#getParameterDetails(Method, boolean)}
