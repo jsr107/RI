@@ -30,6 +30,7 @@ import javax.interceptor.InvocationContext;
  * 
  * @author Rick Hightower
  * @author Eric Dalquist
+ * @since 1.0
  */
 @CachePut @Interceptor
 public class CachePutInterceptor extends AbstractCachePutInterceptor<InvocationContext> {

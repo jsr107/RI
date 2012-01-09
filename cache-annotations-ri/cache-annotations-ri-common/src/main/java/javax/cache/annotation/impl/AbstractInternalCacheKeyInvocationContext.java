@@ -31,11 +31,11 @@ import javax.cache.annotation.CacheInvocationParameter;
  * than creating new immutable Lists.
  * 
  * @author Eric Dalquist
- * @version $Revision$
  * @param <I> The intercepted method invocation
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
  * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
  * {@link javax.cache.annotation.CacheRemoveAll}.
+ * @since 1.0
  */
 public abstract class AbstractInternalCacheKeyInvocationContext<I, A extends Annotation> 
         extends AbstractInternalCacheInvocationContext<I, A>

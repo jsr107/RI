@@ -46,6 +46,7 @@ import javax.cache.annotation.CacheValue;
  * @author Rick Hightower
  * @author Eric Dalquist
  * @param <I> The intercepted method invocation
+ * @since 1.0
  */
 public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I> {
     private final ConcurrentMap<MethodKey, StaticCacheInvocationContext<? extends Annotation>> methodDetailsCache = 

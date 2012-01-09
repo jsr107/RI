@@ -25,7 +25,7 @@ import javax.cache.annotation.CacheResolver;
 
 /**
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class DefaultCacheResolver implements CacheResolver {
     private final Cache<Object, Object> cache;

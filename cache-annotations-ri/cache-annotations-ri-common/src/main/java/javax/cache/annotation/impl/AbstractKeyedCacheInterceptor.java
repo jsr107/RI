@@ -18,15 +18,13 @@ package javax.cache.annotation.impl;
 
 import java.lang.annotation.Annotation;
 
-
-
-
 /**
  * Base class for all interceptor implementations, contains utility methods
  *
  * @author Eric Dalquist
  * @param <I> The intercepted method invocation
  * @param <T> The type of static invocation context data expected
+ * @since 1.0
  */
 public abstract class AbstractKeyedCacheInterceptor<I, T extends StaticCacheKeyInvocationContext<?>> extends AbstractCacheInterceptor<I> {
 

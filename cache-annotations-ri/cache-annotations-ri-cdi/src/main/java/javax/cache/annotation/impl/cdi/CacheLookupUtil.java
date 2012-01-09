@@ -35,7 +35,7 @@ import javax.interceptor.InvocationContext;
  * Utility used by all annotations to lookup the {@link javax.cache.annotation.CacheResolver} and {@link CacheKeyGenerator} for a given method.
  * 
  * @author Rick Hightower
- * 
+ * @since 1.0
  */
 public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> {
     @Inject

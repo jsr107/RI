@@ -30,6 +30,7 @@ import javax.interceptor.InvocationContext;
  *
  * @author Rick Hightower
  * @author Eric Dalquist
+ * @since 1.0
  */
 @CacheResult @Interceptor
 public class CacheResultInterceptor extends AbstractCacheResultInterceptor<InvocationContext> {

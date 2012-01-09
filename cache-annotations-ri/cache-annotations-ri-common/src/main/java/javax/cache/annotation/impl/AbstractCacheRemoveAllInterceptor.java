@@ -30,6 +30,7 @@ import javax.cache.annotation.CacheResolver;
  * @author Rick Hightower
  * @author Eric Dalquist
  * @param <I> The intercepted method invocation
+ * @since 1.0
  */
 public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCacheInterceptor<I> {
     /**

@@ -26,8 +26,8 @@ import java.lang.reflect.Method;
  * Defines API for looking up information about an invocation.
  * 
  * @author Eric Dalquist
- * @version $Revision$
  * @param <I> The intercepted method invocation
+ * @since 1.0
  */
 public interface CacheContextSource<I> {
     /**

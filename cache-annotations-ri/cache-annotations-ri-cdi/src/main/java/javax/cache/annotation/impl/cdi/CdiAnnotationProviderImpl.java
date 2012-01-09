@@ -22,7 +22,7 @@ import javax.cache.annotation.impl.AnnotationProviderImpl;
  * CDI Impl of annotation provider that 
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CdiAnnotationProviderImpl extends AnnotationProviderImpl {
     /**

@@ -30,6 +30,7 @@ import java.util.Map;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
     private final Serializer<V> valueSerializer;

@@ -28,6 +28,7 @@ import javax.enterprise.inject.spi.Extension;
  * Service interface implemented by extensions. An extension is a service provider declared in META-INF/services.
  *
  * @author Greg Luck
+ * @since 1.0
  */
 public class InterceptorExtension implements Extension {
 

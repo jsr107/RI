@@ -27,7 +27,7 @@ import javax.cache.annotation.CacheResult;
  * Details for a method annotated with {@link CacheResult}
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CacheResultMethodDetails extends StaticCacheKeyInvocationContext<CacheResult> {
     /**

@@ -30,6 +30,7 @@ import javax.cache.transaction.Mode;
  * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
  * @author Greg Luck
+ * @since 1.0
  */
 public final class RICacheConfiguration<K, V> extends AbstractCacheConfiguration {
     private volatile RICache<K, V> riCache;

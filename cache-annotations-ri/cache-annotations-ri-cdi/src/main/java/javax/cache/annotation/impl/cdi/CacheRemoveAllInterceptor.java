@@ -30,7 +30,8 @@ import javax.interceptor.InvocationContext;
  * 
  * @author Rick Hightower
  * @author Eric Dalquist
- */
+ * @since 1.0
+*/
 @CacheRemoveAll @Interceptor
 public class CacheRemoveAllInterceptor extends AbstractCacheRemoveAllInterceptor<InvocationContext> {
     @Inject

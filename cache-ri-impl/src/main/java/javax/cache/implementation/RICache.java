@@ -51,6 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @param <V> the type of mapped values*
  * @author Greg Luck
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public final class RICache<K, V> extends AbstractCache<K, V> {
     private final RISimpleCache<K, V> store;

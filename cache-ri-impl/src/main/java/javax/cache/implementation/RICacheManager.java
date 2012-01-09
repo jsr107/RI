@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
  * <p/>
  *
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public class RICacheManager extends AbstractCacheManager implements CacheManager {
 

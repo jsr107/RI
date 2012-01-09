@@ -27,7 +27,7 @@ import javax.cache.annotation.CacheResolver;
  * Details for a method annotated with {@link CachePut}
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CachePutMethodDetails extends StaticCacheKeyInvocationContext<CachePut> {
     private final CacheParameterDetails cacheValueParameter;

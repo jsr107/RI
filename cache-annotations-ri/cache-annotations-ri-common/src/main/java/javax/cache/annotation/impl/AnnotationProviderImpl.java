@@ -22,7 +22,7 @@ import javax.cache.spi.AnnotationProvider;
  * Implements the annotations SPI
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class AnnotationProviderImpl implements AnnotationProvider {
     private static volatile boolean annotationsInitialized;

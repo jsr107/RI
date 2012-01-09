@@ -31,6 +31,7 @@ import javax.cache.transaction.Mode;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public class DelegatingCacheBuilder<K, V> implements CacheBuilder<K, V> {
     private final AbstractCache.Builder<K, V> cacheBuilder;

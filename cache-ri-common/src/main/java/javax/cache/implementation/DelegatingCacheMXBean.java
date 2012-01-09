@@ -26,6 +26,7 @@ import javax.cache.mbeans.CacheMXBean;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public class DelegatingCacheMXBean<K, V> extends DelegatingCacheStatisticsMXBean implements CacheMXBean {
     private final Cache<K, V> cache;

@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public abstract class AbstractCache<K, V> implements Cache<K, V> {
     private static final int CACHE_LOADER_THREADS = 2;

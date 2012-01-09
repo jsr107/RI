@@ -29,6 +29,7 @@ import java.util.Map;
  * @param <K> the type of keys maintained by this cache
  * @param <V> the type of cached values
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 interface RISimpleCache<K, V> extends Iterable<Map.Entry<K, V>> {
 

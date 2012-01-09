@@ -27,7 +27,7 @@ import javax.cache.annotation.CacheResolver;
  * Details for a method annotated with {@link CacheRemoveEntry}
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CacheRemoveEntryMethodDetails extends StaticCacheKeyInvocationContext<CacheRemoveEntry> {
     

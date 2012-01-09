@@ -24,6 +24,7 @@ import java.util.Date;
  * Class to help implementers
  *
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public class DelegatingCacheStatisticsMXBean implements CacheStatisticsMXBean {
     private final Cache cache;

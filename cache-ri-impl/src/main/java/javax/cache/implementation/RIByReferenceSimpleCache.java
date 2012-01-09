@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 class RIByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {
     private final ConcurrentHashMap<K, V> store = new ConcurrentHashMap<K, V>();

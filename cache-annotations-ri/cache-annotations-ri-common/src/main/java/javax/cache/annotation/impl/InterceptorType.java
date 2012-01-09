@@ -21,7 +21,7 @@ package javax.cache.annotation.impl;
  * Possible types of cache related advice
  * 
  * @author Eric Dalquist
- * @version $Revision: 656 $
+ * @since 1.0
  */
 public enum InterceptorType {
     /**

@@ -25,7 +25,7 @@ import java.util.Map;
  * This is NOT thread safe
  * @param <K> the type of keys maintained by this cache
  * @param <V> the type of cached values
- * @author ycosmado
+ * @author Yannis Cosmadopoulos
  * @since 1.0
  */
 public class RIExpiringByReferenceSimpleCache<K, V> implements RISimpleCache<K, V> {

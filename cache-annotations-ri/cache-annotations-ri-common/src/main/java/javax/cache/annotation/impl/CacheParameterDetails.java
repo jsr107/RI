@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CacheParameterDetails {
     private final Class<?> rawType;

@@ -21,8 +21,8 @@ package javax.cache.annotation.impl;
  * Base class for cache related interceptors
  * 
  * @author Eric Dalquist
- * @version $Revision$
  * @param <I> The intercepted method invocation
+ * @since 1.0
  */
 public abstract class AbstractCacheInterceptor<I> {
     /**

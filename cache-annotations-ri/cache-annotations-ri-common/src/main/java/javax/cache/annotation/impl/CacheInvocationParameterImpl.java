@@ -25,7 +25,7 @@ import javax.cache.annotation.CacheInvocationParameter;
  * Provides caching specific information about a method parameter for intercepted method invocations.
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CacheInvocationParameterImpl implements CacheInvocationParameter {
     private final CacheParameterDetails cacheParameterDetails;

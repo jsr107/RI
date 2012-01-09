@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p/>
  *
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public abstract class AbstractCacheConfiguration implements CacheConfiguration {
     private final boolean readThrough;

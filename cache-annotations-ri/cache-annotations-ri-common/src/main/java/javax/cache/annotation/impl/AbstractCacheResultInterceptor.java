@@ -32,6 +32,7 @@ import javax.cache.annotation.CacheResult;
  * @author Rick Hightower
  * @author Eric Dalquist
  * @param <I> The intercepted method invocation
+ * @since 1.0
  */
 public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CacheResultMethodDetails> {
  

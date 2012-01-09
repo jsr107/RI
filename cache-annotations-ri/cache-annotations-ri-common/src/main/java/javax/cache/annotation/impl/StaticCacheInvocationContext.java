@@ -29,6 +29,7 @@ import javax.cache.annotation.CacheResolver;
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
  * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
  * {@link javax.cache.annotation.CacheRemoveAll}.
+ * @since 1.0
  */
 public interface StaticCacheInvocationContext<A extends Annotation> extends CacheMethodDetails<A> {
 

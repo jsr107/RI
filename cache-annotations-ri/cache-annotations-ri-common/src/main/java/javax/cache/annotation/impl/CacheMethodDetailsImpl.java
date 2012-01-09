@@ -28,10 +28,10 @@ import javax.cache.annotation.CacheMethodDetails;
  * find the {@link javax.cache.annotation.CacheResolver};
  * 
  * @author Eric Dalquist
- * @version $Revision$
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
  * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
  * {@link javax.cache.annotation.CacheRemoveAll}.
+ * @since 1.0
  */
 public class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails<A> {
     private final Method targetMethod;

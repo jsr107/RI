@@ -21,6 +21,7 @@ import javax.cache.CacheManager;
 /**
  * Abstract class to help implementers
  * @author Yannis Cosmadopoulos
+ * @since 1.0
  */
 public abstract class AbstractCacheManager implements CacheManager {
     private final String name;

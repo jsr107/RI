@@ -26,7 +26,7 @@ import javax.cache.annotation.CacheResolver;
  * Details for a method annotated with {@link CacheRemoveAll}
  * 
  * @author Eric Dalquist
- * @version $Revision$
+ * @since 1.0
  */
 public class CacheRemoveAllMethodDetails extends AbstractStaticCacheInvocationContext<CacheRemoveAll> {
     

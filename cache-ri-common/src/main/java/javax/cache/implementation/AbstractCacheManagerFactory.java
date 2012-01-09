@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * Simple implementation of the Caching object
- * @author ycosmado
+ * @author Yannis Cosmadopoulos
  * @since 1.0
  */
 public abstract class AbstractCacheManagerFactory implements CacheManagerFactory {

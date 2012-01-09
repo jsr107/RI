@@ -23,11 +23,11 @@ import javax.cache.annotation.CacheInvocationContext;
 /**
  * RI Internal extension of {@link CacheInvocationContext} which provides access to the {@link AbstractStaticCacheInvocationContext}
  * 
- * @author Eric Dalquist
- * @version $Revision$
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
  * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
  * {@link javax.cache.annotation.CacheRemoveAll}.
+ * @author Eric Dalquist
+ * @since 1.0
  */
 public interface InternalCacheInvocationContext<A extends Annotation> extends CacheInvocationContext<A> {
     /**

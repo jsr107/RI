@@ -27,7 +27,7 @@ import javax.inject.Inject;
 /**
  * 
  * @author Rick Hightower
- *
+ * @since 1.0
  */
 public class BeanManagerUtil {
     
