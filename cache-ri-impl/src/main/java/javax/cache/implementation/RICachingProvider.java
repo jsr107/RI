@@ -16,8 +16,8 @@
  */
 package javax.cache.implementation;
 
+import javax.cache.CacheManagerFactory;
 import javax.cache.OptionalFeature;
-import javax.cache.spi.CacheManagerFactory;
 import javax.cache.spi.CachingProvider;
 
 /**

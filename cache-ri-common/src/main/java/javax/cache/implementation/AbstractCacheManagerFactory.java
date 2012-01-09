@@ -17,8 +17,8 @@
 package javax.cache.implementation;
 
 import javax.cache.CacheManager;
+import javax.cache.CacheManagerFactory;
 import javax.cache.CachingShutdownException;
-import javax.cache.spi.CacheManagerFactory;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
