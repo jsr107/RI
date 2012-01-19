@@ -19,6 +19,7 @@ package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
+import javax.cache.event.Filter;
 import javax.cache.mbeans.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
@@ -86,7 +87,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         statistics = new RICacheStatistics(this);
         mBean = new DelegatingCacheMXBean<K, V>(this);
         for (ListenerRegistration<K, V> listener : listeners) {
-            registerCacheEntryListener(listener.cacheEntryListener, listener.synchronous);
+            registerCacheEntryListener(listener.cacheEntryListener, listener.filter);
         }
     }
 
@@ -455,8 +456,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V>
-        cacheEntryListener, boolean synchronous) {
-        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, synchronous);
+        cacheEntryListener, Filter filter) {
+        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, filter);
         return cacheEntryListeners.add(scopedListener);
     }
 
@@ -471,7 +472,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         @SuppressWarnings("unchecked")
         CacheEntryListener<K, V> castCacheEntryListener = (CacheEntryListener<K, V>)cacheEntryListener;
         //Only cacheEntryListener is checked for equality
-        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, true);
+        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, null);
         return cacheEntryListeners.remove(scopedListener);
     }
 
@@ -616,11 +617,11 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     private static final class ScopedListener<K, V> {
         private final CacheEntryListener<? super K, ? super V> listener;
-        private final boolean synchronous;
+        private final Filter filter;
 
-        private ScopedListener(CacheEntryListener<? super K, ? super V> listener, boolean synchronous) {
+        private ScopedListener(CacheEntryListener<? super K, ? super V> listener, Filter filter) {
             this.listener = listener;
-            this.synchronous = synchronous;
+            this.filter = filter;
         }
 
         private CacheEntryListener<? super K, ? super V> getListener() {
@@ -867,8 +868,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         }
 
         @Override
-        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, boolean synchronous) {
-            listeners.add(new ListenerRegistration<K, V>(listener, synchronous));
+        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, Filter filter) {
+            listeners.add(new ListenerRegistration<K, V>(listener, filter));
             return this;
         }
     }
@@ -882,11 +883,11 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     private static final class ListenerRegistration<K, V> {
         private final CacheEntryListener<K, V> cacheEntryListener;
-        private final boolean synchronous;
+        private final Filter filter;
 
-        private ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, boolean synchronous) {
+        private ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, Filter filter) {
             this.cacheEntryListener = cacheEntryListener;
-            this.synchronous = synchronous;
+            this.filter = filter;
         }
     }
 
