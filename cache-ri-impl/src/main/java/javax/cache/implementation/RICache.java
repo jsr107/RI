@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class RICache<K, V> extends AbstractCache<K, V> {
     private final RISimpleCache<K, V> store;
-    private final Set<ScopedListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<ScopedListener<K, V>>();
+    private final Set<FilteredListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<FilteredListener<K, V>>();
     private volatile Status status;
     private final RICacheStatistics statistics;
     private final CacheMXBean mBean;
@@ -77,7 +77,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     ClassLoader classLoader,
                     CacheConfiguration<K, V> configuration,
                     CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter,
-                    CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners) {
+                    Set<ListenerRegistration<K, V>> listeners) {
         super(cacheName, cacheManagerName, classLoader, configuration, cacheLoader, cacheWriter);
         status = Status.UNINITIALISED;
         store = configuration.isStoreByValue() ?
@@ -457,8 +457,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V>
         cacheEntryListener, Filter filter) {
-        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(cacheEntryListener, filter);
-        return cacheEntryListeners.add(scopedListener);
+        FilteredListener<K, V> filteredListener = new FilteredListener<K, V>(cacheEntryListener, filter);
+        return cacheEntryListeners.add(filteredListener);
     }
 
     /**
@@ -472,8 +472,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         @SuppressWarnings("unchecked")
         CacheEntryListener<K, V> castCacheEntryListener = (CacheEntryListener<K, V>)cacheEntryListener;
         //Only cacheEntryListener is checked for equality
-        ScopedListener<K, V> scopedListener = new ScopedListener<K, V>(castCacheEntryListener, null);
-        return cacheEntryListeners.remove(scopedListener);
+        FilteredListener<K, V> filteredListener = new FilteredListener<K, V>(castCacheEntryListener, null);
+        return cacheEntryListeners.remove(filteredListener);
     }
 
     /**
@@ -609,17 +609,17 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     }
 
     /**
-     * Combine a Listener and its NotificationScope.  Equality and hashcode are based purely on the listener.
+     * Combine a Listener and its filter.  Equality and hashcode are based purely on the listener.
      * This implies that the same listener cannot be added to the set of registered listeners more than
-     * once with different notification scopes.
+     * once with filters.
      *
      * @author Greg Luck
      */
-    private static final class ScopedListener<K, V> {
+    private static final class FilteredListener<K, V> {
         private final CacheEntryListener<? super K, ? super V> listener;
         private final Filter filter;
 
-        private ScopedListener(CacheEntryListener<? super K, ? super V> listener, Filter filter) {
+        private FilteredListener(CacheEntryListener<? super K, ? super V> listener, Filter filter) {
             this.listener = listener;
             this.filter = filter;
         }
@@ -639,7 +639,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         }
 
         /**
-         * Equals based on listener (NOT based on scope) - can't have same listener with two different scopes
+         * Equals based on listener (NOT based on filter) - can't have same listener with two different scopes
          *
          * @see java.lang.Object#equals(java.lang.Object)
          */
@@ -654,7 +654,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            ScopedListener<?, ?> other = (ScopedListener<?, ?>) obj;
+            FilteredListener<?, ?> other = (FilteredListener<?, ?>) obj;
             if (listener == null) {
                 if (other.listener != null) {
                     return false;
@@ -834,7 +834,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder<K, V> extends AbstractCache.Builder<K, V> {
-        private final CopyOnWriteArraySet<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
+        private final Set<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
 
         /**
          * Construct a builder.
