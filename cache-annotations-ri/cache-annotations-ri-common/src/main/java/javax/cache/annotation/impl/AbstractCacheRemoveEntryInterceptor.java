@@ -58,8 +58,27 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
             cacheRemove(cacheKeyInvocationContext, methodDetails);
         }
         
-        //Call the annotated method
-        final Object result = this.proceed(invocation);
+        final Object result;
+        try {
+            //Call the annotated method
+            result = this.proceed(invocation);
+        } catch (Throwable t) {
+            if (afterInvocation) {
+                //If after invocation is true and if the throwable passes the include/exclude filters and then call remove
+                final Class<? extends Throwable>[] evictFor = cacheRemoveEntryAnnotation.evictFor();
+                final Class<? extends Throwable>[] noEvictFor = cacheRemoveEntryAnnotation.noEvictFor();
+                
+                //Check for empty/null here since isIncluded returns true for those cases
+                final boolean cache = ClassFilter.isIncluded(t, evictFor, noEvictFor, false);
+                
+                //Exception is included
+                if (cache) {
+                    cacheRemove(cacheKeyInvocationContext, methodDetails);
+                }
+            }
+
+            throw t;
+        }
         
         //If post-invocation - remove entry
         if (afterInvocation) {

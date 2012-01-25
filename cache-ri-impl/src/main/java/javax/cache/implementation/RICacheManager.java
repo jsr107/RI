@@ -17,14 +17,6 @@
 
 package javax.cache.implementation;
 
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheException;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.OptionalFeature;
-import javax.cache.Status;
-import javax.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +25,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.cache.Cache;
+import javax.cache.CacheBuilder;
+import javax.cache.CacheException;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.OptionalFeature;
+import javax.cache.Status;
+import javax.transaction.UserTransaction;
 
 /**
  * The reference implementation for JSR107.
