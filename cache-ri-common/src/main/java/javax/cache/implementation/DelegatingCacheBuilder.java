@@ -22,7 +22,6 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.Filter;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -64,8 +63,8 @@ public class DelegatingCacheBuilder<K, V> implements CacheBuilder<K, V> {
     }
 
     @Override
-    public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, Filter filter) {
-        cacheBuilder.registerCacheEntryListener(listener, filter);
+    public CacheBuilder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener) {
+        cacheBuilder.registerCacheEntryListener(listener);
         return this;
     }
 

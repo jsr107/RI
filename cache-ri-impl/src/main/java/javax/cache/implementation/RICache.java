@@ -19,7 +19,6 @@ package javax.cache.implementation;
 
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
-import javax.cache.event.Filter;
 import javax.cache.mbeans.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
@@ -56,7 +55,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class RICache<K, V> extends AbstractCache<K, V> {
     private final RISimpleCache<K, V> store;
-    private final Set<FilteredListener<K, V>> cacheEntryListeners = new CopyOnWriteArraySet<FilteredListener<K, V>>();
+    private final Set<CacheEntryListener<? super K, ? super V>> cacheEntryListeners =
+            new CopyOnWriteArraySet<CacheEntryListener<? super K, ? super V>>();
     private volatile Status status;
     private final RICacheStatistics statistics;
     private final CacheMXBean mBean;
@@ -77,7 +77,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     ClassLoader classLoader,
                     CacheConfiguration<K, V> configuration,
                     CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter,
-                    Set<ListenerRegistration<K, V>> listeners) {
+                    Set<CacheEntryListener<K, V>> listeners) {
         super(cacheName, cacheManagerName, classLoader, configuration, cacheLoader, cacheWriter);
         status = Status.UNINITIALISED;
         store = configuration.isStoreByValue() ?
@@ -86,8 +86,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 new RIByReferenceSimpleCache<K, V>();
         statistics = new RICacheStatistics(this);
         mBean = new DelegatingCacheMXBean<K, V>(this);
-        for (ListenerRegistration<K, V> listener : listeners) {
-            registerCacheEntryListener(listener.cacheEntryListener, listener.filter);
+        for (CacheEntryListener<K, V> listener : listeners) {
+            registerCacheEntryListener(listener);
         }
     }
 
@@ -455,10 +455,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V>
-        cacheEntryListener, Filter filter) {
-        FilteredListener<K, V> filteredListener = new FilteredListener<K, V>(cacheEntryListener, filter);
-        return cacheEntryListeners.add(filteredListener);
+    public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener) {
+        return cacheEntryListeners.add(cacheEntryListener);
     }
 
     /**
@@ -466,14 +464,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     public boolean unregisterCacheEntryListener(CacheEntryListener<?, ?> cacheEntryListener) {
-        /*
-         * Only listeners that can be added are typed so this cast should be safe
-         */
-        @SuppressWarnings("unchecked")
-        CacheEntryListener<K, V> castCacheEntryListener = (CacheEntryListener<K, V>)cacheEntryListener;
-        //Only cacheEntryListener is checked for equality
-        FilteredListener<K, V> filteredListener = new FilteredListener<K, V>(castCacheEntryListener, null);
-        return cacheEntryListeners.remove(filteredListener);
+        return cacheEntryListeners.remove(cacheEntryListener);
     }
 
     /**
@@ -606,69 +597,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     long getSize() {
         return store.size();
-    }
-
-    /**
-     * Combine a Listener and its filter.  Equality and hashcode are based purely on the listener.
-     * This implies that the same listener cannot be added to the set of registered listeners more than
-     * once with filters.
-     *
-     * @author Greg Luck
-     */
-    private static final class FilteredListener<K, V> {
-        private final CacheEntryListener<? super K, ? super V> listener;
-        private final Filter filter;
-
-        private FilteredListener(CacheEntryListener<? super K, ? super V> listener, Filter filter) {
-            this.listener = listener;
-            this.filter = filter;
-        }
-
-        private CacheEntryListener<? super K, ? super V> getListener() {
-            return listener;
-        }
-
-        /**
-         * Hash code based on listener
-         *
-         * @see java.lang.Object#hashCode()
-         */
-        @Override
-        public int hashCode() {
-            return listener.hashCode();
-        }
-
-        /**
-         * Equals based on listener (NOT based on filter) - can't have same listener with two different scopes
-         *
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            FilteredListener<?, ?> other = (FilteredListener<?, ?>) obj;
-            if (listener == null) {
-                if (other.listener != null) {
-                    return false;
-                }
-            } else if (!listener.equals(other.listener)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return listener.toString();
-        }
     }
 
     /**
@@ -834,7 +762,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @author Yannis Cosmadopoulos
      */
     public static class Builder<K, V> extends AbstractCache.Builder<K, V> {
-        private final Set<ListenerRegistration<K, V>> listeners = new CopyOnWriteArraySet<ListenerRegistration<K, V>>();
+        private final Set<CacheEntryListener<K, V>> listeners = new CopyOnWriteArraySet<CacheEntryListener<K, V>>();
 
         /**
          * Construct a builder.
@@ -868,26 +796,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         }
 
         @Override
-        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener, Filter filter) {
-            listeners.add(new ListenerRegistration<K, V>(listener, filter));
+        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener) {
+            listeners.add(listener);
             return this;
-        }
-    }
-
-    /**
-     * A struct :)
-     *
-     * @param <K>
-     * @param <V>
-     * @author Greg Luck
-     */
-    private static final class ListenerRegistration<K, V> {
-        private final CacheEntryListener<K, V> cacheEntryListener;
-        private final Filter filter;
-
-        private ListenerRegistration(CacheEntryListener<K, V> cacheEntryListener, Filter filter) {
-            this.cacheEntryListener = cacheEntryListener;
-            this.filter = filter;
         }
     }
 
