@@ -35,7 +35,7 @@ import javax.cache.annotation.CacheResult;
  * @since 1.0
  */
 public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CacheResultMethodDetails> {
- 
+    
     /**
      * Handles the {@link Cache#get(Object)} and {@link Cache#put(Object, Object)} logic as specified for the
      * {@link CacheResult} annotation
@@ -70,7 +70,9 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
         if (!cacheResultAnnotation.skipGet()) {
             //Look in cache for existing data
             result = cache.get(cacheKey);
-            if (result != null) {
+            if (cacheResultAnnotation.cacheNull() && CacheContextSource.NULL_PLACEHOLDER.equals(result)) {
+                return null;
+            } else if (result != null) {
                 //Cache hit, return result
                 return result;
             }
@@ -86,6 +88,8 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
             //Cache non-null result
             if (result != null) {
                 cache.put(cacheKey, result);
+            } else if (cacheResultAnnotation.cacheNull()) {
+                cache.put(cacheKey, CacheContextSource.NULL_PLACEHOLDER);
             }
 
             return result;

@@ -17,6 +17,7 @@
 
 package javax.cache.annotation.impl;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -30,6 +31,11 @@ import java.lang.reflect.Method;
  * @since 1.0
  */
 public interface CacheContextSource<I> {
+    /**
+     * Placeholder used for caching a null value
+     */
+    static final NullPlaceholder NULL_PLACEHOLDER = new NullPlaceholder();
+    
     /**
      * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult}, 
      * {@link javax.cache.annotation.CachePut}, or {@link javax.cache.annotation.CacheRemoveEntry}
@@ -59,4 +65,26 @@ public interface CacheContextSource<I> {
      * @return Static information about the annotated method
      */
     StaticCacheInvocationContext<? extends Annotation> getMethodDetails(Method method, Class<? extends Object> targetClass);
+
+    
+    /**
+     * Used to cache null values
+     */
+    public static final class NullPlaceholder implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
+        private NullPlaceholder() {
+        }
+
+        @Override
+        public int hashCode() {
+            return this.getClass().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            //Don't care about instance equality all NullPlaceholder objects are considered equal
+            return obj instanceof NullPlaceholder;
+        }
+    }
 }
