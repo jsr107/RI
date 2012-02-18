@@ -315,8 +315,8 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cachePutAnnotation.cacheKeyGenerator();
         final CacheKeyGenerator cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
         
-        //Load parameter data, CacheValue is not allowed for CacheResult
-        final ParameterDetails parameterDetails = getParameterDetails(method, false);
+        //Load parameter data, CacheValue is allowed for CachePut
+        final ParameterDetails parameterDetails = getParameterDetails(method, true);
 
         //Get the cache resolver to use for the method
         final CacheResolver cacheResolver = cacheResolverFactory.getCacheResolver(cacheMethodDetails);
@@ -355,7 +355,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheRemoveEntryAnnotation.cacheKeyGenerator();
         final CacheKeyGenerator cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
         
-        //Load parameter data, CacheValue is not allowed for CacheResult
+        //Load parameter data, CacheValue is not allowed for CacheRemoveEntry
         final ParameterDetails parameterDetails = getParameterDetails(method, false);
 
         //Get the cache resolver to use for the method
