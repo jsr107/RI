@@ -17,7 +17,6 @@
 
 package javax.cache.annotation.impl;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
@@ -34,7 +33,7 @@ public interface CacheContextSource<I> {
     /**
      * Placeholder used for caching a null value
      */
-    static final NullPlaceholder NULL_PLACEHOLDER = new NullPlaceholder();
+    NullPlaceholder NULL_PLACEHOLDER = NullPlaceholder.INSTANCE;
     
     /**
      * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult}, 
@@ -68,23 +67,12 @@ public interface CacheContextSource<I> {
 
     
     /**
-     * Used to cache null values
+     * Used to cache null values, there should never be more than the single INSTANCE
      */
-    public static final class NullPlaceholder implements Serializable {
-        private static final long serialVersionUID = 1L;
-        
-        private NullPlaceholder() {
-        }
-
-        @Override
-        public int hashCode() {
-            return this.getClass().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            //Don't care about instance equality all NullPlaceholder objects are considered equal
-            return obj instanceof NullPlaceholder;
-        }
+    public enum NullPlaceholder {
+        /**
+         * Null Placeholder for use with {@link javax.cache.CachePut} and {@link javax.cache.CacheResult}
+         */
+        INSTANCE;
     }
 }
