@@ -8,7 +8,7 @@
     </parent>
     <groupId>javax.cache.implementation</groupId>
     <artifactId>cache-ri</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <packaging>pom</packaging>
 
     <name>JSR107 RI</name>
