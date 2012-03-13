@@ -4,7 +4,7 @@
     <parent>
         <groupId>javax.cache.implementation</groupId>
         <artifactId>cache-ri</artifactId>
-        <version>0.5</version>
+        <version>0.6-SNAPSHOT</version>
     </parent>
     <artifactId>cache-ri-impl</artifactId>
     <packaging>jar</packaging>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>javax.cache.implementation</groupId>
             <artifactId>cache-ri-common</artifactId>
-            <version>0.5</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
 
         <dependency>
