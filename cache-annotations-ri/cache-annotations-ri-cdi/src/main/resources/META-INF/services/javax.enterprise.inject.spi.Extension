@@ -1,1 +1,1 @@
-javax.cache.annotation.impl.cdi.InterceptorExtension
+org.jsr107.ri.annotations.cdi.InterceptorExtension
