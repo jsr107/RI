@@ -3,9 +3,9 @@
 http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
     <interceptors>
-        <class>javax.cache.annotation.impl.cdi.CacheResultInterceptor</class>
-        <class>javax.cache.annotation.impl.cdi.CachePutInterceptor</class>
-        <class>javax.cache.annotation.impl.cdi.CacheRemoveEntryInterceptor</class>
-        <class>javax.cache.annotation.impl.cdi.CacheRemoveAllInterceptor</class>
+        <class>org.jsr107.ri.annotations.cdi.CacheResultInterceptor</class>
+        <class>org.jsr107.ri.annotations.cdi.CachePutInterceptor</class>
+        <class>org.jsr107.ri.annotations.cdi.CacheRemoveEntryInterceptor</class>
+        <class>org.jsr107.ri.annotations.cdi.CacheRemoveAllInterceptor</class>
     </interceptors>
 </beans>
