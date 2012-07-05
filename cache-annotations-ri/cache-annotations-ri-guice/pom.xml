@@ -6,7 +6,8 @@
         <artifactId>cache-annotations-ri</artifactId>
         <version>0.6-SNAPSHOT</version>
     </parent>
-    
+
+    <groupId>javax.cache.implementation</groupId>
     <artifactId>cache-annotations-ri-guice</artifactId>
     <packaging>jar</packaging>
 
