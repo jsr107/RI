@@ -38,8 +38,8 @@ public class DelegatingCacheStatisticsMXBean implements CacheStatisticsMXBean {
     }
 
     @Override
-    public void clearStatistics() {
-        cache.getStatistics().clearStatistics();
+    public void clear() {
+        cache.getStatistics().clear();
     }
 
     @Override

@@ -63,7 +63,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
      * Statistics will also automatically be cleared if internal counters overflow.
      */
     @Override
-    public void clearStatistics() {
+    public void clear() {
         cachePuts.set(0);
         cacheMisses.set(0);
         cacheRemovals.set(0);
@@ -264,7 +264,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
             cacheGetTimeTakenNanos.addAndGet(duration);
         } else {
             //counter full. Just reset.
-            clearStatistics();
+            clear();
             cacheGetTimeTakenNanos.set(duration);
         }
     }
@@ -279,7 +279,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
             cachePutTimeTakenNanos.addAndGet(duration);
         } else {
             //counter full. Just reset.
-            clearStatistics();
+            clear();
             cachePutTimeTakenNanos.set(duration);
         }
     }
@@ -293,7 +293,7 @@ public class RICacheStatistics implements CacheStatistics, Serializable {
             cacheRemoveTimeTakenNanos.addAndGet(duration);
         } else {
             //counter full. Just reset.
-            clearStatistics();
+            clear();
             cacheRemoveTimeTakenNanos.set(duration);
         }
     }
