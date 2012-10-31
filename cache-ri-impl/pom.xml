@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>javax.cache.implementation</groupId>
+        <groupId>org.jsr107.ri</groupId>
         <artifactId>cache-ri</artifactId>
         <version>0.6-SNAPSHOT</version>
     </parent>
@@ -18,7 +18,7 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.cache.implementation</groupId>
+            <groupId>org.jsr107.ri</groupId>
             <artifactId>cache-ri-common</artifactId>
             <version>0.6-SNAPSHOT</version>
         </dependency>
