@@ -19,6 +19,7 @@ package org.jsr107.ri;
 
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
+import javax.cache.event.CacheEntryFilter;
 import javax.cache.mbeans.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
@@ -87,7 +88,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         statistics = new RICacheStatistics(this);
         mBean = new DelegatingCacheMXBean<K, V>(this);
         for (CacheEntryListener<K, V> listener : listeners) {
-            registerCacheEntryListener(listener);
+            //todo make configurable? Are there any listeners at startup?
+            registerCacheEntryListener(listener, false, null, true);
         }
     }
 
@@ -455,7 +457,10 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener) {
+    public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener,
+                                              boolean requireOldValue,
+                                              CacheEntryFilter<K, V> cacheEntryFilter,
+                                              boolean synchronous) {
         return cacheEntryListeners.add(cacheEntryListener);
     }
 
