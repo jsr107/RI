@@ -44,7 +44,7 @@ public class CacheRemoveAllMethodDetails extends AbstractStaticCacheInvocationCo
     }
 
     /* (non-Javadoc)
-     * @see javax.cache.implementation.interceptor.MethodDetails#getInterceptorType()
+     * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
      */
     @Override
     public InterceptorType getInterceptorType() {
