@@ -19,12 +19,14 @@ package org.jsr107.ri;
 
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
-import javax.cache.event.CacheEntryFilter;
-import javax.cache.mbeans.CacheMXBean;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.Status;
+import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.CacheEntryListenerException;
+import javax.cache.event.CacheEntryReadListener;
+import javax.cache.mbeans.CacheMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -102,7 +104,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (key == null) {
             throw new NullPointerException();
         }
-        return getInternal(key);
+        V value = getInternal(key);
+        for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+            if (cacheEntryListener instanceof CacheEntryReadListener) {
+                RICacheEntryEvent<K, V> riCacheEntryEvent = new RICacheEntryEvent<K, V>(this, key, value);
+                ((CacheEntryReadListener) cacheEntryListener).entryRead(riCacheEntryEvent);
+            }
+        }
+        return value;
     }
 
     /**
@@ -461,6 +470,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                                               boolean requireOldValue,
                                               CacheEntryFilter<K, V> cacheEntryFilter,
                                               boolean synchronous) {
+        if (cacheEntryListener == null) {
+            throw new CacheEntryListenerException("A listener may not be null");
+        }
         return cacheEntryListeners.add(cacheEntryListener);
     }
 
