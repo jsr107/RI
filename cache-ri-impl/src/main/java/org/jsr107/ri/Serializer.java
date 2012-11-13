@@ -34,5 +34,5 @@ interface Serializer<T> {
      * @throws NullPointerException if value is null
      * @throws IllegalArgumentException if the value can not be stored
      */
-    Binary<T> createBinary(T value);
+    StorageValue<T> createBinary(T value);
 }

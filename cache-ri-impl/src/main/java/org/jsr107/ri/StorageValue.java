@@ -25,7 +25,7 @@ package org.jsr107.ri;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public interface Binary<T> {
+public interface StorageValue<T> {
     /**
      * Get the stored value
      *

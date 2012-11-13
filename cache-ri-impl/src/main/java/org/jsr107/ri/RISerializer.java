@@ -51,7 +51,7 @@ public class RISerializer<T> implements Serializer<T> {
      * {@inheritDoc}
      */
     @Override
-    public Binary<T> createBinary(T value) {
+    public StorageValue<T> createBinary(T value) {
         if (value == null) {
             throw new NullPointerException();
         }
@@ -61,10 +61,10 @@ public class RISerializer<T> implements Serializer<T> {
     }
 
     /**
-     * Binary that stores by reference
+     * StorageValue that stores by reference
      * @param <V> the type
      */
-    private static final class RIByReferenceBinary<V> implements Binary<V> {
+    private static final class RIByReferenceBinary<V> implements StorageValue<V> {
         private final V value;
 
         public RIByReferenceBinary(V value) {
@@ -81,9 +81,9 @@ public class RISerializer<T> implements Serializer<T> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Binary<?> binary = (Binary<?>) o;
+            StorageValue<?> storageValue = (StorageValue<?>) o;
 
-            return hashCode() == binary.hashCode() && get().equals(binary.get());
+            return hashCode() == storageValue.hashCode() && get().equals(storageValue.get());
         }
 
         @Override
@@ -93,9 +93,9 @@ public class RISerializer<T> implements Serializer<T> {
     }
 
     /**
-     * Binary implementation backed by a byte array.
+     * StorageValue implementation backed by a byte array.
      */
-    private static final class RIBinary<V> implements Binary<V> {
+    private static final class RIBinary<V> implements StorageValue<V> {
         private final byte[] bytes;
         private final int hashCode;
         private final SerializationHelper serializationHelper;
@@ -140,9 +140,9 @@ public class RISerializer<T> implements Serializer<T> {
                 return hashCode == riBinary.hashCode &&
                         (Arrays.equals(bytes, riBinary.bytes));
             } else {
-                Binary<?> binary = (Binary<?>) o;
-                return hashCode == binary.hashCode() &&
-                        get().equals(binary.get());
+                StorageValue<?> storageValue = (StorageValue<?>) o;
+                return hashCode == storageValue.hashCode() &&
+                        get().equals(storageValue.get());
             }
         }
 
