@@ -265,15 +265,25 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             throw new NullPointerException("key");
         }
         //store.putAll(map);
+        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             K key = entry.getKey();
             lockManager.lock(key);
             try {
                 store.put(key, entry.getValue());
+                events.add(new RICacheEntryEvent<K, V>(this, key, entry.getValue()));
             } finally {
                 lockManager.unLock(key);
             }
         }
+
+        //call listeners
+        for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+            if (cacheEntryListener instanceof CacheEntryCreatedListener) {
+                ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
+            }
+        }
+
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(map.size());
             statistics.addPutTimeNano(System.nanoTime() - start);
