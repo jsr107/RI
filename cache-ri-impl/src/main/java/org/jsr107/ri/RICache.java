@@ -22,6 +22,8 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
 import javax.cache.CacheWriter;
 import javax.cache.Status;
+import javax.cache.event.CacheEntryCreatedListener;
+import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
@@ -57,6 +59,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 1.0
  */
 public final class RICache<K, V> extends AbstractCache<K, V> {
+
     private final RISimpleCache<K, V> store;
     private final Set<CacheEntryListener<? super K, ? super V>> cacheEntryListeners =
             new CopyOnWriteArraySet<CacheEntryListener<? super K, ? super V>>();
@@ -107,8 +110,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         V value = getInternal(key);
         for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
             if (cacheEntryListener instanceof CacheEntryReadListener) {
-                RICacheEntryEvent<K, V> riCacheEntryEvent = new RICacheEntryEvent<K, V>(this, key, value);
-                ((CacheEntryReadListener) cacheEntryListener).entryRead(riCacheEntryEvent);
+                ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+                events.add(new RICacheEntryEvent<K, V>(this, key, value));
+                ((CacheEntryReadListener<K, V>) cacheEntryListener).onRead(events);
             }
         }
         return value;
@@ -216,6 +220,13 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         lockManager.lock(key);
         try {
             store.put(key, value);
+            for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+                if (cacheEntryListener instanceof CacheEntryCreatedListener) {
+                    ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+                    events.add(new RICacheEntryEvent<K, V>(this, key, value));
+                    ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
+                }
+            }
         } finally {
             lockManager.unLock(key);
         }

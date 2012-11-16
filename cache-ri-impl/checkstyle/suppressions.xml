@@ -10,6 +10,7 @@
     <suppress checks="StrictDuplicateCode" files=".java" lines="1-53"/>
 
     <suppress checks="NPathComplexity" files="RICache.java"/>
+    <suppress checks="ClassDataAbstractionCoupling" files="RICache.java"/>
     <suppress checks="CyclomaticComplexity" files="RICacheConfiguration.java"/>
     <suppress checks="NPathComplexity" files="RICacheConfiguration.java"/>
     <suppress checks="NPathComplexity" files="AbstractCacheConfiguration.java"/>
