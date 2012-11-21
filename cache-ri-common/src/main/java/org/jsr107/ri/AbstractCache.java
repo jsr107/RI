@@ -17,16 +17,12 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheWriter;
 import javax.cache.Caching;
-import javax.cache.InvalidConfigurationException;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -58,12 +54,9 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param cacheManagerName the cache manager name
      * @param classLoader      the class loader
      * @param configuration    the configuration
-     * @param cacheLoader      the cache loader
-     * @param cacheWriter      the cache writer
      */
     public AbstractCache(String cacheName, String cacheManagerName, ClassLoader classLoader,
-                  CacheConfiguration<K, V> configuration,
-                  CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter) {
+                  CacheConfiguration<K, V> configuration) {
         assert configuration != null;
         this.configuration = configuration;
 
@@ -76,8 +69,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
         assert classLoader != null;
         this.classLoader = classLoader;
 
-        this.cacheWriter = cacheWriter;
-        this.cacheLoader = cacheLoader;
+        this.cacheWriter = configuration.getCacheWriter();
+        this.cacheLoader = configuration.getCacheLoader();
     }
 
     /**
@@ -147,140 +140,5 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      */
     protected void submit(FutureTask<?> task) {
         executorService.submit(task);
-    }
-
-    /**
-     * Builder
-     *
-     * @param <K>
-     * @param <V>
-     * @author Yannis Cosmadopoulos
-     */
-    public abstract static class Builder<K, V> implements CacheBuilder<K, V> {
-        /**
-         * cache name
-         */
-        protected final String cacheName;
-        /**
-         * cache manager name
-         */
-        protected final String cacheManagerName;
-        /**
-         * class loader
-         */
-        protected final ClassLoader classLoader;
-        /**
-         * cache loader
-         */
-        protected CacheLoader<K, ? extends V> cacheLoader;
-        /**
-         * cache writer
-         */
-        protected CacheWriter<? super K, ? super V> cacheWriter;
-
-
-        private final AbstractCacheConfiguration.Builder configurationBuilder;
-
-        /**
-         * builder
-         * @param cacheName
-         * @param cacheManagerName
-         * @param classLoader
-         */
-        public Builder(String cacheName, String cacheManagerName,
-                       ClassLoader classLoader,
-                       AbstractCacheConfiguration.Builder configurationBuilder) {
-            if (cacheName == null) {
-                throw new NullPointerException("cacheName");
-            }
-            this.cacheName = cacheName;
-            if (classLoader == null) {
-                throw new NullPointerException("cacheLoader");
-            }
-            this.classLoader = classLoader;
-            if (cacheManagerName == null) {
-                throw new NullPointerException("cacheManagerName");
-            }
-            this.cacheManagerName = cacheManagerName;
-            if (configurationBuilder == null) {
-                throw new NullPointerException("configurationBuilder");
-            }
-            this.configurationBuilder = configurationBuilder;
-        }
-
-        @Override
-        public Builder<K, V> setCacheLoader(CacheLoader<K, ? extends V> cacheLoader) {
-            if (cacheLoader == null) {
-                throw new NullPointerException("cacheLoader");
-            }
-            this.cacheLoader = cacheLoader;
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setCacheWriter(CacheWriter<? super K, ? super V> cacheWriter) {
-            if (cacheWriter == null) {
-                throw new NullPointerException("cacheWriter");
-            }
-            this.cacheWriter = cacheWriter;
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setStatisticsEnabled(boolean enableStatistics) {
-            configurationBuilder.setStatisticsEnabled(enableStatistics);
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setReadThrough(boolean readThrough) {
-            configurationBuilder.setReadThrough(readThrough);
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setWriteThrough(boolean writeThrough) {
-            configurationBuilder.setWriteThrough(writeThrough);
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration duration) {
-            if (type == null) {
-                throw new NullPointerException();
-            }
-            if (duration == null) {
-                throw new NullPointerException();
-            }
-            configurationBuilder.setExpiry(type, duration);
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setStoreByValue(boolean storeByValue) {
-            configurationBuilder.setStoreByValue(storeByValue);
-            return this;
-        }
-
-        @Override
-        public Builder<K, V> setTransactionEnabled(IsolationLevel isolationLevel, Mode mode) {
-            configurationBuilder.setTransactionEnabled(isolationLevel, mode);
-            return this;
-        }
-
-        /**
-         * create configuration
-         * @return a CacheConfiguration
-         */
-        protected CacheConfiguration<K, V> createCacheConfiguration() {
-            CacheConfiguration<K, V> configuration = configurationBuilder.build();
-            if (configuration.isReadThrough() && (cacheLoader == null)) {
-                throw new InvalidConfigurationException("cacheLoader");
-            }
-            if (configuration.isWriteThrough() && (cacheWriter == null)) {
-                throw new InvalidConfigurationException("cacheWriter");
-            }
-            return configuration;
-        }
     }
 }

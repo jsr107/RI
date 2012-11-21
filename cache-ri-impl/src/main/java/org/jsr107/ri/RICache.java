@@ -20,7 +20,6 @@ package org.jsr107.ri;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
-import javax.cache.CacheWriter;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
@@ -72,24 +71,25 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @param cacheManagerName the cache manager name
      * @param classLoader      the class loader
      * @param configuration    the configuration
-     * @param cacheLoader      the cache loader
-     * @param cacheWriter      the cache writer
-     * @param listeners        the cache listeners
      */
-    private RICache(String cacheName, String cacheManagerName,
-                    ClassLoader classLoader,
-                    CacheConfiguration<K, V> configuration,
-                    CacheLoader<K, ? extends V> cacheLoader, CacheWriter<? super K, ? super V> cacheWriter,
-                    Set<CacheEntryListener<K, V>> listeners) {
-        super(cacheName, cacheManagerName, classLoader, configuration, cacheLoader, cacheWriter);
+    RICache(String cacheName, 
+            String cacheManagerName,
+            ClassLoader classLoader,
+            CacheConfiguration<K, V> configuration) {
+        
+        super(cacheName, cacheManagerName, classLoader, configuration);
+        
         status = Status.UNINITIALISED;
         store = configuration.isStoreByValue() ?
                 new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader),
                         new RISerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
+                
         statistics = new RICacheStatistics(this);
+        
         mBean = new DelegatingCacheMXBean<K, V>(this);
-        for (CacheEntryListener<K, V> listener : listeners) {
+        
+        for (CacheEntryListener<? super K, ? super V> listener : configuration.getCacheEntryListeners()) {
             //todo make configurable? Are there any listeners at startup?
             registerCacheEntryListener(listener, false, null, true);
         }
@@ -768,54 +768,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             Map<K, ? extends V> value = cacheLoader.loadAll(keysNotInStore);
             cache.putAll(value);
             return value;
-        }
-    }
-
-    /**
-     * A Builder for RICache.
-     *
-     * @param <K>
-     * @param <V>
-     * @author Yannis Cosmadopoulos
-     */
-    public static class Builder<K, V> extends AbstractCache.Builder<K, V> {
-        private final Set<CacheEntryListener<K, V>> listeners = new CopyOnWriteArraySet<CacheEntryListener<K, V>>();
-
-        /**
-         * Construct a builder.
-         *
-         * @param cacheName        the name of the cache to be built
-         * @param cacheManagerName the name of the cache manager
-         * @param classLoader the class loader
-         */
-        public Builder(String cacheName, String cacheManagerName, ClassLoader classLoader) {
-            this(cacheName, cacheManagerName, classLoader, new RICacheConfiguration.Builder());
-        }
-
-        private Builder(String cacheName, String cacheManagerName, ClassLoader classLoader,
-                        RICacheConfiguration.Builder configurationBuilder) {
-            super(cacheName, cacheManagerName, classLoader, configurationBuilder);
-        }
-
-        /**
-         * Builds the cache
-         *
-         * @return a constructed cache.
-         */
-        @Override
-        public RICache<K, V> build() {
-            CacheConfiguration<K, V> configuration = createCacheConfiguration();
-            RICache<K, V> riCache = new RICache<K, V>(cacheName, cacheManagerName,
-                classLoader, configuration,
-                cacheLoader, cacheWriter, listeners);
-            ((RICacheConfiguration) configuration).setRiCache(riCache);
-            return riCache;
-        }
-
-        @Override
-        public Builder<K, V> registerCacheEntryListener(CacheEntryListener<K, V> listener) {
-            listeners.add(listener);
-            return this;
         }
     }
 

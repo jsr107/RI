@@ -9,6 +9,6 @@
     <!-- Suppress duplicate checking of copyright notice -->
     <suppress checks="StrictDuplicateCode" files=".java" lines="1-53"/>
 
-    <suppress checks="NPathComplexity" files="AbstractCacheConfiguration.java"/>
-
+    <suppress checks="NPathComplexity" files="SimpleCacheConfiguration.java"/>
+    <suppress checks="CyclomaticComplexity" files="SimpleCacheConfiguration.java"/>
 </suppressions>

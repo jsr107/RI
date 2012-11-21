@@ -23,16 +23,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.cache.Cache;
-import javax.cache.CacheBuilder;
+import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 import javax.transaction.UserTransaction;
 
 /**
@@ -68,39 +68,61 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
     }
 
     /**
-     * Returns the status of this CacheManager.
-     * <p/>
-     *
-     * @return one of {@link javax.cache.Status}
+     * {@inheritDoc}
      */
     @Override
     public Status getStatus() {
         return status;
     }
 
+    
     /**
      * {@inheritDoc}
      */
     @Override
-    public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName) {
-
-        if (caches.get(cacheName) != null) {
-            throw new CacheException("Cache " + cacheName + " already exists");
+    public <K, V> Cache<K, V> configureCache(String cacheName, CacheConfiguration<K, V> cacheConfiguration) {
+        if (status != Status.STARTED) {
+            throw new IllegalStateException();
         }
 
-        //TODO: where did these naming constraints come from?
         if (cacheName == null) {
-            throw new NullPointerException("A cache name must must not be null.");
+            throw new NullPointerException("cacheName must not be null");
         }
-        Pattern searchPattern = Pattern.compile("\\S+");
-        Matcher matcher = searchPattern.matcher(cacheName);
-        if (!matcher.find()) {
-            throw new IllegalArgumentException("A cache name must contain one or more non-whitespace characters");
+        
+        if (cacheConfiguration == null) {
+            throw new NullPointerException("cacheConfiguration must not be null");
         }
-
-        return new RICacheBuilder<K, V>(cacheName);
+        
+        if (cacheConfiguration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
+            cacheConfiguration.getTransactionMode() != Mode.NONE) {
+            throw new IllegalArgumentException("isolation level expected when mode specified");
+        }
+        
+        if (cacheConfiguration.getTransactionIsolationLevel() != IsolationLevel.NONE &&
+            cacheConfiguration.getTransactionMode() == Mode.NONE) {
+            throw new IllegalArgumentException("mode expected when isolation level specified");
+        }
+        
+        synchronized (caches) {
+            Cache<?, ?> cache = caches.get(cacheName);
+            
+            if (cache == null) {
+                cache = new RICache<K, V>(cacheName, getName(), getClassLoader(), cacheConfiguration);
+                caches.put(cache.getName(), cache);
+                
+                cache.start();
+            } else {
+                //ensure that the existing cache has the same configuration as the provided one
+                if (!cache.getConfiguration().equals(cacheConfiguration)) {
+                    throw new CacheException("Cache " + cache.getName() + " already registered but with a different configuration");
+                }                
+            }
+        
+            return (Cache<K, V>)cache;
+        }
     }
-
+    
+    
     /**
      * {@inheritDoc}
      */
@@ -132,16 +154,6 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
             }
             return Collections.unmodifiableSet(set);
         }
-    }
-
-    private void addCacheInternal(Cache<?, ?> cache) {
-        synchronized (caches) {
-            if (caches.get(cache.getName()) != null) {
-                throw new CacheException("Cache " + cache.getName() + " already exists");
-            }
-            caches.put(cache.getName(), cache);
-        }
-        cache.start();
     }
 
     /**
@@ -222,24 +234,5 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
      */
     Logger getLogger() {
         return LOGGER;
-    }
-
-    /**
-     * RI implementation of {@link CacheBuilder}
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     */
-    private class RICacheBuilder<K, V> extends DelegatingCacheBuilder<K, V> {
-        public RICacheBuilder(String cacheName) {
-            super(new RICache.Builder<K, V>(cacheName, getName(), getClassLoader()));
-        }
-
-        @Override
-        public Cache<K, V> build() {
-            Cache<K, V>  cache = super.build();
-            addCacheInternal(cache);
-            return cache;
-        }
     }
 }

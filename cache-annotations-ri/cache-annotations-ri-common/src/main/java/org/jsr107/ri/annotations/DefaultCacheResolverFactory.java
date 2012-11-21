@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 
 import javax.cache.Cache;
-import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.annotation.CacheMethodDetails;
@@ -68,9 +67,8 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         Cache<Object, Object> cache = this.cacheManager.getCache(cacheName);
         
         if (cache == null) {
-            this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a copy of the default cache will be created.");
-            final CacheBuilder<Object, Object> cacheBuilder = this.cacheManager.<Object, Object>createCacheBuilder(cacheName);
-            cache = cacheBuilder.build();
+            this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
+            cache = this.cacheManager.configureCache(cacheName, new DefaultCacheConfiguration());
         }
         
         return new DefaultCacheResolver(cache);
@@ -88,9 +86,8 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         
         if (cache == null) {
             this.logger.warning("No Cache named '" + exceptionCacheName + 
-                    "' was found in the CacheManager, a copy of the default cache will be created.");
-            final CacheBuilder<Object, Object> cacheBuilder = this.cacheManager.<Object, Object>createCacheBuilder(exceptionCacheName);
-            cache = cacheBuilder.build();
+                    "' was found in the CacheManager, a default cache will be created.");
+            cache = this.cacheManager.configureCache(exceptionCacheName, new DefaultCacheConfiguration());
         }
         
         return new DefaultCacheResolver(cache);
