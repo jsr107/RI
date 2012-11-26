@@ -27,6 +27,7 @@ import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryReadListener;
+import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.mbeans.CacheMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,23 +76,23 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      * @param classLoader      the class loader
      * @param configuration    the configuration
      */
-    RICache(String cacheName, 
+    RICache(String cacheName,
             String cacheManagerName,
             ClassLoader classLoader,
             CacheConfiguration<K, V> configuration) {
-        
+
         super(cacheName, cacheManagerName, classLoader, configuration);
-        
+
         status = Status.UNINITIALISED;
         store = configuration.isStoreByValue() ?
                 new RIByValueSimpleCache<K, V>(new RISerializer<K>(classLoader),
                         new RISerializer<V>(classLoader)) :
                 new RIByReferenceSimpleCache<K, V>();
-                
+
         statistics = new RICacheStatistics(this);
-        
+
         mBean = new DelegatingCacheMXBean<K, V>(this);
-        
+
         for (CacheEntryListener<? super K, ? super V> listener : configuration.getCacheEntryListeners()) {
             //todo make configurable? Are there any listeners at startup?
             registerCacheEntryListener(listener, false, null, true);
@@ -128,11 +129,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             throw new NullPointerException("key");
         }
         // will throw NPE if keys=null
+        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
         HashMap<K, V> map = new HashMap<K, V>(keys.size());
         for (K key : keys) {
             V value = getInternal(key);
             if (value != null) {
                 map.put(key, value);
+                //listener only triggered when not null.
+                events.add(new RICacheEntryEvent<K, V>(this, key, value));
             }
         }
         return map;
@@ -219,12 +223,26 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         lockManager.lock(key);
         try {
+            boolean update = false;
+            if (store.get(key) != null) {
+                update = true;
+            }
             store.put(key, value);
-            for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
-                if (cacheEntryListener instanceof CacheEntryCreatedListener) {
-                    ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
-                    events.add(new RICacheEntryEvent<K, V>(this, key, value));
-                    ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
+            if (!update) {
+                for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+                    if (cacheEntryListener instanceof CacheEntryCreatedListener) {
+                        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+                        events.add(new RICacheEntryEvent<K, V>(this, key, value));
+                        ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
+                    }
+                }
+            } else {
+                for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+                    if (cacheEntryListener instanceof CacheEntryUpdatedListener) {
+                        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+                        events.add(new RICacheEntryEvent<K, V>(this, key, value));
+                        ((CacheEntryUpdatedListener<K, V>) cacheEntryListener).onUpdated(events);
+                    }
                 }
             }
         } finally {
@@ -580,7 +598,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (cls.isAssignableFrom(this.getClass())) {
             return cls.cast(this);
         }
-        
+
         throw new IllegalArgumentException("Unwrapping to " + cls + " is not a supported by this implementation");
     }
 
@@ -702,6 +720,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             this.mapIterator = mapIterator;
             this.lockManager = lockManager;
         }
+
         /**
          * {@inheritDoc}
          */
@@ -794,6 +813,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
     /**
      * Simple lock management
+     *
      * @param <K> the type of the object to be locked
      * @author Yannis Cosmadopoulos
      * @since 1.0
@@ -807,6 +827,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
         /**
          * Lock the object
+         *
          * @param key the key
          */
         private void lock(K key) {
@@ -827,6 +848,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
         /**
          * Unlock the object
+         *
          * @param key the object
          */
         private void unLock(K key) {
@@ -836,6 +858,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
         /**
          * Factory/pool
+         *
          * @author Yannis Cosmadopoulos
          * @since 1.0
          */
@@ -872,6 +895,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
 
     /**
      * A mutable entry
+     *
      * @param <K>
      * @param <V>
      * @author Yannis Cosmadopoulos
