@@ -108,8 +108,8 @@ class RIByValueSimpleCache<K, V> implements RISimpleCache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public void put(K key, V value) {
-        store.put(createKeyHolder(key), createValueHolder(value));
+    public V put(K key, V value) {
+         return returnValue(store.put(createKeyHolder(key), createValueHolder(value)));
     }
 
     @Override

@@ -49,10 +49,11 @@ interface RISimpleCache<K, V> extends Iterable<Map.Entry<K, V>> {
 
     /**
      * @param key   the key
-     * @param value the valu
+     * @param value the value
+     * @return oldValue
      * @see javax.cache.Cache#put(Object, Object)
      */
-    void put(K key, V value);
+    V put(K key, V value);
 
     /**
      * @param key   the key

@@ -64,9 +64,9 @@ public class RIExpiringByReferenceSimpleCache<K, V> implements RISimpleCache<K, 
      * {@inheritDoc}
      */
     @Override
-    public void put(K key, V value) {
+    public V put(K key, V value) {
         long now = System.currentTimeMillis();
-        store.put(key, new ExpiryWrapper<V>(value, now));
+        return (store.put(key, new ExpiryWrapper<V>(value, now))).getValue(now);
     }
 
     /**

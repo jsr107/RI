@@ -38,10 +38,14 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
      *
      * @param source the cache that originated the event
      */
-    public RICacheEntryEvent(Cache source, K key, V value) {
+    public RICacheEntryEvent(Cache source, K key, V value, V oldValue) {
         super(source);
         this.key = key;
         this.value = value;
+        this.oldValue = oldValue;
+        if (oldValue != null) {
+            oldValueAvailable = true;
+        }
     }
 
     /**

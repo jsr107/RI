@@ -94,7 +94,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         mBean = new DelegatingCacheMXBean<K, V>(this);
 
         for (CacheEntryListener<? super K, ? super V> listener : configuration.getCacheEntryListeners()) {
-            //todo make configurable? Are there any listeners at startup?
             registerCacheEntryListener(listener, false, null, true);
         }
     }
@@ -112,7 +111,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
             if (cacheEntryListener instanceof CacheEntryReadListener) {
                 ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
-                events.add(new RICacheEntryEvent<K, V>(this, key, value));
+                events.add(new RICacheEntryEvent<K, V>(this, key, value, null));
                 ((CacheEntryReadListener<K, V>) cacheEntryListener).onRead(events);
             }
         }
@@ -136,7 +135,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             if (value != null) {
                 map.put(key, value);
                 //listener only triggered when not null.
-                events.add(new RICacheEntryEvent<K, V>(this, key, value));
+                events.add(new RICacheEntryEvent<K, V>(this, key, value, null));
             }
         }
         return map;
@@ -220,56 +219,45 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public void put(K key, V value) {
         checkStatusStarted();
-        long start = statisticsEnabled() ? System.nanoTime() : 0;
-        lockManager.lock(key);
-        try {
-            boolean update = false;
-            if (store.get(key) != null) {
-                update = true;
-            }
-            store.put(key, value);
-            if (!update) {
-                for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
-                    if (cacheEntryListener instanceof CacheEntryCreatedListener) {
-                        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
-                        events.add(new RICacheEntryEvent<K, V>(this, key, value));
-                        ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
-                    }
-                }
-            } else {
-                for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
-                    if (cacheEntryListener instanceof CacheEntryUpdatedListener) {
-                        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
-                        events.add(new RICacheEntryEvent<K, V>(this, key, value));
-                        ((CacheEntryUpdatedListener<K, V>) cacheEntryListener).onUpdated(events);
-                    }
-                }
-            }
-        } finally {
-            lockManager.unLock(key);
-        }
-        if (statisticsEnabled()) {
-            statistics.increaseCachePuts(1);
-            statistics.addPutTimeNano(System.nanoTime() - start);
-        }
+        //in-process makes not performance difference
+        getAndPut(key, value);
     }
 
     @Override
     public V getAndPut(K key, V value) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        V result;
+        V oldValue;
         lockManager.lock(key);
         try {
-            result = store.getAndPut(key, value);
+            oldValue = store.getAndPut(key, value);
         } finally {
             lockManager.unLock(key);
         }
+
+        if (oldValue == null) {
+            for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+                if (cacheEntryListener instanceof CacheEntryCreatedListener) {
+                    ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+                    events.add(new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                    ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
+                }
+            }
+        } else {
+            for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
+                if (cacheEntryListener instanceof CacheEntryUpdatedListener) {
+                    ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+                    events.add(new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                    ((CacheEntryUpdatedListener<K, V>) cacheEntryListener).onUpdated(events);
+                }
+            }
+        }
+
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
             statistics.addPutTimeNano(System.nanoTime() - start);
         }
-        return result;
+        return oldValue;
     }
 
     /**
@@ -283,13 +271,18 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             throw new NullPointerException("key");
         }
         //store.putAll(map);
-        ArrayList events = new ArrayList<CacheEntryEvent<K, V>>();
+        ArrayList newEvents = new ArrayList<CacheEntryEvent<K, V>>();
+        ArrayList replaceEvents = new ArrayList<CacheEntryEvent<K, V>>();
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             K key = entry.getKey();
             lockManager.lock(key);
             try {
-                store.put(key, entry.getValue());
-                events.add(new RICacheEntryEvent<K, V>(this, key, entry.getValue()));
+                V oldValue = store.put(key, entry.getValue());
+                if (oldValue == null) {
+                    newEvents.add(new RICacheEntryEvent<K, V>(this, key, entry.getValue(), oldValue));
+                } else {
+                    replaceEvents.add(new RICacheEntryEvent<K, V>(this, key, entry.getValue(), oldValue));
+                }
             } finally {
                 lockManager.unLock(key);
             }
@@ -298,7 +291,10 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         //call listeners
         for (CacheEntryListener<? super K, ? super V> cacheEntryListener : cacheEntryListeners) {
             if (cacheEntryListener instanceof CacheEntryCreatedListener) {
-                ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(events);
+                ((CacheEntryCreatedListener<K, V>) cacheEntryListener).onCreated(newEvents);
+            }
+            if (cacheEntryListener instanceof CacheEntryUpdatedListener) {
+                ((CacheEntryUpdatedListener<K, V>) cacheEntryListener).onUpdated(replaceEvents);
             }
         }
 
