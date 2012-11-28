@@ -36,8 +36,7 @@ import javax.cache.transaction.Mode;
 import javax.transaction.UserTransaction;
 
 /**
- * The reference implementation for JSR107.
- * <p/>
+ * The reference implementation of the {@link CacheManager}.
  *
  * @author Yannis Cosmadopoulos
  * @since 1.0

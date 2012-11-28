@@ -21,6 +21,8 @@ import javax.cache.Cache;
 import javax.cache.event.CacheEntryEvent;
 
 /**
+ * The reference implementation of the {@link CacheEntryEvent}.
+ * 
  * @param <K> the type of keys maintained by this cache
  * @param <V> the type of cached values
  * @author Greg Luck
@@ -35,17 +37,35 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
 
     /**
      * Constructs a cache entry event from a given cache as source
+     * (without an old value)
      *
      * @param source the cache that originated the event
+     * @param key    the key
+     * @param value  the value
      */
-    public RICacheEntryEvent(Cache source, K key, V value, V oldValue) {
+    public RICacheEntryEvent(Cache<K, V> source, K key, V value) {
+        super(source);
+        this.key = key;
+        this.value = value;
+        this.oldValue = null;
+        this.oldValueAvailable = false;
+    }
+    
+    /**
+     * Constructs a cache entry event from a given cache as source
+     * (with an old value)
+     *
+     * @param source   the cache that originated the event
+     * @param key      the key
+     * @param value    the value
+     * @param oldValue the oldValue
+     */
+    public RICacheEntryEvent(Cache<K, V> source, K key, V value, V oldValue) {
         super(source);
         this.key = key;
         this.value = value;
         this.oldValue = oldValue;
-        if (oldValue != null) {
-            oldValueAvailable = true;
-        }
+        this.oldValueAvailable = true;
     }
 
     /**

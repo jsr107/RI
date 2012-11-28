@@ -19,8 +19,7 @@ package org.jsr107.ri;
 
 import java.util.ArrayList;
 
-import javax.cache.CacheConfiguration.Duration;
-import javax.cache.CacheConfiguration.ExpiryType;
+import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.event.CacheEntryListener;
@@ -40,8 +39,7 @@ import javax.cache.transaction.Mode;
 public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheConfigurationBuilder<K, V, ? extends B>> 
     implements CacheConfigurationBuilder<K, V, B> {
 
-    private static final ExpiryType DEFAULT_EXPIRY_TYPE = ExpiryType.MODIFIED;
-    private static final Duration DEFAULT_EXPIRY_TIME_TO_LIVE = Duration.ETERNAL;
+    private static final CacheEntryExpiryPolicy DEFAULT_CACHE_ENTRY_EXPIRY_POLICY = CacheEntryExpiryPolicy.DEFAULT;
     private static final boolean DEFAULT_IS_READ_THROUGH = false;
     private static final boolean DEFAULT_IS_WRITE_THROUGH = false;
     private static final boolean DEFAULT_IS_STATISTICS_ENABLED = false;
@@ -84,16 +82,11 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
      * A flag indicating if the cache will be store-by-value or store-by-reference.
      */
     protected boolean storeByValue;
-    
-    /**
-     * The expiration time-to-live {@link Duration}.
-     */
-    protected Duration expiryDuration;
 
     /**
-     * The type of expiry.
+     * The {@link CacheEntryExpiryPolicy}.
      */
-    protected ExpiryType expiryType;
+    protected CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy;
     
     /**
      * The transaction {@link IsolationLevel}.
@@ -113,8 +106,7 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
         this.cacheEntryListeners = new ArrayList<CacheEntryListener<? super K, ? super V>>();
         this.cacheLoader = null;
         this.cacheWriter = null;
-        this.expiryType = DEFAULT_EXPIRY_TYPE;
-        this.expiryDuration = DEFAULT_EXPIRY_TIME_TO_LIVE;
+        this.cacheEntryExpiryPolicy = DEFAULT_CACHE_ENTRY_EXPIRY_POLICY;
         this.isReadThrough = DEFAULT_IS_READ_THROUGH;
         this.isWriteThrough = DEFAULT_IS_WRITE_THROUGH;
         this.isStatisticsEnabled = DEFAULT_IS_STATISTICS_ENABLED;
@@ -154,17 +146,12 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
      * {@inheritDoc}
      */
     @Override
-    public B setExpiry(ExpiryType expiryType, Duration duration) {
-        if (expiryType == null) {
-            throw new NullPointerException("expiryType can not be null");
-        }
-        
-        if (duration == null) {
-            throw new NullPointerException("duration can not be null");
+    public B setCacheEntryExpiryPolicy(CacheEntryExpiryPolicy<? super K, ? super V> policy) {
+        if (policy == null) {
+            throw new NullPointerException("policy can not be null");
         }
             
-        this.expiryType = expiryType;
-        this.expiryDuration = duration;
+        this.cacheEntryExpiryPolicy = policy;
         return (B)this;
     }
     

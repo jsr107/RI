@@ -50,7 +50,7 @@ public class SimpleCacheConfigurationBuilder<K, V> extends
         return new SimpleCacheConfiguration<K, V>(
                 cacheEntryListeners, 
                 cacheLoader, cacheWriter, 
-                expiryDuration, expiryType, 
+                cacheEntryExpiryPolicy,
                 isReadThrough, isWriteThrough, 
                 isStatisticsEnabled, 
                 storeByValue, 

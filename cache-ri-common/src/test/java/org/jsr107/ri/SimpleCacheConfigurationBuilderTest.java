@@ -20,6 +20,8 @@ import org.jsr107.ri.SimpleCacheConfigurationBuilder;
 import org.junit.Test;
 
 import javax.cache.CacheConfiguration;
+import javax.cache.CacheConfiguration.Duration;
+import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.Caching;
@@ -100,47 +102,38 @@ public class SimpleCacheConfigurationBuilderTest {
     @Test(expected=NullPointerException.class)
     public void setExpiry_null() {
         CacheConfigurationBuilder<Integer, String, ?> builder = getCacheConfigurationBuilder();
-        builder.setExpiry(null, CacheConfiguration.Duration.ETERNAL);
+        builder.setCacheEntryExpiryPolicy(null);
         fail();
-    }
-
-    @Test
-    public void setExpiry_good_null() {
-        CacheConfigurationBuilder<Integer, String, ?> builder = getCacheConfigurationBuilder();
-        try {
-            builder.setExpiry(CacheConfiguration.ExpiryType.MODIFIED, null);
-            fail();
-        } catch(NullPointerException e) {
-            //
-        }
     }
 
     @Test
     public void getExpiry_default() {
         CacheConfigurationBuilder<Integer, String, ?> builder = getCacheConfigurationBuilder();
         CacheConfiguration<Integer, String> config = builder.build();
-        assertEquals(CacheConfiguration.ExpiryType.MODIFIED, config.getExpiryType());
-        assertEquals(CacheConfiguration.Duration.ETERNAL, config.getExpiryDuration());
+        assertEquals(CacheEntryExpiryPolicy.DEFAULT, config.getCacheEntryExpiryPolicy());
     }
 
     @Test
-    public void setExpiry_accessed() {
-        CacheConfigurationBuilder<Integer, String, ?> builder = getCacheConfigurationBuilder();
-        CacheConfiguration.ExpiryType type = CacheConfiguration.ExpiryType.ACCESSED;
-        CacheConfiguration.Duration duration = new CacheConfiguration.Duration(TimeUnit.MINUTES, 4L);
-        builder.setExpiry(type, duration);
-        CacheConfiguration<Integer, String> config = builder.build();
-        assertEquals(duration, config.getExpiryDuration());
+    public void getDefaultExpiryDuration_creation() {
+        CacheEntryExpiryPolicy<?, ?> policy = CacheEntryExpiryPolicy.DEFAULT;
+        Duration expiryDuration = policy.getTTLForCreatedEntry(null);
+        assertEquals(Duration.ETERNAL, expiryDuration);
     }
 
     @Test
-    public void setExpiry_modified() {
-        CacheConfigurationBuilder<Integer, String, ?> builder = getCacheConfigurationBuilder();
-        CacheConfiguration.ExpiryType type = CacheConfiguration.ExpiryType.MODIFIED;
-        CacheConfiguration.Duration duration = new CacheConfiguration.Duration(TimeUnit.HOURS, 4L);
-        builder.setExpiry(type, duration);
-        CacheConfiguration<Integer, String> config = builder.build();
-        assertEquals(duration, config.getExpiryDuration());
+    public void getDefaultExpiryDuration_accessed() {
+        CacheEntryExpiryPolicy<?, ?> policy = CacheEntryExpiryPolicy.DEFAULT;
+        Duration currentDuration = new Duration(TimeUnit.HOURS, 4L);
+        Duration expiryDuration = policy.getTTLForAccessedEntry(null, currentDuration);
+        assertEquals(currentDuration, expiryDuration);
+    }
+
+    @Test
+    public void getDefaultExpiryDuration_modified() {
+        CacheEntryExpiryPolicy<?, ?> policy = CacheEntryExpiryPolicy.DEFAULT;
+        Duration currentDuration = new Duration(TimeUnit.HOURS, 4L);        
+        Duration expiryDuration = policy.getTTLForModifiedEntry(null, currentDuration);
+        assertEquals(currentDuration, expiryDuration);
     }
 
     protected boolean isSupported(OptionalFeature feature) {

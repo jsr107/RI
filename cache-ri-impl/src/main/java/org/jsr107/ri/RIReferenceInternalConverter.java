@@ -14,25 +14,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.jsr107.ri;
 
 /**
- * Tagging interface for a binary representation of a value or key.
- * An implementation may be a wrapper of a byte array, an interface to a stream or to a NIO buffer.
+ * An {@link RIInternalConverter} that simply returns a reference to the 
+ * provided value.
  *
- * @param <T> the type of the object
- * @author Yannis Cosmadopoulos
- * @since 1.0
+ * @param <T> the type of values to convert 
+ * 
+ * @author Brian Oliver
  */
-interface Serializer<T> {
+public class RIReferenceInternalConverter<T> implements RIInternalConverter<T> {
+
     /**
-     * Convert an object to a binary.
-     *
-     * @param value the value
-     * @return binary representation of value
-     * @throws javax.cache.CacheException is an error occurred during serialization
-     * @throws NullPointerException if value is null
-     * @throws IllegalArgumentException if the value can not be stored
+     * {@inheritDoc}
      */
-    StorageValue<T> createBinary(T value);
+    @Override
+    public T fromInternal(Object internal) {
+        return (T)internal;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object toInternal(T value) {
+        return value;
+    }
 }

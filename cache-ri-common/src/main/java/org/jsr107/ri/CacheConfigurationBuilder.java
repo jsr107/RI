@@ -18,6 +18,7 @@
 package org.jsr107.ri;
 
 import javax.cache.CacheConfiguration;
+import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.event.CacheEntryListener;
@@ -137,26 +138,11 @@ public interface CacheConfigurationBuilder<K, V, B extends CacheConfigurationBui
     B setStatisticsEnabled(boolean isStatisticsEnabled);
 
     /**
-     * Sets the cache expiration configuration
+     * Sets the {@link CacheEntryExpiryPolicy}.
      * 
-     * TODO: This will change when we introduce ExpiryPolicys
-     *
-     * @param type whether based on creation/modification or last access time
-     * @param duration the amount of time
+     * @param policy the {@link CacheEntryExpiryPolicy}
      * @return the {@link CacheConfigurationBuilder}
-     * @throws NullPointerException if size is duration
+     * @throws NullPointerException if the policy is <code>null</code>
      */
-    B setExpiry(CacheConfiguration.ExpiryType type, CacheConfiguration.Duration duration);
-
-    //todo #65
-    /**
-     *
-     * Sets the cache expiration
-     *
-     * @param type whether based on creation/modification or last access time
-     * @param duration the amount of time
-     * @return the builder
-     * @throws NullPointerException if size is duration
-     */
-    //CacheBuilder<K, V> setExpiry(CacheConfiguration.ExpiryPolicy policy);
+    B setCacheEntryExpiryPolicy(CacheEntryExpiryPolicy<? super K, ? super V> policy);
 }

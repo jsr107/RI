@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import javax.cache.CacheConfiguration;
+import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.event.CacheEntryListener;
@@ -64,17 +65,8 @@ public class DefaultCacheConfiguration<K, V> implements CacheConfiguration<K, V>
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Duration getExpiryDuration() {
-        return Duration.ETERNAL;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ExpiryType getExpiryType() {
-        return ExpiryType.MODIFIED;
+    public CacheEntryExpiryPolicy<? super K, ? super V> getCacheEntryExpiryPolicy() {
+        return CacheEntryExpiryPolicy.DEFAULT;
     }
 
     /**

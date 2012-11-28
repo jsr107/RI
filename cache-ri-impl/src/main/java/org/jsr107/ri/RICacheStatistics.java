@@ -25,8 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * The reference implementation for JSR107.
- * @since 1.0
+ * The reference implementation of {@link CacheStatistics}.
  */
 public class RICacheStatistics implements CacheStatistics, Serializable {
 

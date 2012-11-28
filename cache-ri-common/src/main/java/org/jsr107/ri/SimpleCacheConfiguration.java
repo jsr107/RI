@@ -20,6 +20,7 @@ package org.jsr107.ri;
 import java.util.ArrayList;
 
 import javax.cache.CacheConfiguration;
+import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.event.CacheEntryListener;
@@ -54,15 +55,9 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
     protected CacheWriter<? super K, ? super V> cacheWriter;
     
     /**
-     * The {@link Duration} (time to live) of Cache entries
-     * based on the {@link #getExpiryType()}.
+     * The {@link CacheEntryExpiryPolicy} for the {@link CacheConfiguration}.
      */
-    protected Duration expiryDuration;
-    
-    /**
-     * The {@link ExpiryType} for the built {@link CacheConfiguration}.
-     */
-    protected ExpiryType expiryType;
+    protected CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy;
     
     /**
      * A flag indicating if "read-through" mode is required.
@@ -100,8 +95,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
      * @param cacheEntryListeners
      * @param cacheLoader
      * @param cacheWriter
-     * @param expiryDuration
-     * @param expiryType
+     * @param cacheEntryExpiryPolicy
      * @param isReadThrough
      * @param isWriteThrough
      * @param isStatisticsEnabled
@@ -113,8 +107,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
             Iterable<CacheEntryListener<? super K, ? super V>> cacheEntryListeners,
             CacheLoader<K, ? extends V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
-            javax.cache.CacheConfiguration.Duration expiryDuration,
-            javax.cache.CacheConfiguration.ExpiryType expiryType,
+            CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy, 
             boolean isReadThrough, boolean isWriteThrough,
             boolean isStatisticsEnabled, boolean isStoreByValue,
             IsolationLevel txnIsolationLevel, Mode txnMode) {
@@ -128,8 +121,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
         this.cacheLoader = cacheLoader;
         this.cacheWriter = cacheWriter;
         
-        this.expiryDuration = expiryDuration;
-        this.expiryType = expiryType;
+        this.cacheEntryExpiryPolicy = cacheEntryExpiryPolicy;
         
         this.isReadThrough = isReadThrough;
         this.isWriteThrough = isWriteThrough;
@@ -150,7 +142,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
     public SimpleCacheConfiguration(CacheConfiguration<K, V> configuration) {
         this(configuration.getCacheEntryListeners(), 
              configuration.getCacheLoader(), configuration.getCacheWriter(), 
-             configuration.getExpiryDuration(), configuration.getExpiryType(),
+             configuration.getCacheEntryExpiryPolicy(),
              configuration.isReadThrough(), configuration.isWriteThrough(),
              configuration.isStatisticsEnabled(), configuration.isStoreByValue(),
              configuration.getTransactionIsolationLevel(), configuration.getTransactionMode());
@@ -183,17 +175,8 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Duration getExpiryDuration() {
-        return this.expiryDuration;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ExpiryType getExpiryType() {
-        return this.expiryType;
+    public CacheEntryExpiryPolicy<? super K, ? super V> getCacheEntryExpiryPolicy() {
+        return this.cacheEntryExpiryPolicy;
     }
     
     /**
@@ -273,9 +256,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
         result = prime * result
                 + ((cacheWriter == null) ? 0 : cacheWriter.hashCode());
         result = prime * result
-                + ((expiryDuration == null) ? 0 : expiryDuration.hashCode());
-        result = prime * result
-                + ((expiryType == null) ? 0 : expiryType.hashCode());
+                + ((cacheEntryExpiryPolicy == null) ? 0 : cacheEntryExpiryPolicy.hashCode());
         result = prime * result + (isReadThrough ? 1231 : 1237);
         result = prime * result + (isStatisticsEnabled ? 1231 : 1237);
         result = prime * result + (isStoreByValue ? 1231 : 1237);
@@ -321,14 +302,11 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
         } else if (!cacheWriter.equals(other.cacheWriter)) {
             return false;
         }
-        if (expiryDuration == null) {
-            if (other.expiryDuration != null) {
+        if (cacheEntryExpiryPolicy == null) {
+            if (other.cacheEntryExpiryPolicy != null) {
                 return false;
             }
-        } else if (!expiryDuration.equals(other.expiryDuration)) {
-            return false;
-        }
-        if (expiryType != other.expiryType) {
+        } else if (!cacheEntryExpiryPolicy.equals(other.cacheEntryExpiryPolicy)) {
             return false;
         }
         if (isReadThrough != other.isReadThrough) {

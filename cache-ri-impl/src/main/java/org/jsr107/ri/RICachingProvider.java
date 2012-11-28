@@ -21,8 +21,7 @@ import javax.cache.OptionalFeature;
 import javax.cache.spi.CachingProvider;
 
 /**
- * The reference implementation for JSR107.
- * <p/>
+ * The reference implementation of the {@link CachingProvider}.
  *
  * @author Yannis Cosmadopoulos
  * @since 1.0
