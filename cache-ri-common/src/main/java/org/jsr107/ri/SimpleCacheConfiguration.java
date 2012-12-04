@@ -23,7 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
-import javax.cache.event.CacheEntryListener;
+import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -39,10 +39,9 @@ import javax.cache.transaction.Mode;
 public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> {
 
     /**
-     * The collection of {@link CacheEntryListener}s to register when building
-     * a {@link CacheConfiguration}.
+     * The {@link CacheEntryListenerRegistration}s for the {@link CacheConfiguration}.
      */
-    protected ArrayList<CacheEntryListener<? super K, ? super V>> cacheEntryListeners;
+    protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
 
     /**
      * The {@link CacheLoader} for the built {@link CacheConfiguration}.
@@ -92,7 +91,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
     /**
      * Constructs a {@link SimpleCacheConfiguration}.
      * 
-     * @param cacheEntryListeners
+     * @param cacheEntryListenerRegistrations
      * @param cacheLoader
      * @param cacheWriter
      * @param cacheEntryExpiryPolicy
@@ -104,7 +103,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
      * @param txnMode
      */
     public SimpleCacheConfiguration(
-            Iterable<CacheEntryListener<? super K, ? super V>> cacheEntryListeners,
+            Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
             CacheLoader<K, ? extends V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
             CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy, 
@@ -112,10 +111,9 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
             boolean isStatisticsEnabled, boolean isStoreByValue,
             IsolationLevel txnIsolationLevel, Mode txnMode) {
         
-        this.cacheEntryListeners = new ArrayList<CacheEntryListener<? super K, ? super V>>();
-        for (CacheEntryListener<? super K, ? super V> listener : cacheEntryListeners)
-        {
-            this.cacheEntryListeners.add(listener);
+        this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
+        for (CacheEntryListenerRegistration<? super K, ? super V> registration : cacheEntryListenerRegistrations) {
+            this.cacheEntryListenerRegistrations.add(registration);
         }
         
         this.cacheLoader = cacheLoader;
@@ -140,7 +138,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
      * @param configuration  the {@link CacheConfiguration} from which to copy
      */
     public SimpleCacheConfiguration(CacheConfiguration<K, V> configuration) {
-        this(configuration.getCacheEntryListeners(), 
+        this(configuration.getCacheEntryListenerRegistrations(), 
              configuration.getCacheLoader(), configuration.getCacheWriter(), 
              configuration.getCacheEntryExpiryPolicy(),
              configuration.isReadThrough(), configuration.isWriteThrough(),
@@ -152,8 +150,8 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
      * {@inheritDoc}
      */
     @Override
-    public Iterable<CacheEntryListener<? super K, ? super V>> getCacheEntryListeners() {
-        return this.cacheEntryListeners;
+    public Iterable<CacheEntryListenerRegistration<? super K, ? super V>> getCacheEntryListenerRegistrations() {
+        return cacheEntryListenerRegistrations;
     }
     
     /**
@@ -249,7 +247,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
         int result = 1;
         result = prime
                 * result
-                + ((cacheEntryListeners == null) ? 0 : cacheEntryListeners
+                + ((cacheEntryListenerRegistrations == null) ? 0 : cacheEntryListenerRegistrations
                         .hashCode());
         result = prime * result
                 + ((cacheLoader == null) ? 0 : cacheLoader.hashCode());
@@ -281,11 +279,11 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
             return false;
         }
         SimpleCacheConfiguration other = (SimpleCacheConfiguration) obj;
-        if (cacheEntryListeners == null) {
-            if (other.cacheEntryListeners != null) {
+        if (cacheEntryListenerRegistrations == null) {
+            if (other.cacheEntryListenerRegistrations != null) {
                 return false;
             }
-        } else if (!cacheEntryListeners.equals(other.cacheEntryListeners)) {
+        } else if (!cacheEntryListenerRegistrations.equals(other.cacheEntryListenerRegistrations)) {
             return false;
         }
         if (cacheLoader == null) {

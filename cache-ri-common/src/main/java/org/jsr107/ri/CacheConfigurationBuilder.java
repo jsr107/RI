@@ -21,6 +21,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
+import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
@@ -97,16 +98,22 @@ public interface CacheConfigurationBuilder<K, V, B extends CacheConfigurationBui
     B setCacheWriter(CacheWriter<? super K, ? super V> cacheWriter);
 
     /**
-     * Specifies that a listener should be registered for a Cache when
-     * a {@link CacheConfiguration} from this builder is used to configure a 
-     * Cache.
-     *
-     * @param cacheEntryListener the listener to add for later registration
+     * Adds the definition of a {@link CacheEntryListener} to be registered
+     * with a Cache.
+     * 
+     * @see Cache#registerCacheEntryListener(CacheEntryListener, boolean, CacheEntryFilter, boolean)
+     * 
+     * @param cacheEntryListener The listener to add
+     * @param requireOldValue    is the old value supplied in an event
+     * @param cacheEntryFilter   the filter to be applied to events
+     * @param synchronous        whether the caller is blocked until the listener invocation completes
      * @return the {@link CacheConfigurationBuilder}
-     * @throws NullPointerException if any of the arguments are null.
      */
-    B addCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener);
-
+    B addCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener,
+                            boolean requireOldValue,
+                            CacheEntryFilter<K, V> cacheEntryFilter,
+                            boolean synchronous);
+    
     /**
      * Sets whether the cache is store-by-value cache.
      *

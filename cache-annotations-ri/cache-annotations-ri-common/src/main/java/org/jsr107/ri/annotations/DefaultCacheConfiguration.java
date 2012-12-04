@@ -23,7 +23,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
-import javax.cache.event.CacheEntryListener;
+import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -40,10 +40,10 @@ public class DefaultCacheConfiguration<K, V> implements CacheConfiguration<K, V>
 
     /**
      * {@inheritDoc}
-     */
+     */    
     @Override
-    public Iterable<CacheEntryListener<? super K, ? super V>> getCacheEntryListeners() {
-        return ((Set<CacheEntryListener<? super K, ? super V>>)Collections.EMPTY_SET);
+    public Iterable<CacheEntryListenerRegistration<? super K, ? super V>> getCacheEntryListenerRegistrations() {
+        return ((Set<CacheEntryListenerRegistration<? super K, ? super V>>)Collections.EMPTY_SET);
     }
 
     /**

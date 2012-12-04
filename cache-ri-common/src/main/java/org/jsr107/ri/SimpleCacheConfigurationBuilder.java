@@ -48,7 +48,7 @@ public class SimpleCacheConfigurationBuilder<K, V> extends
         }
         
         return new SimpleCacheConfiguration<K, V>(
-                cacheEntryListeners, 
+                cacheEntryListenerRegistrations, 
                 cacheLoader, cacheWriter, 
                 cacheEntryExpiryPolicy,
                 isReadThrough, isWriteThrough, 

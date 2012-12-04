@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
+import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -48,18 +50,17 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
     private static final Mode DEFAULT_TRANSACTION_MODE = Mode.NONE;
 
     /**
-     * The collection of {@link CacheEntryListener}s to register when building
-     * a CacheConfiguration.
+     * The {@link CacheEntryListenerRegistration}s for the {@link CacheConfiguration}.
      */
-    protected ArrayList<CacheEntryListener<? super K, ? super V>> cacheEntryListeners;
+    protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
 
     /**
-     * The {@link CacheLoader} for the built CacheConfiguration.
+     * The {@link CacheLoader} for the built {@link CacheConfiguration}.
      */
     protected CacheLoader<K, ? extends V> cacheLoader;
     
     /**
-     * The {@link CacheWriter} for the build CacheConfiguration.
+     * The {@link CacheWriter} for the build {@link CacheConfiguration}.
      */
     protected CacheWriter<? super K, ? super V> cacheWriter;
 
@@ -103,7 +104,7 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
      * default CacheConfiguration options.
      */
     public AbstractCacheConfigurationBuilder() {
-        this.cacheEntryListeners = new ArrayList<CacheEntryListener<? super K, ? super V>>();
+        this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
         this.cacheLoader = null;
         this.cacheWriter = null;
         this.cacheEntryExpiryPolicy = DEFAULT_CACHE_ENTRY_EXPIRY_POLICY;
@@ -119,10 +120,33 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
      * {@inheritDoc}
      */
     @Override
-    public B addCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener) {
-        cacheEntryListeners.add(cacheEntryListener);
+    public B addCacheEntryListener(final CacheEntryListener<? super K, ? super V> listener,
+                                   final boolean requireOldValue, 
+                                   final CacheEntryFilter<K, V> filter,
+                                   final boolean synchronous) {
+        
+        cacheEntryListenerRegistrations.add(new CacheEntryListenerRegistration() {
+            @Override
+            public CacheEntryListener getCacheEntryListener() {
+                return listener;
+            }
+            @Override
+            public CacheEntryFilter getCacheEntryFilter() {
+                return filter;
+            }
+            @Override
+            public boolean isOldValueRequired() {
+                return requireOldValue;
+            }
+            @Override
+            public boolean isSynchronous() {
+                return synchronous;
+            }
+        });
+        
         return (B)this;
     }
+    
     
     /**
      * {@inheritDoc}
