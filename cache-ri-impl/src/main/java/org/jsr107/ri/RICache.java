@@ -24,12 +24,14 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryCreatedListener;
+import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryReadListener;
+import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.mbeans.CacheMXBean;
 import java.util.ArrayList;
@@ -457,7 +459,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
                 }
                 
-                
             } finally {
                 lockManager.unLock(key);
             }
@@ -488,13 +489,20 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         boolean result;
         lockManager.lock(key);
         try {
+            RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+
             Object internalKey = keyConverter.toInternal(key);
             Object internalValue = valueConverter.toInternal(value);
             
             RICachedValue cachedValue = entries.get(internalKey);
                     
+            boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
             if (cachedValue == null || cachedValue.isExpiredAt(now)) {
-                //TODO: raise the "expired" event (if necessary)
+                
+                if (isExpired) {
+                    V expiredValue = valueConverter.fromInternal(cachedValue.get());
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                }
 
                 Duration duration = expiryPolicy.getTTLForCreatedEntry(new RIEntry(key, value));
                 long expiryTime = duration.getAdjustedTime(now);
@@ -503,10 +511,12 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 entries.put(internalKey, cachedValue);
                 result = true;
                 
-                //TODO: raise the "created" event
+                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
             } else {
                 result = false;
             }
+            
+            dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             
         } finally {
             lockManager.unLock(key);
@@ -539,9 +549,14 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             if (cachedValue == null || cachedValue.isExpiredAt(now)) {
                 result = false;
             } else {
-                result = entries.remove(internalKey);
+                entries.remove(internalKey);
+                V value = valueConverter.fromInternal(cachedValue.get());
                 
-                //TODO: raise "remove" event
+                RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                dispatcher.dispatch(cacheEntryListenerRegistrations.values());
+                
+                result = true;
             }
         } finally {
             lockManager.unLock(key);
@@ -580,7 +595,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 if (internalValue.equals(oldInternalValue)) {
                     entries.remove(internalKey);
                     
-                    //TODO: raise "remove" event
+                    RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+                    dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue));
+                    dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                     
                     result = true;
                 } else {
@@ -617,9 +634,11 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 entries.remove(internalKey);
                 result = valueConverter.fromInternal(cachedValue.getInternalValue(now));
                 
-                //TODO: raise "read" event
-                
-                //TODO: raise "remove" event
+                CacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, result);
+                RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+                dispatcher.addEvent(CacheEntryReadListener.class, event);
+                dispatcher.addEvent(CacheEntryRemovedListener.class, event);
+                dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             }
         } finally {
             lockManager.unLock(key);
@@ -670,7 +689,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     cachedValue.setInternalValue(newInternalValue, now);
                     cachedValue.setExpiryTime(expiryTime);
                     
-                    //TODO: raise "update" event
+                    RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+                    dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, newValue, oldValue));
+                    dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                     
                     result = true;
                 } else {
@@ -706,6 +727,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             if (cachedValue == null || cachedValue.isExpiredAt(now)) {
                 result = false;
             } else {
+                V previousValue = valueConverter.fromInternal(cachedValue.get());
+                        
                 Duration duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry(key, value), new Duration(now, cachedValue.getExpiryTime()));
                 long expiryTime = duration.getAdjustedTime(now);
 
@@ -713,7 +736,9 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 cachedValue.setInternalValue(internalValue, now);
                 cachedValue.setExpiryTime(expiryTime);
                 
-                //TODO: raise "update" event
+                RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, previousValue));
+                dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                 
                 result = true;
             }
@@ -746,18 +771,19 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             if (cachedValue == null || cachedValue.isExpiredAt(now)) {
                 result = null;
             } else {
+                result = valueConverter.fromInternal(cachedValue.getInternalValue(now));
+                
                 Duration duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry(key, value), new Duration(now, cachedValue.getExpiryTime()));
                 long expiryTime = duration.getAdjustedTime(now);
-
-                result = valueConverter.fromInternal(cachedValue.getInternalValue(now));
                 
                 Object internalValue = valueConverter.toInternal(value);
                 cachedValue.setInternalValue(internalValue, now);
                 cachedValue.setExpiryTime(expiryTime);
 
-                //TODO: raise "read" event
-                
-                //TODO: raise "update" event
+                RICacheEventEventDispatcher dispatcher = new RICacheEventEventDispatcher<K, V>();
+                dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(this, key, result));
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, result));
+                dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             }
         } finally {
             lockManager.unLock(key);
@@ -1188,6 +1214,8 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         @Override
         public Entry<K, V> next() {
             if (hasNext()) {
+                //TODO: we need to lock around this
+                
                 RICachedValue cachedValue = nextEntry.getValue();
                 K key = (K)RICache.this.keyConverter.fromInternal(nextEntry.getKey());
                 V value = (V)RICache.this.valueConverter.fromInternal(cachedValue.getInternalValue(now));
@@ -1214,9 +1242,12 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
          */
         @Override
         public void remove() {
+            
+            //TODO: we need to lock around this
+            
             iterator.remove();
             
-            //TODO: raise "remove" event
+            //TODO: raise "remove" event (if not expired)
             
             nextEntry = null;
         }
@@ -1450,7 +1481,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     Object internalValue = cachedValue.getInternalValue(now);
                     value = internalValue == null ? null : (V)RICache.this.valueConverter.fromInternal(internalValue);
                     
-                    //TODO: raise a "read" event
+                    //TODO: raise a "read" event (do we raise this here or as part of commit?)
                 }
             }
             
