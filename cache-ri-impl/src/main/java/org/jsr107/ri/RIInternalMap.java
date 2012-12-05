@@ -66,30 +66,22 @@ interface RIInternalMap<K, V> extends Iterable<Map.Entry<K, V>> {
     V getAndPut(K key, V value);
 
     /**
-     * Adds all of the entries in the specified map to this structure, replacing
-     * and overwriting any existing values.
-     * 
-     * @param map the map of key/values
-     */
-    void putAll(Map<? extends K, ? extends V> map);
-
-    /**
      * Removes the value associated with the key from this structure.
      * 
      * @param key the key
-     * @return true if removed
+     * @return the value removed or <code>null</code> if there was no value
      */
-    boolean remove(Object key);
+    V remove(Object key);
 
+    /**
+     * Removes all values from this structured.
+     */
+    void clear();
+    
     /**
      * Gets the number of entries in this structure.
      * 
      * @return the size
      */
     int size();
-
-    /**
-     * Removes all of the entries in this structure.
-     */
-    void removeAll();
 }

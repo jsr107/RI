@@ -61,17 +61,9 @@ class RISimpleInternalMap<K, V> implements RIInternalMap<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public void putAll(Map<? extends K, ? extends V> map) {
-        internalMap.putAll(map);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean remove(Object key) {
+    public V remove(Object key) {
         //noinspection SuspiciousMethodCalls
-        return internalMap.remove(key) != null;
+        return internalMap.remove(key);
     }
 
     /**
@@ -80,14 +72,6 @@ class RISimpleInternalMap<K, V> implements RIInternalMap<K, V> {
     @Override
     public int size() {
         return internalMap.size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removeAll() {
-        internalMap.clear();
     }
 
     /**
@@ -105,5 +89,13 @@ class RISimpleInternalMap<K, V> implements RIInternalMap<K, V> {
     public V get(Object key) {
         //noinspection SuspiciousMethodCalls
         return internalMap.get(key);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void clear() {
+        internalMap.clear();
     }
 }

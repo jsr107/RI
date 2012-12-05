@@ -122,7 +122,7 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
     @Override
     public B addCacheEntryListener(final CacheEntryListener<? super K, ? super V> listener,
                                    final boolean requireOldValue, 
-                                   final CacheEntryFilter<K, V> filter,
+                                   final CacheEntryFilter<? super K, ? super V> filter,
                                    final boolean synchronous) {
         
         cacheEntryListenerRegistrations.add(new CacheEntryListenerRegistration() {

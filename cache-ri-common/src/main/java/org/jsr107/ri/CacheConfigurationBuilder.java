@@ -111,7 +111,7 @@ public interface CacheConfigurationBuilder<K, V, B extends CacheConfigurationBui
      */
     B addCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener,
                             boolean requireOldValue,
-                            CacheEntryFilter<K, V> cacheEntryFilter,
+                            CacheEntryFilter<? super K, ? super V> cacheEntryFilter,
                             boolean synchronous);
     
     /**

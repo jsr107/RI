@@ -31,8 +31,8 @@ import javax.cache.event.CacheEntryListenerRegistration;
  */
 public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListenerRegistration<K, V> {
 
-    private CacheEntryListener<K, V> listener;
-    private CacheEntryFilter<K, V> filter;
+    private CacheEntryListener<? super K, ? super V> listener;
+    private CacheEntryFilter<? super K, ? super V> filter;
     private boolean isOldValueRequired;
     private boolean isSynchronous;
     
@@ -44,8 +44,8 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
      * @param isOldValueRequired  if the old value is required for events with this listener
      * @param isSynchronous       if the listener should block the thread causing the event
      */
-    public RICacheEntryListenerRegistration(CacheEntryListener<K, V> listener, 
-                                            CacheEntryFilter<K, V> filter, 
+    public RICacheEntryListenerRegistration(CacheEntryListener<? super K, ? super V> listener, 
+                                            CacheEntryFilter<? super K, ? super V> filter, 
                                             boolean isOldValueRequired, 
                                             boolean isSynchronous) {
         this.listener = listener;
@@ -59,7 +59,7 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
      * {@inheritDoc}
      */
     @Override
-    public CacheEntryFilter<K, V> getCacheEntryFilter() {
+    public CacheEntryFilter<? super K, ? super V> getCacheEntryFilter() {
         return filter;
     }
     
@@ -67,7 +67,7 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
      * {@inheritDoc}
      */
     @Override
-    public CacheEntryListener<K, V> getCacheEntryListener() {
+    public CacheEntryListener<? super K, ? super V> getCacheEntryListener() {
         return listener;
     }
     

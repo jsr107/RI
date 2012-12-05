@@ -43,13 +43,15 @@ public class RICacheEventEventDispatcher<K, V> {
      * The map of {@link CacheEntryEvent}s to deliver, keyed by the class of
      * {@link CacheEntryListener} to which they should be dispatched.
      */
-    private ConcurrentHashMap<Class<? extends CacheEntryListener>, ArrayList<CacheEntryEvent<K, V>>> eventMap;
+    private ConcurrentHashMap<Class<? extends CacheEntryListener>, 
+                              ArrayList<CacheEntryEvent<? extends K, ? extends V>>> eventMap;
     
     /**
      * Constructs an {@link RICacheEventEventDispatcher}.
      */
     public RICacheEventEventDispatcher() {
-        this.eventMap = new ConcurrentHashMap<Class<? extends CacheEntryListener>, ArrayList<CacheEntryEvent<K, V>>>();
+        this.eventMap = new ConcurrentHashMap<Class<? extends CacheEntryListener>, 
+                                              ArrayList<CacheEntryEvent<? extends K, ? extends V>>>();
     }
     
     /**
@@ -60,7 +62,8 @@ public class RICacheEventEventDispatcher<K, V> {
      *                         receive the event
      * @param event         the event to be dispatched
      */
-    public void addEvent(Class<? extends CacheEntryListener> listenerClass, CacheEntryEvent<K, V> event) {
+    public void addEvent(Class<? extends CacheEntryListener> listenerClass, 
+                         CacheEntryEvent<? extends K, ? extends V> event) {
         if (listenerClass == null) {
             throw new NullPointerException("listenerClass can't be null");
         }
@@ -74,11 +77,11 @@ public class RICacheEventEventDispatcher<K, V> {
         }
         
         //for safety
-        ArrayList<CacheEntryEvent<K, V>> eventList;
+        ArrayList<CacheEntryEvent<? extends K, ? extends V>> eventList;
         synchronized (this) {
             eventList = eventMap.get(listenerClass);
             if (eventList == null) {
-                eventList = new ArrayList<CacheEntryEvent<K, V>>();
+                eventList = new ArrayList<CacheEntryEvent<? extends K, ? extends V>>();
                 eventMap.put(listenerClass, eventList);
             }
         }
@@ -95,7 +98,7 @@ public class RICacheEventEventDispatcher<K, V> {
      * @param registrations the {@link CacheEntryListenerRegistration} defining
      *                         {@link CacheEntryListener}s to which to dispatch events
      */
-    public void dispatch(Iterable<CacheEntryListenerRegistration<K, V>> registrations) {
+    public void dispatch(Iterable<CacheEntryListenerRegistration<? super K, ? super V>> registrations) {
     
         //TODO: we could really optimize this implementation
 
@@ -105,13 +108,13 @@ public class RICacheEventEventDispatcher<K, V> {
         
         //TODO: we need to remove/hide old values appropriately
         
-        Iterable<CacheEntryEvent<K, V>> events;
+        Iterable<CacheEntryEvent<? extends K, ? extends V>> events;
 
         //notify expiry listeners
         events = eventMap.get(CacheEntryExpiredListener.class);
         if (events != null) {
-            for (CacheEntryListenerRegistration<K, V> registration : registrations) {
-                CacheEntryListener<K, V> listener = registration.getCacheEntryListener();
+            for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryExpiredListener) {
                     ((CacheEntryExpiredListener) listener).onExpired(events);
                 }
@@ -121,8 +124,8 @@ public class RICacheEventEventDispatcher<K, V> {
         //notify create listeners
         events = eventMap.get(CacheEntryCreatedListener.class);
         if (events != null) {
-            for (CacheEntryListenerRegistration<K, V> registration : registrations) {
-                CacheEntryListener<K, V> listener = registration.getCacheEntryListener();
+            for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryCreatedListener) {
                     ((CacheEntryCreatedListener) listener).onCreated(events);
                 }
@@ -132,8 +135,8 @@ public class RICacheEventEventDispatcher<K, V> {
         //notify read listeners
         events = eventMap.get(CacheEntryReadListener.class);
         if (events != null) {
-            for (CacheEntryListenerRegistration<K, V> registration : registrations) {
-                CacheEntryListener<K, V> listener = registration.getCacheEntryListener();
+            for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryReadListener) {
                     ((CacheEntryReadListener) listener).onRead(events);
                 }
@@ -143,8 +146,8 @@ public class RICacheEventEventDispatcher<K, V> {
         //notify update listeners
         events = eventMap.get(CacheEntryUpdatedListener.class);
         if (events != null) {
-            for (CacheEntryListenerRegistration<K, V> registration : registrations) {
-                CacheEntryListener<K, V> listener = registration.getCacheEntryListener();
+            for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryUpdatedListener) {
                     ((CacheEntryUpdatedListener) listener).onUpdated(events);
                 }
@@ -154,8 +157,8 @@ public class RICacheEventEventDispatcher<K, V> {
         //notify remove listeners
         events = eventMap.get(CacheEntryRemovedListener.class);
         if (events != null) {
-            for (CacheEntryListenerRegistration<K, V> registration : registrations) {
-                CacheEntryListener<K, V> listener = registration.getCacheEntryListener();
+            for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryRemovedListener) {
                     ((CacheEntryRemovedListener) listener).onRemoved(events);
                 }
