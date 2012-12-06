@@ -66,7 +66,7 @@ public class DefaultCacheConfiguration<K, V> implements CacheConfiguration<K, V>
      * {@inheritDoc}
      */
     public CacheEntryExpiryPolicy<? super K, ? super V> getCacheEntryExpiryPolicy() {
-        return CacheEntryExpiryPolicy.DEFAULT;
+        return new CacheEntryExpiryPolicy.Default<K, V>();
     }
 
     /**

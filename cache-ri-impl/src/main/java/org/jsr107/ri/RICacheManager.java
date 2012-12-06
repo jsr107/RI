@@ -41,10 +41,14 @@ import javax.transaction.UserTransaction;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class RICacheManager extends AbstractCacheManager implements CacheManager {
+public class RICacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final HashMap<String, Cache<?, ?>> caches = new HashMap<String, Cache<?, ?>>();
+    
+    private final String name;
+    private final ClassLoader classLoader;
+    
     private volatile Status status;
 
     /**
@@ -55,7 +59,8 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
      * @throws NullPointerException if classLoader or name is null.
      */
     public RICacheManager(String name, ClassLoader classLoader) {
-        super(name, classLoader);
+        this.name = name;
+        this.classLoader = classLoader;
         status = Status.UNINITIALISED;
         if (classLoader == null) {
             throw new NullPointerException("No classLoader specified");
@@ -64,6 +69,22 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
             throw new NullPointerException("No name specified");
         }
         status = Status.STARTED;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Getter
+     * @return the class loader
+     */
+    protected ClassLoader getClassLoader() {
+        return classLoader;
     }
 
     /**
@@ -201,7 +222,6 @@ public class RICacheManager extends AbstractCacheManager implements CacheManager
         if (status != Status.STARTED) {
             throw new IllegalStateException();
         }
-        super.shutdown();
         ArrayList<Cache<?, ?>> cacheList;
         synchronized (caches) {
             cacheList = new ArrayList<Cache<?, ?>>(caches.values());

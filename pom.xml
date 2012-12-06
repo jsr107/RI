@@ -21,7 +21,6 @@
 
     <modules>
         <module>cache-annotations-ri</module>
-        <module>cache-ri-common</module>
         <module>cache-ri-impl</module>
     </modules>
 

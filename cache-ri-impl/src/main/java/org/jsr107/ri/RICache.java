@@ -17,11 +17,15 @@
 
 package org.jsr107.ri;
 
+import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheConfiguration.Duration;
 import javax.cache.CacheEntryExpiryPolicy;
+import javax.cache.CacheException;
 import javax.cache.CacheLoader;
+import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
+import javax.cache.Caching;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
@@ -43,8 +47,11 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -64,8 +71,30 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Greg Luck
  * @author Yannis Cosmadopoulos
  */
-public final class RICache<K, V> extends AbstractCache<K, V> {
+public final class RICache<K, V> implements Cache<K, V> {
 
+    /**
+     * The name of the {@link Cache} as used with in the scope of the 
+     * Cache Manager.
+     */
+    private final String cacheName;
+    
+    /**
+     * The name of the Cache Manager as used with in the scope of the
+     * Cache Manager Factory.
+     */
+    private final String cacheManagerName;
+    
+    /**
+     * The {@link ClassLoader} to use for deserializing classes (when necessary).
+     */
+    private final ClassLoader classLoader;
+    
+    /**
+     * The {@link CacheConfiguration} for the {@link Cache}.
+     */
+    private final CacheConfiguration<K, V> configuration;
+    
     /**
      * The {@link RIInternalConverter} for keys.
      */
@@ -101,9 +130,18 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     
     private final RICacheStatistics statistics;
     private final CacheMXBean mBean;
-    
+
+    /**
+     * A {@link LockManager} to control concurrent access to cache entries.
+     */
     private final LockManager<K> lockManager = new LockManager<K>();
 
+    /**
+     * An {@link ExecutorService} for the purposes of performing asynchronous
+     * background work.
+     */
+    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+    
     /**
      * Constructs a cache.
      *
@@ -117,7 +155,13 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
             ClassLoader classLoader,
             CacheConfiguration<K, V> configuration) {
         
-        super(cacheName, cacheManagerName, classLoader, configuration);
+        this.cacheName = cacheName;
+        this.cacheManagerName = cacheManagerName;
+        this.classLoader = classLoader;
+        
+        //we make a copy of the configuration here so that the provided one
+        //may be changed and or used independently for other caches
+        this.configuration = new RICacheConfiguration<K, V>(configuration);
                 
         keyConverter = configuration.isStoreByValue() ? 
                             new RISerializingInternalConverter<K>(classLoader) : 
@@ -151,6 +195,39 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         }
     }
 
+    /**
+     * Requests a {@link FutureTask} to be performed.
+     * 
+     * @param task the {@link FutureTask} to be performed
+     */
+    protected void submit(FutureTask<?> task) {
+        executorService.submit(task);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getName() {
+        return cacheName;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CacheManager getCacheManager() {
+        return Caching.getCacheManager(classLoader, cacheManagerName);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CacheConfiguration<K, V> getConfiguration() {
+        return configuration;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -228,13 +305,16 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (key == null) {
             throw new NullPointerException("key");
         }
-        if (getCacheLoader() == null) {
+        
+        CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
+        
+        if (cacheLoader == null) {
             return null;
         }
         if (containsKey(key)) {
             return null;
         }
-        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, getCacheLoader(), key));
+        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, cacheLoader, key));
         submit(task);
         return task;
     }
@@ -248,13 +328,16 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         if (keys == null) {
             throw new NullPointerException("keys");
         }
-        if (getCacheLoader() == null) {
+        
+        CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
+
+        if (cacheLoader == null) {
             return null;
         }
         if (keys.contains(null)) {
             throw new NullPointerException("key");
         }
-        Callable<Map<K, ? extends V>> callable = new RICacheLoaderLoadAllCallable<K, V>(this, getCacheLoader(), keys);
+        Callable<Map<K, ? extends V>> callable = new RICacheLoaderLoadAllCallable<K, V>(this, cacheLoader, keys);
         FutureTask<Map<K, ? extends V>> task = new FutureTask<Map<K, ? extends V>>(callable);
         submit(task);
         return task;
@@ -1019,7 +1102,13 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
      */
     @Override
     public void stop() {
-        super.stop();
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new CacheException(e);
+        }
+        
         entries.clear();
         status = Status.STOPPED;
     }
@@ -1070,7 +1159,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                     statistics.increaseCacheMisses(1);
                 }
                 
-                CacheLoader<K, ? extends V> cacheLoader = getCacheLoader();
+                CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
                 
                 if (cacheLoader == null) {
                     return null;

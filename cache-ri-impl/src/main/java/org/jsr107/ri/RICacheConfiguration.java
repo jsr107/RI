@@ -28,7 +28,7 @@ import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
 /**
- * A Simple implementation of a {@link CacheConfiguration}.
+ * The reference implementation of a {@link CacheConfiguration}.
  * 
  * @param <K> the type of keys maintained the cache
  * @param <V> the type of cached values
@@ -36,7 +36,7 @@ import javax.cache.transaction.Mode;
  * @author Brian Oliver
  * @since 1.0
  */
-public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> {
+public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
 
     /**
      * The {@link CacheEntryListenerRegistration}s for the {@link CacheConfiguration}.
@@ -89,7 +89,23 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
     protected Mode txnMode;
     
     /**
-     * Constructs a {@link SimpleCacheConfiguration}.
+     * Constructs an {@link RICacheConfiguration} using default values.
+     */
+    public RICacheConfiguration() {
+        this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
+        this.cacheLoader = null;
+        this.cacheWriter = null;
+        this.cacheEntryExpiryPolicy = new CacheEntryExpiryPolicy.Default<K, V>();
+        this.isReadThrough = false;
+        this.isWriteThrough = false;
+        this.isStatisticsEnabled = false;
+        this.isStoreByValue = true;
+        this.txnIsolationLevel = IsolationLevel.NONE;
+        this.txnMode = Mode.NONE;
+    }
+    
+    /**
+     * Constructs a {@link RICacheConfiguration}.
      * 
      * @param cacheEntryListenerRegistrations
      * @param cacheLoader
@@ -102,7 +118,7 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
      * @param txnIsolationLevel
      * @param txnMode
      */
-    public SimpleCacheConfiguration(
+    public RICacheConfiguration(
             Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
             CacheLoader<K, ? extends V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
@@ -133,11 +149,11 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
     }
     
     /**
-     * A copy-constructor for a {@link SimpleCacheConfiguration}.
+     * A copy-constructor for a {@link RICacheConfiguration}.
      * 
      * @param configuration  the {@link CacheConfiguration} from which to copy
      */
-    public SimpleCacheConfiguration(CacheConfiguration<K, V> configuration) {
+    public RICacheConfiguration(CacheConfiguration<K, V> configuration) {
         this(configuration.getCacheEntryListenerRegistrations(), 
              configuration.getCacheLoader(), configuration.getCacheWriter(), 
              configuration.getCacheEntryExpiryPolicy(),
@@ -241,6 +257,9 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
         this.isStatisticsEnabled = isStatisticsEnabled;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -267,18 +286,21 @@ public class SimpleCacheConfiguration<K, V> implements CacheConfiguration<K, V> 
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-        if (obj == null) {
+        if (object == null) {
             return false;
         }
-        if (!(obj instanceof SimpleCacheConfiguration)) {
+        if (!(object instanceof RICacheConfiguration)) {
             return false;
         }
-        SimpleCacheConfiguration other = (SimpleCacheConfiguration) obj;
+        RICacheConfiguration<?, ?> other = (RICacheConfiguration<?, ?>) object;
         if (cacheEntryListenerRegistrations == null) {
             if (other.cacheEntryListenerRegistrations != null) {
                 return false;

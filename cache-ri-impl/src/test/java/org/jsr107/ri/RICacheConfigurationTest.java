@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.TimeUnit;
 
 import javax.cache.CacheConfiguration;
-import javax.cache.CacheEntryExpiryPolicy;
+import javax.cache.CacheConfiguration.Duration;
 
 import org.junit.Test;
 
@@ -36,14 +36,13 @@ import org.junit.Test;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class SimpleCacheConfigurationTest {
-	
-	public <K, V> CacheConfiguration<K, V> getCacheConfiguration()
-	{
-		CacheConfigurationBuilder<K, V, ?> builder = new SimpleCacheConfigurationBuilder<K, V>();
-		return builder.build();
-	}
-	
+public class RICacheConfigurationTest {
+    
+    public <K, V> CacheConfiguration<K, V> getCacheConfiguration()
+    {
+        return new RICacheConfiguration<K, V>();
+    }
+    
     @Test
     public void checkDefaults() {
         CacheConfiguration<?, ?> config = getCacheConfiguration();
@@ -51,7 +50,11 @@ public class SimpleCacheConfigurationTest {
         assertFalse(config.isWriteThrough());
         assertFalse(config.isStatisticsEnabled());
         assertTrue(config.isStoreByValue());
-        assertEquals(CacheEntryExpiryPolicy.DEFAULT, config.getCacheEntryExpiryPolicy());
+        
+        Duration duration = new Duration(TimeUnit.MINUTES, 10);
+        assertEquals(Duration.ETERNAL, config.getCacheEntryExpiryPolicy().getTTLForCreatedEntry(null));
+        assertEquals(duration, config.getCacheEntryExpiryPolicy().getTTLForAccessedEntry(null, duration));
+        assertEquals(duration, config.getCacheEntryExpiryPolicy().getTTLForModifiedEntry(null, duration));
     }
 
     @Test
