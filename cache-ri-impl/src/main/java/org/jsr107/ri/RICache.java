@@ -1020,10 +1020,12 @@ public final class RICache<K, V> implements Cache<K, V> {
         try {
             long now = System.currentTimeMillis();
             
+            RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
+
             Object internalKey = keyConverter.toInternal(key);
             RICachedValue cachedValue = entries.get(internalKey);
             
-            EntryProcessorEntry entry = new EntryProcessorEntry(key, cachedValue, now);
+            EntryProcessorEntry entry = new EntryProcessorEntry(key, cachedValue, now, dispatcher);
             result = entryProcessor.process(entry);
 
             Duration duration;
@@ -1038,33 +1040,39 @@ public final class RICache<K, V> implements Cache<K, V> {
                 
                 cachedValue = new RICachedValue(valueConverter.toInternal(entry.value), now, expiryTime);
                 
-                if (!cachedValue.isExpiredAt(now)) {
-                    entries.put(internalKey, cachedValue);
-                    
-                    //TODO: raise "created" event
+                if (cachedValue.isExpiredAt(now)) {
+                    V previousValue = valueConverter.fromInternal(cachedValue.get());
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
                 }
+                
+                entries.put(internalKey, cachedValue);
+                
+                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value));
                 break;
                 
             case UPDATE:
                 duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry<K, V>(key, entry.value), new Duration(now, cachedValue.getExpiryTime()));
                 expiryTime = duration.getAdjustedTime(now);
                 
+                V previousValue = valueConverter.fromInternal(cachedValue.get());
                 cachedValue.setInternalValue(valueConverter.toInternal(entry.value), now);
                 cachedValue.setExpiryTime(expiryTime);
                 
-                //TODO: raise the "updated" event
-                
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, previousValue));
                 break;
                 
             case REMOVE:
+                previousValue = valueConverter.fromInternal(cachedValue.get());
                 entries.remove(internalKey);
                
-                //TODO: raise the "removed" event
-                
+                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
                 break;
+                
             default:
                 break;
             }
+            
+            dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             
         } finally {
             lockManager.unLock(key);
@@ -1575,19 +1583,26 @@ public final class RICache<K, V> implements Cache<K, V> {
         private long now;
         
         /**
+         * The dispatcher to use for capturing events to eventually dispatch.
+         */
+        private RICacheEventEventDispatcher<K, V> dispatcher;
+        
+        /**
          * Construct a {@link MutableEntry}
          * 
          * @param key         the key for the {@link MutableEntry}
          * @param cachedValue the {@link RICachedValue} of the {@link MutableEntry}
          *                    (may be <code>null</code>)
          * @param now         the current time                        
+         * @param dispatcher  the dispatch to capture events to dispatch
          */
-        EntryProcessorEntry(K key, RICachedValue cachedValue, long now) {
+        EntryProcessorEntry(K key, RICachedValue cachedValue, long now, RICacheEventEventDispatcher<K, V> dispatcher) {
             this.key = key;
             this.cachedValue = cachedValue;
             this.operation = MutableEntryOperation.NONE;
             this.value = null;
             this.now = now;
+            this.dispatcher = dispatcher;
         }
 
         /**
@@ -1610,7 +1625,9 @@ public final class RICache<K, V> implements Cache<K, V> {
                     Object internalValue = cachedValue.getInternalValue(now);
                     value = internalValue == null ? null : (V)RICache.this.valueConverter.fromInternal(internalValue);
                     
-                    //TODO: raise a "read" event (do we raise this here or as part of commit?)
+                    if (value != null) {
+                        dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(RICache.this, key, value));
+                    }
                 }
             }
             
@@ -1622,7 +1639,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public boolean exists() {
-            return (operation == MutableEntryOperation.NONE && cachedValue != null) || value != null; 
+            return (operation == MutableEntryOperation.NONE && cachedValue != null && !cachedValue.isExpiredAt(now)) || value != null; 
         }
 
         /**
@@ -1630,7 +1647,7 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public void remove() {
-            operation = cachedValue == null ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
+            operation = cachedValue == null || cachedValue.isExpiredAt(now) ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
             value = null;
         }
 
@@ -1642,7 +1659,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (value == null) {
                 throw new NullPointerException();
             }
-            operation = cachedValue == null ? MutableEntryOperation.CREATE : MutableEntryOperation.UPDATE;
+            operation = cachedValue == null || cachedValue.isExpiredAt(now) ? MutableEntryOperation.CREATE : MutableEntryOperation.UPDATE;
             this.value = value;
         }
     }
