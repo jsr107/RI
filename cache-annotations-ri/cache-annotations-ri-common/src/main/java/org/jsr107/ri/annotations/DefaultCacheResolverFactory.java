@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.cache.SimpleCacheConfiguration;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
@@ -68,7 +69,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         
         if (cache == null) {
             this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
-            cache = this.cacheManager.configureCache(cacheName, new DefaultCacheConfiguration());
+            cache = this.cacheManager.configureCache(cacheName, new SimpleCacheConfiguration<Object, Object>());
         }
         
         return new DefaultCacheResolver(cache);
@@ -87,7 +88,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         if (cache == null) {
             this.logger.warning("No Cache named '" + exceptionCacheName + 
                     "' was found in the CacheManager, a default cache will be created.");
-            cache = this.cacheManager.configureCache(exceptionCacheName, new DefaultCacheConfiguration());
+            cache = this.cacheManager.configureCache(exceptionCacheName, new SimpleCacheConfiguration<Object, Object>());
         }
         
         return new DefaultCacheResolver(cache);
