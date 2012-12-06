@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
-import javax.cache.event.CacheEntryFilter;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
@@ -122,7 +122,7 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
     @Override
     public B addCacheEntryListener(final CacheEntryListener<? super K, ? super V> listener,
                                    final boolean requireOldValue, 
-                                   final CacheEntryFilter<? super K, ? super V> filter,
+                                   final CacheEntryEventFilter<? super K, ? super V> filter,
                                    final boolean synchronous) {
         
         cacheEntryListenerRegistrations.add(new CacheEntryListenerRegistration() {
@@ -131,7 +131,7 @@ public abstract class AbstractCacheConfigurationBuilder<K, V, B extends CacheCon
                 return listener;
             }
             @Override
-            public CacheEntryFilter getCacheEntryFilter() {
+            public CacheEntryEventFilter getCacheEntryFilter() {
                 return filter;
             }
             @Override

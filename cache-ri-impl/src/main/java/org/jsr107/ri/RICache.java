@@ -26,7 +26,7 @@ import javax.cache.Status;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryExpiredListener;
-import javax.cache.event.CacheEntryFilter;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryListenerRegistration;
@@ -140,7 +140,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
         for (CacheEntryListenerRegistration<? super K, ? super V> r : configuration.getCacheEntryListenerRegistrations()) {
             
             CacheEntryListener<? super K, ? super V> listener = r.getCacheEntryListener();
-            CacheEntryFilter<? super K, ? super V> filter = r.getCacheEntryFilter();
+            CacheEntryEventFilter<? super K, ? super V> filter = r.getCacheEntryFilter();
             boolean oldValueRequired = r.isOldValueRequired();
             boolean synchronous = r.isSynchronous();
             
@@ -897,7 +897,7 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
     @Override
     public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V> listener,
                                               boolean requireOldValue,
-                                              CacheEntryFilter<? super K, ? super V> filter,
+                                              CacheEntryEventFilter<? super K, ? super V> filter,
                                               boolean synchronous) {
         if (listener == null) {
             throw new CacheEntryListenerException("A listener may not be null");
@@ -1236,7 +1236,6 @@ public final class RICache<K, V> extends AbstractCache<K, V> {
                 }
             }
         }
-        
         
         /**
          * {@inheritDoc}

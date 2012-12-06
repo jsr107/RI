@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryExpiredListener;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryReadListener;
@@ -44,14 +45,14 @@ public class RICacheEventEventDispatcher<K, V> {
      * {@link CacheEntryListener} to which they should be dispatched.
      */
     private ConcurrentHashMap<Class<? extends CacheEntryListener>, 
-                              ArrayList<CacheEntryEvent<? extends K, ? extends V>>> eventMap;
+                              ArrayList<CacheEntryEvent<K, V>>> eventMap;
     
     /**
      * Constructs an {@link RICacheEventEventDispatcher}.
      */
     public RICacheEventEventDispatcher() {
         this.eventMap = new ConcurrentHashMap<Class<? extends CacheEntryListener>, 
-                                              ArrayList<CacheEntryEvent<? extends K, ? extends V>>>();
+                                              ArrayList<CacheEntryEvent<K, V>>>();
     }
     
     /**
@@ -63,7 +64,7 @@ public class RICacheEventEventDispatcher<K, V> {
      * @param event         the event to be dispatched
      */
     public void addEvent(Class<? extends CacheEntryListener> listenerClass, 
-                         CacheEntryEvent<? extends K, ? extends V> event) {
+                         CacheEntryEvent<K, V> event) {
         if (listenerClass == null) {
             throw new NullPointerException("listenerClass can't be null");
         }
@@ -77,11 +78,11 @@ public class RICacheEventEventDispatcher<K, V> {
         }
         
         //for safety
-        ArrayList<CacheEntryEvent<? extends K, ? extends V>> eventList;
+        ArrayList<CacheEntryEvent<K, V>> eventList;
         synchronized (this) {
             eventList = eventMap.get(listenerClass);
             if (eventList == null) {
-                eventList = new ArrayList<CacheEntryEvent<? extends K, ? extends V>>();
+                eventList = new ArrayList<CacheEntryEvent<K, V>>();
                 eventMap.put(listenerClass, eventList);
             }
         }
@@ -108,15 +109,19 @@ public class RICacheEventEventDispatcher<K, V> {
         
         //TODO: we need to remove/hide old values appropriately
         
-        Iterable<CacheEntryEvent<? extends K, ? extends V>> events;
+        Iterable<CacheEntryEvent<K, V>> events;
 
         //notify expiry listeners
         events = eventMap.get(CacheEntryExpiredListener.class);
         if (events != null) {
             for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
+                Iterable<CacheEntryEvent<K, V>> iterable = 
+                        filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
+                
                 CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryExpiredListener) {
-                    ((CacheEntryExpiredListener) listener).onExpired(events);
+                    ((CacheEntryExpiredListener) listener).onExpired(iterable);
                 }
             }
         }
@@ -125,9 +130,13 @@ public class RICacheEventEventDispatcher<K, V> {
         events = eventMap.get(CacheEntryCreatedListener.class);
         if (events != null) {
             for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
+                Iterable<CacheEntryEvent<K, V>> iterable = 
+                        filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
+
                 CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryCreatedListener) {
-                    ((CacheEntryCreatedListener) listener).onCreated(events);
+                    ((CacheEntryCreatedListener) listener).onCreated(iterable);
                 }
             }
         }
@@ -136,9 +145,13 @@ public class RICacheEventEventDispatcher<K, V> {
         events = eventMap.get(CacheEntryReadListener.class);
         if (events != null) {
             for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
+                Iterable<CacheEntryEvent<K, V>> iterable = 
+                        filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
+
                 CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryReadListener) {
-                    ((CacheEntryReadListener) listener).onRead(events);
+                    ((CacheEntryReadListener) listener).onRead(iterable);
                 }
             }
         }
@@ -147,9 +160,13 @@ public class RICacheEventEventDispatcher<K, V> {
         events = eventMap.get(CacheEntryUpdatedListener.class);
         if (events != null) {
             for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
+                Iterable<CacheEntryEvent<K, V>> iterable = 
+                        filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
+
                 CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryUpdatedListener) {
-                    ((CacheEntryUpdatedListener) listener).onUpdated(events);
+                    ((CacheEntryUpdatedListener) listener).onUpdated(iterable);
                 }
             }
         }
@@ -158,9 +175,13 @@ public class RICacheEventEventDispatcher<K, V> {
         events = eventMap.get(CacheEntryRemovedListener.class);
         if (events != null) {
             for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+                CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
+                Iterable<CacheEntryEvent<K, V>> iterable = 
+                        filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
+
                 CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
                 if (listener instanceof CacheEntryRemovedListener) {
-                    ((CacheEntryRemovedListener) listener).onRemoved(events);
+                    ((CacheEntryRemovedListener) listener).onRemoved(iterable);
                 }
             }
         }

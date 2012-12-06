@@ -21,7 +21,7 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
-import javax.cache.event.CacheEntryFilter;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
@@ -101,7 +101,7 @@ public interface CacheConfigurationBuilder<K, V, B extends CacheConfigurationBui
      * Adds the definition of a {@link CacheEntryListener} to be registered
      * with a Cache.
      * 
-     * @see Cache#registerCacheEntryListener(CacheEntryListener, boolean, CacheEntryFilter, boolean)
+     * @see Cache#registerCacheEntryListener(CacheEntryListener, boolean, CacheEntryEventFilter, boolean)
      * 
      * @param cacheEntryListener The listener to add
      * @param requireOldValue    is the old value supplied in an event
@@ -111,7 +111,7 @@ public interface CacheConfigurationBuilder<K, V, B extends CacheConfigurationBui
      */
     B addCacheEntryListener(CacheEntryListener<? super K, ? super V> cacheEntryListener,
                             boolean requireOldValue,
-                            CacheEntryFilter<? super K, ? super V> cacheEntryFilter,
+                            CacheEntryEventFilter<? super K, ? super V> cacheEntryFilter,
                             boolean synchronous);
     
     /**

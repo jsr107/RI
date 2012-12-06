@@ -15,9 +15,9 @@
  *  limitations under the License.
  */
 
-    package org.jsr107.ri;
+package org.jsr107.ri;
 
-import javax.cache.event.CacheEntryFilter;
+import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerRegistration;
 
@@ -32,7 +32,7 @@ import javax.cache.event.CacheEntryListenerRegistration;
 public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListenerRegistration<K, V> {
 
     private CacheEntryListener<? super K, ? super V> listener;
-    private CacheEntryFilter<? super K, ? super V> filter;
+    private CacheEntryEventFilter<? super K, ? super V> filter;
     private boolean isOldValueRequired;
     private boolean isSynchronous;
     
@@ -40,12 +40,12 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
      * Constructs an {@link RICacheEntryListenerRegistration}.
      * 
      * @param listener            the {@link CacheEntryListener}
-     * @param filter              the optional {@link CacheEntryFilter}
+     * @param filter              the optional {@link CacheEntryEventFilter}
      * @param isOldValueRequired  if the old value is required for events with this listener
      * @param isSynchronous       if the listener should block the thread causing the event
      */
     public RICacheEntryListenerRegistration(CacheEntryListener<? super K, ? super V> listener, 
-                                            CacheEntryFilter<? super K, ? super V> filter, 
+                                            CacheEntryEventFilter<? super K, ? super V> filter, 
                                             boolean isOldValueRequired, 
                                             boolean isSynchronous) {
         this.listener = listener;
@@ -59,7 +59,7 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
      * {@inheritDoc}
      */
     @Override
-    public CacheEntryFilter<? super K, ? super V> getCacheEntryFilter() {
+    public CacheEntryEventFilter<? super K, ? super V> getCacheEntryFilter() {
         return filter;
     }
     
