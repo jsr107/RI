@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheConfiguration.Duration;
+import javax.cache.SimpleCacheConfiguration;
 
 import org.junit.Test;
 
@@ -55,6 +56,14 @@ public class RICacheConfigurationTest {
         assertEquals(Duration.ETERNAL, config.getCacheEntryExpiryPolicy().getTTLForCreatedEntry(null));
         assertEquals(duration, config.getCacheEntryExpiryPolicy().getTTLForAccessedEntry(null, duration));
         assertEquals(duration, config.getCacheEntryExpiryPolicy().getTTLForModifiedEntry(null, duration));
+    }
+
+    @Test
+    public void notSameButClone() {
+        CacheConfiguration<?, ?> config1 = new RICacheConfiguration(new SimpleCacheConfiguration());
+        CacheConfiguration<?, ?> config2 = getCacheConfiguration();
+        assertNotSame(config1, config2);
+        assertEquals(config1, config2);
     }
 
     @Test

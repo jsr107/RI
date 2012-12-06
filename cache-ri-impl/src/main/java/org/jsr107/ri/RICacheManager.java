@@ -132,8 +132,12 @@ public class RICacheManager implements CacheManager {
                 
                 cache.start();
             } else {
+                //note: we must clone the provided configuration as it needs to be
+                //      the same internal type as our internal configuration
+                RICacheConfiguration<K, V> config = new RICacheConfiguration<K, V>(cacheConfiguration);
+                
                 //ensure that the existing cache has the same configuration as the provided one
-                if (!cache.getConfiguration().equals(cacheConfiguration)) {
+                if (!cache.getConfiguration().equals(config)) {
                     throw new CacheException("Cache " + cache.getName() + " already registered but with a different configuration");
                 }                
             }
@@ -141,7 +145,6 @@ public class RICacheManager implements CacheManager {
             return (Cache<K, V>)cache;
         }
     }
-    
     
     /**
      * {@inheritDoc}

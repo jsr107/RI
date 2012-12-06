@@ -79,6 +79,11 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
     protected boolean isStoreByValue;
     
     /**
+     * A flag indicating if the cache will use transactions.
+     */
+    protected boolean isTransactionsEnabled;
+    
+    /**
      * The transaction {@link IsolationLevel}.
      */
     protected IsolationLevel txnIsolationLevel;
@@ -89,7 +94,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
     protected Mode txnMode;
     
     /**
-     * Constructs an {@link RICacheConfiguration} using default values.
+     * Constructs an {@link RICacheConfiguration} with the standard default values.
      */
     public RICacheConfiguration() {
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
@@ -100,35 +105,47 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
         this.isWriteThrough = false;
         this.isStatisticsEnabled = false;
         this.isStoreByValue = true;
+        this.isTransactionsEnabled = false;
         this.txnIsolationLevel = IsolationLevel.NONE;
         this.txnMode = Mode.NONE;
     }
     
     /**
-     * Constructs a {@link RICacheConfiguration}.
+     * Constructs a {@link RICacheConfiguration} based on a set of parameters.
      * 
-     * @param cacheEntryListenerRegistrations
-     * @param cacheLoader
-     * @param cacheWriter
-     * @param cacheEntryExpiryPolicy
-     * @param isReadThrough
-     * @param isWriteThrough
-     * @param isStatisticsEnabled
-     * @param storeByValue
-     * @param txnIsolationLevel
-     * @param txnMode
+     * @param cacheEntryListenerRegistrations the {@link CacheEntryListenerRegistration}s
+     * @param cacheLoader                     the {@link CacheLoader}
+     * @param cacheWriter                     the {@link CacheWriter}
+     * @param cacheEntryExpiryPolicy          the {@link CacheEntryExpiryPolicy}
+     * @param isReadThrough                   is read-through caching supported
+     * @param isWriteThrough                  is write-through caching supported
+     * @param isStatisticsEnabled             are statistics enabled
+     * @param isStoreByValue                  <code>true</code> if the "store-by-value" more
+     *                                        or <code>false</code> for "store-by-reference"
+     * @param isTransactionsEnabled           <code>true</code> if transactions are enabled                                       
+     * @param txnIsolationLevel               the {@link IsolationLevel}
+     * @param txnMode                         the {@link Mode}
      */
     public RICacheConfiguration(
             Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
             CacheLoader<K, ? extends V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
             CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy, 
-            boolean isReadThrough, boolean isWriteThrough,
-            boolean isStatisticsEnabled, boolean isStoreByValue,
-            IsolationLevel txnIsolationLevel, Mode txnMode) {
+            boolean isReadThrough, 
+            boolean isWriteThrough,
+            boolean isStatisticsEnabled, 
+            boolean isStoreByValue,
+            boolean isTransactionsEnabled,
+            IsolationLevel txnIsolationLevel, 
+            Mode txnMode) {
         
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
-        for (CacheEntryListenerRegistration<? super K, ? super V> registration : cacheEntryListenerRegistrations) {
+        for (CacheEntryListenerRegistration<? super K, ? super V> r : cacheEntryListenerRegistrations) {
+            RICacheEntryListenerRegistration<? super K, ? super V> registration = 
+                new RICacheEntryListenerRegistration<K, V>(r.getCacheEntryListener(), 
+                                                           r.getCacheEntryFilter(), 
+                                                           r.isOldValueRequired(), 
+                                                           r.isSynchronous());
             this.cacheEntryListenerRegistrations.add(registration);
         }
         
@@ -144,6 +161,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
         
         this.isStoreByValue = isStoreByValue;
         
+        this.isTransactionsEnabled = isTransactionsEnabled;
         this.txnIsolationLevel = txnIsolationLevel;
         this.txnMode = txnMode;
     }
@@ -155,11 +173,16 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
      */
     public RICacheConfiguration(CacheConfiguration<K, V> configuration) {
         this(configuration.getCacheEntryListenerRegistrations(), 
-             configuration.getCacheLoader(), configuration.getCacheWriter(), 
+             configuration.getCacheLoader(), 
+             configuration.getCacheWriter(), 
              configuration.getCacheEntryExpiryPolicy(),
-             configuration.isReadThrough(), configuration.isWriteThrough(),
-             configuration.isStatisticsEnabled(), configuration.isStoreByValue(),
-             configuration.getTransactionIsolationLevel(), configuration.getTransactionMode());
+             configuration.isReadThrough(), 
+             configuration.isWriteThrough(),
+             configuration.isStatisticsEnabled(), 
+             configuration.isStoreByValue(),
+             configuration.isTransactionsEnabled(),
+             configuration.getTransactionIsolationLevel(), 
+             configuration.getTransactionMode());
     }
 
     /**
@@ -185,7 +208,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
     public CacheWriter<? super K, ? super V> getCacheWriter() {
         return this.cacheWriter;
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -245,18 +268,18 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public boolean isTransactionEnabled() {
-        return this.txnMode != Mode.NONE;
+    public void setStatisticsEnabled(boolean isStatisticsEnabled) {
+        this.isStatisticsEnabled = isStatisticsEnabled;
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setStatisticsEnabled(boolean isStatisticsEnabled) {
-        this.isStatisticsEnabled = isStatisticsEnabled;
+    public boolean isTransactionsEnabled() {
+        return this.isTransactionsEnabled;
     }
-
+    
     /**
      * {@inheritDoc}
      */
@@ -339,6 +362,9 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
             return false;
         }
         if (isWriteThrough != other.isWriteThrough) {
+            return false;
+        }
+        if (isTransactionsEnabled != other.isTransactionsEnabled) {
             return false;
         }
         if (txnIsolationLevel != other.txnIsolationLevel) {

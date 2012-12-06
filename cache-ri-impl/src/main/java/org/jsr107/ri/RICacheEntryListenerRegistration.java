@@ -54,7 +54,6 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
         this.isSynchronous = isSynchronous;
     }
     
-    
     /**
      * {@inheritDoc}
      */
@@ -106,17 +105,17 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object object) {
+        if (this == object) {
             return true;
         }
-        if (obj == null) {
+        if (object == null) {
             return false;
         }
-        if (!(obj instanceof RICacheEntryListenerRegistration)) {
+        if (!(object instanceof RICacheEntryListenerRegistration)) {
             return false;
         }
-        RICacheEntryListenerRegistration other = (RICacheEntryListenerRegistration) obj;
+        RICacheEntryListenerRegistration<?, ?> other = (RICacheEntryListenerRegistration<?, ?>) object;
         if (filter == null) {
             if (other.filter != null) {
                 return false;

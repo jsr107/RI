@@ -17,8 +17,6 @@
     <suppress checks="CyclomaticComplexity" files="RICacheConfiguration.java"/>
     <suppress checks="NPathComplexity" files="RICacheConfiguration.java"/>
     
-    <suppress checks="NPathComplexity" files="AbstractCacheConfiguration.java"/>
-
     <suppress checks="NPathComplexity" files="AbstractCacheLookupUtil.java"/>
     <suppress checks="CyclomaticComplexity" files="AbstractCacheLookupUtil.java"/>
     

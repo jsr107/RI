@@ -113,7 +113,7 @@ public class DefaultCacheConfiguration<K, V> implements CacheConfiguration<K, V>
      * {@inheritDoc}
      */
     @Override
-    public boolean isTransactionEnabled() {
+    public boolean isTransactionsEnabled() {
         return false;
     }
 
