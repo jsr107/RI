@@ -1006,7 +1006,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor) {
+    public <T> T invokeEntryProcessor(K key, EntryProcessor<K, V, T> entryProcessor) {
         checkStatusStarted();
         if (key == null) {
             throw new NullPointerException();
@@ -1015,7 +1015,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             throw new NullPointerException();
         }
         
-        Object result = null;
+        T result = null;
         lockManager.lock(key);
         try {
             long now = System.currentTimeMillis();
