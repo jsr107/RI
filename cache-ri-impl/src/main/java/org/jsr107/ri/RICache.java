@@ -978,6 +978,28 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
+    public void clear() {
+        checkStatusStarted();
+
+        Iterator<Map.Entry<Object, RICachedValue>> iterator = entries.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Object, RICachedValue> entry = iterator.next();
+            Object internalKey = entry.getKey();
+            K key = keyConverter.fromInternal(internalKey);
+
+            lockManager.lock(key);
+            try {
+                iterator.remove();
+            } finally {
+                lockManager.unLock(key);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V> listener,
                                               boolean requireOldValue,
                                               CacheEntryEventFilter<? super K, ? super V> filter,
@@ -1285,9 +1307,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      * An {@link Iterator} over Cache {@link Entry}s that lazily converts
      * from internal value representation to natural value representation on 
      * demand.
-     *
-     * @param <K> the type of the key
-     * @param <V> the type of the value
      */
     private final class RIEntryIterator implements Iterator<Entry<K, V>> {
         
@@ -1530,31 +1549,28 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     private enum MutableEntryOperation {
         /**
-         * Don't perform any operations on the {@link CachedValue}.
+         * Don't perform any operations on the {@link RICachedValue}.
          */
         NONE,
         
         /**
-         * Create a new {@link CachedValue}.
+         * Create a new {@link RICachedValue}.
          */
         CREATE,
         
         /**
-         * Remove the {@link CachedValue} (and thus the Cache Entry).
+         * Remove the {@link RICachedValue} (and thus the Cache Entry).
          */
         REMOVE,
         
         /**
-         * Update the {@link CachedValue}.
+         * Update the {@link RICachedValue}.
          */
         UPDATE;
     }
     
     /**
      * A {@link MutableEntry} that is used by {@link EntryProcessor}s.
-     * 
-     * @param <K> the type of key
-     * @param <V> the type of value
      */
     private class EntryProcessorEntry implements MutableEntry<K, V> {
         /**
