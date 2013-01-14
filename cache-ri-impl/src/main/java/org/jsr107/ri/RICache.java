@@ -1181,10 +1181,19 @@ public final class RICache<K, V> implements Cache<K, V> {
             cachedValue = entries.get(internalKey);
                 
             boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
+
+
+
             if (cachedValue == null || isExpired) {
-                
+
+
+
                 V expiredValue = isExpired ? valueConverter.fromInternal(cachedValue.get()) : null;
-                                                
+
+                if (isExpired) {
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                }
+
                 if (statisticsEnabled()) {
                     statistics.increaseCacheMisses(1);
                 }
@@ -1212,9 +1221,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 if (cachedValue.isExpiredAt(now)) {
                     return null;
                 } else {
-                    if (isExpired) {
-                        dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
-                    }
+
                     
                     entries.put(internalKey, cachedValue);
                     
