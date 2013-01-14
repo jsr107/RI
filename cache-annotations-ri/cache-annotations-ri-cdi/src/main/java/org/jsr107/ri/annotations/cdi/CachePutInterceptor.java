@@ -17,8 +17,9 @@
 package org.jsr107.ri.annotations.cdi;
 
 
-import javax.cache.annotation.CachePut;
 import org.jsr107.ri.annotations.AbstractCachePutInterceptor;
+
+import javax.cache.annotation.CachePut;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;

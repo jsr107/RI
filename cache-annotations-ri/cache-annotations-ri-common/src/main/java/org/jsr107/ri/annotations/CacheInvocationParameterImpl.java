@@ -16,10 +16,9 @@
  */
 package org.jsr107.ri.annotations;
 
+import javax.cache.annotation.CacheInvocationParameter;
 import java.lang.annotation.Annotation;
 import java.util.Set;
-
-import javax.cache.annotation.CacheInvocationParameter;
 
 /**
  * Provides caching specific information about a method parameter for intercepted method invocations.

@@ -17,6 +17,7 @@
 
 package org.jsr107.ri;
 
+import javax.cache.CacheException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,8 +26,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.util.Arrays;
-
-import javax.cache.CacheException;
 
 /**
  * An {@link RIInternalConverter} that converts values to and from their 

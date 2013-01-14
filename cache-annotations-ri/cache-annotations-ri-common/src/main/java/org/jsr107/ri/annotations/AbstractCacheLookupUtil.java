@@ -16,18 +16,6 @@
  */
 package org.jsr107.ri.annotations;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.AnnotationFormatError;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import javax.cache.annotation.CacheDefaults;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyParam;
@@ -39,6 +27,17 @@ import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.CacheValue;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.AnnotationFormatError;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Utility used by all annotations to lookup the {@link CacheResolver} and {@link CacheKeyGenerator} for a given method.

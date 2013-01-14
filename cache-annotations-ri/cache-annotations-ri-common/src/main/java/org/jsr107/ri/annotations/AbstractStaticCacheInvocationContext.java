@@ -17,13 +17,12 @@
 
 package org.jsr107.ri.annotations;
 
+import javax.cache.annotation.CacheMethodDetails;
+import javax.cache.annotation.CacheResolver;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-
-import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CacheResolver;
 
 /**
  * @author Eric Dalquist

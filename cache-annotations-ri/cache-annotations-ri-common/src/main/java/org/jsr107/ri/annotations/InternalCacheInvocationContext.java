@@ -16,9 +16,8 @@
  */
 package org.jsr107.ri.annotations;
 
-import java.lang.annotation.Annotation;
-
 import javax.cache.annotation.CacheInvocationContext;
+import java.lang.annotation.Annotation;
 
 /**
  * RI Internal extension of {@link CacheInvocationContext} which provides access to the {@link AbstractStaticCacheInvocationContext}

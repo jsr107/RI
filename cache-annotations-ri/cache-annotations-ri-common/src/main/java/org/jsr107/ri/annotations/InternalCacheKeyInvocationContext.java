@@ -16,9 +16,8 @@
  */
 package org.jsr107.ri.annotations;
 
-import java.lang.annotation.Annotation;
-
 import javax.cache.annotation.CacheKeyInvocationContext;
+import java.lang.annotation.Annotation;
 
 /**
  * @author Eric Dalquist

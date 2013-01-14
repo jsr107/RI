@@ -17,9 +17,8 @@
 
 package org.jsr107.ri.annotations.spring;
 
-import org.jsr107.ri.annotations.InterceptorType;
-
 import org.aopalliance.intercept.MethodInterceptor;
+import org.jsr107.ri.annotations.InterceptorType;
 
 /**
  * Common subclass for all jcache interceptors

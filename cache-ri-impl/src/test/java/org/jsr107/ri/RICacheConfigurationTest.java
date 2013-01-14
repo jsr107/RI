@@ -17,21 +17,20 @@
 
 package org.jsr107.ri;
 
+import org.junit.Test;
+
+import javax.cache.Configuration;
+import javax.cache.Configuration.Duration;
+import javax.cache.SimpleConfiguration;
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
-import java.util.concurrent.TimeUnit;
-
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheConfiguration.Duration;
-import javax.cache.SimpleCacheConfiguration;
-
-import org.junit.Test;
-
 /**
- * Unit tests for a {@link CacheConfiguration}.
+ * Unit tests for a {@link javax.cache.Configuration}.
  *
  * @author Brian Oliver
  * @author Yannis Cosmadopoulos
@@ -39,59 +38,59 @@ import org.junit.Test;
  */
 public class RICacheConfigurationTest {
     
-    public <K, V> CacheConfiguration<K, V> getCacheConfiguration()
+    public <K, V> Configuration<K, V> getCacheConfiguration()
     {
         return new RICacheConfiguration<K, V>();
     }
     
     @Test
     public void checkDefaults() {
-        CacheConfiguration<?, ?> config = getCacheConfiguration();
+        Configuration<?, ?> config = getCacheConfiguration();
         assertFalse(config.isReadThrough());
         assertFalse(config.isWriteThrough());
         assertFalse(config.isStatisticsEnabled());
         assertTrue(config.isStoreByValue());
         
         Duration duration = new Duration(TimeUnit.MINUTES, 10);
-        assertEquals(Duration.ETERNAL, config.getCacheEntryExpiryPolicy().getTTLForCreatedEntry(null));
-        assertEquals(duration, config.getCacheEntryExpiryPolicy().getTTLForAccessedEntry(null, duration));
-        assertEquals(duration, config.getCacheEntryExpiryPolicy().getTTLForModifiedEntry(null, duration));
+        assertEquals(Duration.ETERNAL, config.getExpiryPolicy().getTTLForCreatedEntry(null));
+        assertEquals(duration, config.getExpiryPolicy().getTTLForAccessedEntry(null, duration));
+        assertEquals(duration, config.getExpiryPolicy().getTTLForModifiedEntry(null, duration));
     }
 
     @Test
     public void notSameButClone() {
-        CacheConfiguration<?, ?> config1 = new RICacheConfiguration(new SimpleCacheConfiguration());
-        CacheConfiguration<?, ?> config2 = getCacheConfiguration();
+        Configuration<?, ?> config1 = new RICacheConfiguration(new SimpleConfiguration());
+        Configuration<?, ?> config2 = getCacheConfiguration();
         assertNotSame(config1, config2);
         assertEquals(config1, config2);
     }
 
     @Test
     public void notSame() {
-        CacheConfiguration<?, ?> config1 = getCacheConfiguration();
-        CacheConfiguration<?, ?> config2 = getCacheConfiguration();
+        Configuration<?, ?> config1 = getCacheConfiguration();
+        Configuration<?, ?> config2 = getCacheConfiguration();
         assertNotSame(config1, config2);
     }
 
     @Test
     public void equals() {
-        CacheConfiguration<?, ?> config1 = getCacheConfiguration();
-        CacheConfiguration<?, ?> config2 = getCacheConfiguration();
+        Configuration<?, ?> config1 = getCacheConfiguration();
+        Configuration<?, ?> config2 = getCacheConfiguration();
         assertEquals(config1, config2);
     }
 
     @Test
     public void equalsNotEquals() {
-        CacheConfiguration<?, ?> config1 = getCacheConfiguration();
+        Configuration<?, ?> config1 = getCacheConfiguration();
         config1.setStatisticsEnabled(!config1.isStatisticsEnabled());
         
-        CacheConfiguration<?, ?> config2 = getCacheConfiguration();
+        Configuration<?, ?> config2 = getCacheConfiguration();
         assertFalse(config1.equals(config2));
     }
 
     @Test
     public void setStatisticsEnabled() {
-        CacheConfiguration<?, ?> config = getCacheConfiguration();
+        Configuration<?, ?> config = getCacheConfiguration();
         boolean isStatisticsEnabled = config.isStatisticsEnabled();
         config.setStatisticsEnabled(!isStatisticsEnabled);
         assertEquals(!isStatisticsEnabled, config.isStatisticsEnabled());
@@ -99,24 +98,24 @@ public class RICacheConfigurationTest {
 
     @Test
     public void DurationEquals() {
-        CacheConfiguration.Duration duration1 = new CacheConfiguration.Duration(TimeUnit.DAYS, 2);
-        CacheConfiguration.Duration duration2 = new CacheConfiguration.Duration(TimeUnit.DAYS, 2);
+        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
+        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.DAYS, 2);
         assertEquals(duration1, duration2);
     }
 
 
     @Test
     public void durationNotEqualsAmount() {
-        CacheConfiguration.Duration duration1 = new CacheConfiguration.Duration(TimeUnit.DAYS, 2);
-        CacheConfiguration.Duration duration2 = new CacheConfiguration.Duration(TimeUnit.DAYS, 3);
+        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
+        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.DAYS, 3);
         assertFalse(duration1.equals(duration2));
         assertFalse(duration1.hashCode() == duration2.hashCode());
     }
 
     @Test
     public void durationNotEqualsUnit() {
-        CacheConfiguration.Duration duration1 = new CacheConfiguration.Duration(TimeUnit.DAYS, 2);
-        CacheConfiguration.Duration duration2 = new CacheConfiguration.Duration(TimeUnit.MINUTES, 2);
+        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
+        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 2);
         assertFalse(duration1.equals(duration2));
         assertFalse(duration1.hashCode() == duration2.hashCode());
 
@@ -132,16 +131,16 @@ public class RICacheConfigurationTest {
      */
     @Test
     public void durationEqualsWhenSemanticallyEqualsButExpressedDifferentUnits() {
-        CacheConfiguration.Duration duration1 = new CacheConfiguration.Duration(TimeUnit.SECONDS, 120);
-        CacheConfiguration.Duration duration2 = new CacheConfiguration.Duration(TimeUnit.MINUTES, 2);
+        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.SECONDS, 120);
+        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 2);
         assertEquals(duration1, duration2);
         assertEquals(duration1.hashCode(), duration2.hashCode());
     }
 
     @Test
     public void durationEqualsWhenSemanticallyEqualsButExpressedDifferentUnitsHashCode() {
-        CacheConfiguration.Duration duration1 = new CacheConfiguration.Duration(TimeUnit.SECONDS, 120);
-        CacheConfiguration.Duration duration2 = new CacheConfiguration.Duration(TimeUnit.MINUTES, 2);
+        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.SECONDS, 120);
+        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 2);
         assertEquals(duration1, duration2);
         assertEquals(duration1.hashCode(), duration2.hashCode());
     }
@@ -150,15 +149,15 @@ public class RICacheConfigurationTest {
     @Test
     public void durationNotEqualsUnitEquals() {
         long time = 2;
-        CacheConfiguration.Duration duration1 = new CacheConfiguration.Duration(TimeUnit.HOURS, 2);
+        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.HOURS, 2);
         time *= 60;
-        CacheConfiguration.Duration duration2 = new CacheConfiguration.Duration(TimeUnit.MINUTES, 120);
+        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 120);
         assertEquals(duration1, duration2);
         time *= 60;
-        duration2 = new CacheConfiguration.Duration(TimeUnit.SECONDS, time);
+        duration2 = new Configuration.Duration(TimeUnit.SECONDS, time);
         assertEquals(duration1, duration2);
         time *= 1000;
-        duration2 = new CacheConfiguration.Duration(TimeUnit.MILLISECONDS, time);
+        duration2 = new Configuration.Duration(TimeUnit.MILLISECONDS, time);
         assertEquals(duration1, duration2);
     }
 
@@ -166,26 +165,26 @@ public class RICacheConfigurationTest {
     @Test
     public void DurationExceptions() {
         try {
-            new CacheConfiguration.Duration(null, 2);
+            new Configuration.Duration(null, 2);
         } catch (NullPointerException e) {
             //expected
         }
 
         try {
-            new CacheConfiguration.Duration(TimeUnit.MINUTES, 0);
+            new Configuration.Duration(TimeUnit.MINUTES, 0);
         } catch (NullPointerException e) {
             //expected
         }
 
 
         try {
-            new CacheConfiguration.Duration(TimeUnit.MICROSECONDS, 10);
+            new Configuration.Duration(TimeUnit.MICROSECONDS, 10);
         } catch (IllegalArgumentException e) {
             //expected
         }
 
         try {
-            new CacheConfiguration.Duration(TimeUnit.MILLISECONDS, -10);
+            new Configuration.Duration(TimeUnit.MILLISECONDS, -10);
         } catch (IllegalArgumentException e) {
             //expected
         }

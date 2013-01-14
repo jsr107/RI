@@ -24,7 +24,6 @@ import org.jsr107.ri.annotations.spring.CachePutInterceptor;
 import org.jsr107.ri.annotations.spring.CacheRemoveAllInterceptor;
 import org.jsr107.ri.annotations.spring.CacheRemoveEntryInterceptor;
 import org.jsr107.ri.annotations.spring.CacheResultInterceptor;
-
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
 import org.springframework.beans.MutablePropertyValues;

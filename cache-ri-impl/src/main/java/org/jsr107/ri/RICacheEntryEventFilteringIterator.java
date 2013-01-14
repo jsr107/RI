@@ -16,11 +16,10 @@
  */
 package org.jsr107.ri;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * A adapter to {@link Iterator}s to allow filtering of {@link CacheEntryEvent}s

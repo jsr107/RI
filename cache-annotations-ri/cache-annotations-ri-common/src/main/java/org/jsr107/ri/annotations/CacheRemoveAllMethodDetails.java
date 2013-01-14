@@ -16,11 +16,10 @@
  */
 package org.jsr107.ri.annotations;
 
-import java.util.List;
-
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResolver;
+import java.util.List;
 
 /**
  * Details for a method annotated with {@link CacheRemoveAll}

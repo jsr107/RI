@@ -16,18 +16,17 @@
  */
 package org.jsr107.ri;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
-import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryEventFilter;
+import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Collects and appropriately dispatches {@link CacheEntryEvent}s to

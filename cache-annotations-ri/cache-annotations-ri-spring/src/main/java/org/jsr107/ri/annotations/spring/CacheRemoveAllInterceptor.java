@@ -17,11 +17,10 @@
 
 package org.jsr107.ri.annotations.spring;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.jsr107.ri.annotations.AbstractCacheRemoveAllInterceptor;
 import org.jsr107.ri.annotations.CacheContextSource;
 import org.jsr107.ri.annotations.InterceptorType;
-
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author Eric Dalquist

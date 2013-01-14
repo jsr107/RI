@@ -18,19 +18,19 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheConfiguration.Duration;
-import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Caching;
+import javax.cache.Configuration;
+import javax.cache.Configuration.Duration;
+import javax.cache.ExpiryPolicy;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
-import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryEventFilter;
+import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryListenerRegistration;
@@ -91,9 +91,9 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final ClassLoader classLoader;
     
     /**
-     * The {@link CacheConfiguration} for the {@link Cache}.
+     * The {@link javax.cache.Configuration} for the {@link Cache}.
      */
-    private final CacheConfiguration<K, V> configuration;
+    private final Configuration<K, V> configuration;
     
     /**
      * The {@link RIInternalConverter} for keys.
@@ -112,9 +112,9 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final RIInternalMap<Object, RICachedValue> entries;
 
     /**
-     * The {@link CacheEntryExpiryPolicy} for the Cache.
+     * The {@link javax.cache.ExpiryPolicy} for the Cache.
      */
-    private final CacheEntryExpiryPolicy<? super K, ? super V> expiryPolicy;
+    private final ExpiryPolicy<? super K, ? super V> expiryPolicy;
     
     /**
      * The {@link CacheEntryListenerRegistration}s for the Cache.
@@ -153,7 +153,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     RICache(String cacheName, 
             String cacheManagerName,
             ClassLoader classLoader,
-            CacheConfiguration<K, V> configuration) {
+            Configuration<K, V> configuration) {
         
         this.cacheName = cacheName;
         this.cacheManagerName = cacheManagerName;
@@ -171,7 +171,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                              new RISerializingInternalConverter<V>(classLoader) :
                              new RIReferenceInternalConverter<V>();
         
-        this.expiryPolicy = configuration.getCacheEntryExpiryPolicy();
+        this.expiryPolicy = configuration.getExpiryPolicy();
         
         status = Status.UNINITIALISED;
  
@@ -224,7 +224,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheConfiguration<K, V> getConfiguration() {
+    public Configuration<K, V> getConfiguration() {
         return configuration;
     }
     

@@ -17,23 +17,22 @@
 
 package org.jsr107.ri;
 
+import javax.cache.Cache;
+import javax.cache.CacheException;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.Configuration;
+import javax.cache.OptionalFeature;
+import javax.cache.Status;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
+import javax.transaction.UserTransaction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheException;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.OptionalFeature;
-import javax.cache.Status;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
-import javax.transaction.UserTransaction;
 
 /**
  * The reference implementation of the {@link CacheManager}.
@@ -100,7 +99,7 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public <K, V> Cache<K, V> configureCache(String cacheName, CacheConfiguration<K, V> cacheConfiguration) {
+    public <K, V> Cache<K, V> configureCache(String cacheName, Configuration<K, V> configuration) {
         if (status != Status.STARTED) {
             throw new IllegalStateException();
         }
@@ -109,17 +108,17 @@ public class RICacheManager implements CacheManager {
             throw new NullPointerException("cacheName must not be null");
         }
         
-        if (cacheConfiguration == null) {
-            throw new NullPointerException("cacheConfiguration must not be null");
+        if (configuration == null) {
+            throw new NullPointerException("configuration must not be null");
         }
         
-        if (cacheConfiguration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
-            cacheConfiguration.getTransactionMode() != Mode.NONE) {
+        if (configuration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
+            configuration.getTransactionMode() != Mode.NONE) {
             throw new IllegalArgumentException("isolation level expected when mode specified");
         }
         
-        if (cacheConfiguration.getTransactionIsolationLevel() != IsolationLevel.NONE &&
-            cacheConfiguration.getTransactionMode() == Mode.NONE) {
+        if (configuration.getTransactionIsolationLevel() != IsolationLevel.NONE &&
+            configuration.getTransactionMode() == Mode.NONE) {
             throw new IllegalArgumentException("mode expected when isolation level specified");
         }
         
@@ -127,14 +126,14 @@ public class RICacheManager implements CacheManager {
             Cache<?, ?> cache = caches.get(cacheName);
             
             if (cache == null) {
-                cache = new RICache<K, V>(cacheName, getName(), getClassLoader(), cacheConfiguration);
+                cache = new RICache<K, V>(cacheName, getName(), getClassLoader(), configuration);
                 caches.put(cache.getName(), cache);
                 
                 cache.start();
             } else {
                 //note: we must clone the provided configuration as it needs to be
                 //      the same internal type as our internal configuration
-                RICacheConfiguration<K, V> config = new RICacheConfiguration<K, V>(cacheConfiguration);
+                RICacheConfiguration<K, V> config = new RICacheConfiguration<K, V>(configuration);
                 
                 //ensure that the existing cache has the same configuration as the provided one
                 if (!cache.getConfiguration().equals(config)) {

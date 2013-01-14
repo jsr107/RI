@@ -18,10 +18,10 @@
 package org.jsr107.ri.annotations.guice;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.jsr107.ri.annotations.AbstractCacheResultInterceptor;
 import org.jsr107.ri.annotations.CacheContextSource;
 import org.jsr107.ri.annotations.InterceptorType;
+
 import javax.inject.Inject;
 
 /**

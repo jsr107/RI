@@ -17,12 +17,12 @@
 
 package org.jsr107.ri.annotations.cdi;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
 import org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
+
 import javax.interceptor.InvocationContext;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * CDI specific cache invocation context using {@link InvocationContext}

@@ -17,17 +17,16 @@
 
 package org.jsr107.ri.annotations;
 
-import java.lang.annotation.Annotation;
-import java.util.logging.Logger;
-
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
-import javax.cache.SimpleCacheConfiguration;
+import javax.cache.SimpleConfiguration;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
+import java.lang.annotation.Annotation;
+import java.util.logging.Logger;
 
 /**
  * Default {@link CacheResolverFactory} that uses the default {@link CacheManager} and finds the {@link Cache}
@@ -69,7 +68,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         
         if (cache == null) {
             this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
-            cache = this.cacheManager.configureCache(cacheName, new SimpleCacheConfiguration<Object, Object>());
+            cache = this.cacheManager.configureCache(cacheName, new SimpleConfiguration<Object, Object>());
         }
         
         return new DefaultCacheResolver(cache);
@@ -88,7 +87,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
         if (cache == null) {
             this.logger.warning("No Cache named '" + exceptionCacheName + 
                     "' was found in the CacheManager, a default cache will be created.");
-            cache = this.cacheManager.configureCache(exceptionCacheName, new SimpleCacheConfiguration<Object, Object>());
+            cache = this.cacheManager.configureCache(exceptionCacheName, new SimpleConfiguration<Object, Object>());
         }
         
         return new DefaultCacheResolver(cache);

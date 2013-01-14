@@ -17,13 +17,12 @@
 
 package org.jsr107.ri.annotations.spring;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
+import org.aopalliance.intercept.MethodInvocation;
 import org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
 
-import org.aopalliance.intercept.MethodInvocation;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * Spring specific cache key invocation context using {@link MethodInvocation}

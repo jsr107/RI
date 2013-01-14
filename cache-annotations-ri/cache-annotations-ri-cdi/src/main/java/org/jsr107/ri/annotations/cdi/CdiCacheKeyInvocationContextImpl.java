@@ -17,12 +17,12 @@
 
 package org.jsr107.ri.annotations.cdi;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
 import org.jsr107.ri.annotations.AbstractInternalCacheKeyInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheKeyInvocationContext;
+
 import javax.interceptor.InvocationContext;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * CDI specific cache key invocation context using {@link InvocationContext}

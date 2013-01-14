@@ -17,9 +17,8 @@
 
 package org.jsr107.ri.annotations;
 
-import java.util.Arrays;
-
 import javax.cache.annotation.CacheKey;
+import java.util.Arrays;
 
 /**
  * Default cache key implementation. Keeps a reference to a copy of the entire parameter array from

@@ -17,14 +17,13 @@
 package org.jsr107.ri.annotations;
 
 
-import java.lang.annotation.Annotation;
-
 import javax.cache.Cache;
 import javax.cache.annotation.CacheInvocationParameter;
 import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheResolver;
+import java.lang.annotation.Annotation;
 
 
 /**

@@ -17,18 +17,17 @@
 
 package org.jsr107.ri;
 
-import java.util.ArrayList;
-
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheEntryExpiryPolicy;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
+import javax.cache.Configuration;
+import javax.cache.ExpiryPolicy;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
+import java.util.ArrayList;
 
 /**
- * The reference implementation of a {@link CacheConfiguration}.
+ * The reference implementation of a {@link javax.cache.Configuration}.
  * 
  * @param <K> the type of keys maintained the cache
  * @param <V> the type of cached values
@@ -36,27 +35,27 @@ import javax.cache.transaction.Mode;
  * @author Brian Oliver
  * @since 1.0
  */
-public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
+public class RICacheConfiguration<K, V> implements Configuration<K, V> {
 
     /**
-     * The {@link CacheEntryListenerRegistration}s for the {@link CacheConfiguration}.
+     * The {@link CacheEntryListenerRegistration}s for the {@link javax.cache.Configuration}.
      */
     protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
 
     /**
-     * The {@link CacheLoader} for the built {@link CacheConfiguration}.
+     * The {@link CacheLoader} for the built {@link javax.cache.Configuration}.
      */
     protected CacheLoader<K, ? extends V> cacheLoader;
     
     /**
-     * The {@link CacheWriter} for the built {@link CacheConfiguration}.
+     * The {@link CacheWriter} for the built {@link javax.cache.Configuration}.
      */
     protected CacheWriter<? super K, ? super V> cacheWriter;
     
     /**
-     * The {@link CacheEntryExpiryPolicy} for the {@link CacheConfiguration}.
+     * The {@link javax.cache.ExpiryPolicy} for the {@link javax.cache.Configuration}.
      */
-    protected CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy;
+    protected ExpiryPolicy<? super K, ? super V> expiryPolicy;
     
     /**
      * A flag indicating if "read-through" mode is required.
@@ -100,7 +99,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
         this.cacheLoader = null;
         this.cacheWriter = null;
-        this.cacheEntryExpiryPolicy = new CacheEntryExpiryPolicy.Default<K, V>();
+        this.expiryPolicy = new ExpiryPolicy.Default<K, V>();
         this.isReadThrough = false;
         this.isWriteThrough = false;
         this.isStatisticsEnabled = false;
@@ -116,7 +115,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
      * @param cacheEntryListenerRegistrations the {@link CacheEntryListenerRegistration}s
      * @param cacheLoader                     the {@link CacheLoader}
      * @param cacheWriter                     the {@link CacheWriter}
-     * @param cacheEntryExpiryPolicy          the {@link CacheEntryExpiryPolicy}
+     * @param expiryPolicy          the {@link javax.cache.ExpiryPolicy}
      * @param isReadThrough                   is read-through caching supported
      * @param isWriteThrough                  is write-through caching supported
      * @param isStatisticsEnabled             are statistics enabled
@@ -130,7 +129,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
             Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
             CacheLoader<K, ? extends V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
-            CacheEntryExpiryPolicy<? super K, ? super V> cacheEntryExpiryPolicy, 
+            ExpiryPolicy<? super K, ? super V> expiryPolicy,
             boolean isReadThrough, 
             boolean isWriteThrough,
             boolean isStatisticsEnabled, 
@@ -152,7 +151,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
         this.cacheLoader = cacheLoader;
         this.cacheWriter = cacheWriter;
         
-        this.cacheEntryExpiryPolicy = cacheEntryExpiryPolicy;
+        this.expiryPolicy = expiryPolicy;
         
         this.isReadThrough = isReadThrough;
         this.isWriteThrough = isWriteThrough;
@@ -169,13 +168,13 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
     /**
      * A copy-constructor for a {@link RICacheConfiguration}.
      * 
-     * @param configuration  the {@link CacheConfiguration} from which to copy
+     * @param configuration  the {@link javax.cache.Configuration} from which to copy
      */
-    public RICacheConfiguration(CacheConfiguration<K, V> configuration) {
+    public RICacheConfiguration(Configuration<K, V> configuration) {
         this(configuration.getCacheEntryListenerRegistrations(), 
              configuration.getCacheLoader(), 
              configuration.getCacheWriter(), 
-             configuration.getCacheEntryExpiryPolicy(),
+             configuration.getExpiryPolicy(),
              configuration.isReadThrough(), 
              configuration.isWriteThrough(),
              configuration.isStatisticsEnabled(), 
@@ -212,8 +211,8 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
     /**
      * {@inheritDoc}
      */
-    public CacheEntryExpiryPolicy<? super K, ? super V> getCacheEntryExpiryPolicy() {
-        return this.cacheEntryExpiryPolicy;
+    public ExpiryPolicy<? super K, ? super V> getExpiryPolicy() {
+        return this.expiryPolicy;
     }
     
     /**
@@ -296,7 +295,7 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
         result = prime * result
                 + ((cacheWriter == null) ? 0 : cacheWriter.hashCode());
         result = prime * result
-                + ((cacheEntryExpiryPolicy == null) ? 0 : cacheEntryExpiryPolicy.hashCode());
+                + ((expiryPolicy == null) ? 0 : expiryPolicy.hashCode());
         result = prime * result + (isReadThrough ? 1231 : 1237);
         result = prime * result + (isStatisticsEnabled ? 1231 : 1237);
         result = prime * result + (isStoreByValue ? 1231 : 1237);
@@ -345,11 +344,11 @@ public class RICacheConfiguration<K, V> implements CacheConfiguration<K, V> {
         } else if (!cacheWriter.equals(other.cacheWriter)) {
             return false;
         }
-        if (cacheEntryExpiryPolicy == null) {
-            if (other.cacheEntryExpiryPolicy != null) {
+        if (expiryPolicy == null) {
+            if (other.expiryPolicy != null) {
                 return false;
             }
-        } else if (!cacheEntryExpiryPolicy.equals(other.cacheEntryExpiryPolicy)) {
+        } else if (!expiryPolicy.equals(other.expiryPolicy)) {
             return false;
         }
         if (isReadThrough != other.isReadThrough) {

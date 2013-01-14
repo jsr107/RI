@@ -18,9 +18,9 @@
 package org.jsr107.ri.annotations.guice;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 

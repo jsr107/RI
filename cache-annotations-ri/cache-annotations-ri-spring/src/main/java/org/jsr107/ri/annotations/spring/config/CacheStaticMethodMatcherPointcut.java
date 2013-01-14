@@ -16,17 +16,16 @@
  */
 package org.jsr107.ri.annotations.spring.config;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
+import org.aopalliance.intercept.MethodInvocation;
 import org.jsr107.ri.annotations.CacheContextSource;
 import org.jsr107.ri.annotations.InterceptorType;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
 import org.jsr107.ri.annotations.spring.CacheMethodInterceptor;
-
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 
 /**

@@ -21,13 +21,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.matcher.Matchers;
 import org.aopalliance.intercept.MethodInvocation;
-
-import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CachePut;
-import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheRemoveEntry;
-import javax.cache.annotation.CacheResolverFactory;
-import javax.cache.annotation.CacheResult;
 import org.jsr107.ri.annotations.CacheContextSource;
 import org.jsr107.ri.annotations.DefaultCacheKeyGenerator;
 import org.jsr107.ri.annotations.DefaultCacheResolverFactory;
@@ -36,6 +29,13 @@ import org.jsr107.ri.annotations.guice.CachePutInterceptor;
 import org.jsr107.ri.annotations.guice.CacheRemoveAllInterceptor;
 import org.jsr107.ri.annotations.guice.CacheRemoveEntryInterceptor;
 import org.jsr107.ri.annotations.guice.CacheResultInterceptor;
+
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemoveAll;
+import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheResolverFactory;
+import javax.cache.annotation.CacheResult;
 
 /**
  * Standard cache module for binding all cache interceptors to their respective annotations. This module needs to be part of the

@@ -18,7 +18,6 @@
 package org.jsr107.ri.annotations.guice;
 
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.jsr107.ri.annotations.InterceptorType;
 
 /**

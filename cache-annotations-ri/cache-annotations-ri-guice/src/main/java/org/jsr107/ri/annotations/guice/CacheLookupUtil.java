@@ -19,14 +19,14 @@ package org.jsr107.ri.annotations.guice;
 
 import com.google.inject.Injector;
 import org.aopalliance.intercept.MethodInvocation;
-
-import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheResolverFactory;
 import org.jsr107.ri.annotations.AbstractCacheLookupUtil;
 import org.jsr107.ri.annotations.InternalCacheInvocationContext;
 import org.jsr107.ri.annotations.InternalCacheKeyInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheKeyInvocationContext;
+
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheResolverFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;

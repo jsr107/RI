@@ -17,8 +17,9 @@
 package org.jsr107.ri.annotations.cdi;
 
 
-import javax.cache.annotation.CacheRemoveAll;
 import org.jsr107.ri.annotations.AbstractCacheRemoveAllInterceptor;
+
+import javax.cache.annotation.CacheRemoveAll;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;

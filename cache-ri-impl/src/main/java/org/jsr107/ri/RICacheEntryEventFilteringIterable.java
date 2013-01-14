@@ -16,10 +16,9 @@
  */
 package org.jsr107.ri;
 
-import java.util.Iterator;
-
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
+import java.util.Iterator;
 
 /**
  * An adapter to provide {@link Iterable}s over Cache Entries, those of which

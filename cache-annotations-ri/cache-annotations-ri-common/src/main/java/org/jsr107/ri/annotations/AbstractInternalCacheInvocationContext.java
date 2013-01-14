@@ -16,12 +16,11 @@
  */
 package org.jsr107.ri.annotations;
 
+import javax.cache.annotation.CacheInvocationParameter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-
-import javax.cache.annotation.CacheInvocationParameter;
 
 
 /**

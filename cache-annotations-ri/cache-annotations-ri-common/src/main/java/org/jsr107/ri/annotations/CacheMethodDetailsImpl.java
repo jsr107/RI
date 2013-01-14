@@ -16,11 +16,10 @@
  */
 package org.jsr107.ri.annotations;
 
+import javax.cache.annotation.CacheMethodDetails;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
-
-import javax.cache.annotation.CacheMethodDetails;
 
 
 /**

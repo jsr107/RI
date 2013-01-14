@@ -16,13 +16,12 @@
  */
 package org.jsr107.ri;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 import javax.cache.CacheManager;
 import javax.cache.CacheManagerFactory;
 import javax.cache.CachingShutdownException;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * @author Yannis Cosmadopoulos

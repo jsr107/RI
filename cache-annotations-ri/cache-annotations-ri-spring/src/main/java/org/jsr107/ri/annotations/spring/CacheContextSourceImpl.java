@@ -17,24 +17,23 @@
 
 package org.jsr107.ri.annotations.spring;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
-import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheResolverFactory;
+import org.aopalliance.intercept.MethodInvocation;
 import org.jsr107.ri.annotations.AbstractCacheLookupUtil;
 import org.jsr107.ri.annotations.CacheContextSource;
 import org.jsr107.ri.annotations.InternalCacheInvocationContext;
 import org.jsr107.ri.annotations.InternalCacheKeyInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheKeyInvocationContext;
-
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
+
+import javax.cache.annotation.CacheKeyGenerator;
+import javax.cache.annotation.CacheResolverFactory;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * @author Eric Dalquist

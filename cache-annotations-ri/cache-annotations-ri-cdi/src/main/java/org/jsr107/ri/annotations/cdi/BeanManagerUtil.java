@@ -16,13 +16,12 @@
  */
 package org.jsr107.ri.annotations.cdi;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  * 
