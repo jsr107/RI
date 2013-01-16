@@ -1108,7 +1108,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public Iterator<Entry<K, V>> iterator() {
         checkStatusStarted();
-        
+
         long now = System.currentTimeMillis();
         
         return new RIEntryIterator(entries.iterator(), now);
@@ -1316,7 +1316,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * demand.
      */
     private final class RIEntryIterator implements Iterator<Entry<K, V>> {
-        
+
         /**
          * The {@link Iterator} over the internal entries.
          */
@@ -1344,12 +1344,14 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.nextEntry = null;
             this.now = now;
         }
-        
+
+
         /**
          * Fetches the next available, non-expired entry from the underlying 
          * iterator
          */
         private void fetch() {
+
             while (nextEntry == null && iterator.hasNext()) {
                 Map.Entry<Object, RICachedValue> entry = iterator.next();
                 RICachedValue cachedValue = entry.getValue();
