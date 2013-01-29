@@ -1182,11 +1182,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 
             boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
 
-
-
             if (cachedValue == null || isExpired) {
-
-
 
                 V expiredValue = isExpired ? valueConverter.fromInternal(cachedValue.get()) : null;
 
@@ -1325,7 +1321,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         /**
          * The next available non-expired cache entry.
          */
-        private Map.Entry<Object, RICachedValue> nextEntry;
+        private RIEntry<K, V> nextEntry;
 
         /**
          * The time the iteration commenced.  We use this to determine what
@@ -1345,19 +1341,30 @@ public final class RICache<K, V> implements Cache<K, V> {
             this.now = now;
         }
 
-
         /**
          * Fetches the next available, non-expired entry from the underlying 
-         * iterator
+         * iterator.
          */
         private void fetch() {
 
             while (nextEntry == null && iterator.hasNext()) {
+
                 Map.Entry<Object, RICachedValue> entry = iterator.next();
                 RICachedValue cachedValue = entry.getValue();
-                
-                if (!cachedValue.isExpiredAt(now)) {
-                    nextEntry = entry;
+
+                K key = (K)RICache.this.keyConverter.fromInternal(entry.getKey());
+                lockManager.lock(key);
+                try {
+                    if (!cachedValue.isExpiredAt(now)) {
+                        V value = (V)RICache.this.valueConverter.fromInternal(cachedValue.getInternalValue(now));
+                        nextEntry = new RIEntry<K, V>(key, value);
+
+                        Duration duration = expiryPolicy.getTTLForAccessedEntry(nextEntry, new Duration(now, cachedValue.getExpiryTime()));
+                        long expiryTime = duration.getAdjustedTime(now);
+                        cachedValue.setExpiryTime(expiryTime);
+                    }
+                } finally {
+                    lockManager.unLock(key);
                 }
             }
         }
@@ -1379,23 +1386,16 @@ public final class RICache<K, V> implements Cache<K, V> {
         @Override
         public Entry<K, V> next() {
             if (hasNext()) {
-                //TODO: we need to lock around this
-                
-                RICachedValue cachedValue = nextEntry.getValue();
-                K key = (K)RICache.this.keyConverter.fromInternal(nextEntry.getKey());
-                V value = (V)RICache.this.valueConverter.fromInternal(cachedValue.getInternalValue(now));
-                
-                RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
-                
-                Duration duration = expiryPolicy.getTTLForAccessedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
-                long expiryTime = duration.getAdjustedTime(now);
-                cachedValue.setExpiryTime(expiryTime);
-                
-                //TODO: raise "read" event
-                
+                RIEntry<K, V> entry = nextEntry;
+
+                //raise "read" event
+                RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
+                dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(RICache.this, entry.getKey(), entry.getValue()));
+                dispatcher.dispatch(cacheEntryListenerRegistrations.values());
+
                 //reset nextEntry to force fetching the next available entry
                 nextEntry = null;
-                
+
                 return entry;
             } else {
                 throw new NoSuchElementException();
