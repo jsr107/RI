@@ -1319,9 +1319,14 @@ public final class RICache<K, V> implements Cache<K, V> {
         private final Iterator<Map.Entry<Object, RICachedValue>> iterator;
 
         /**
-         * The next available non-expired cache entry.
+         * The next available non-expired cache entry to return.
          */
         private RIEntry<K, V> nextEntry;
+
+        /**
+         * The last returned cache entry (so we can allow for removal)
+         */
+        private RIEntry<K, V> lastEntry;
 
         /**
          * The time the iteration commenced.  We use this to determine what
@@ -1338,6 +1343,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         private RIEntryIterator(Iterator<Map.Entry<Object, RICachedValue>> iterator, long now) {
             this.iterator = iterator;
             this.nextEntry = null;
+            this.lastEntry = null;
             this.now = now;
         }
 
@@ -1386,17 +1392,19 @@ public final class RICache<K, V> implements Cache<K, V> {
         @Override
         public Entry<K, V> next() {
             if (hasNext()) {
-                RIEntry<K, V> entry = nextEntry;
+                //remember the lastEntry (so that we call allow for removal)
+                lastEntry = nextEntry;
 
                 //raise "read" event
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(RICache.this, entry.getKey(), entry.getValue()));
+                dispatcher.addEvent(CacheEntryReadListener.class,
+                                    new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(), lastEntry.getValue()));
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
 
                 //reset nextEntry to force fetching the next available entry
                 nextEntry = null;
 
-                return entry;
+                return lastEntry;
             } else {
                 throw new NoSuchElementException();
             }
@@ -1407,14 +1415,33 @@ public final class RICache<K, V> implements Cache<K, V> {
          */
         @Override
         public void remove() {
-            
-            //TODO: we need to lock around this
-            
-            iterator.remove();
-            
-            //TODO: raise "remove" event (if not expired)
-            
-            nextEntry = null;
+
+            if (lastEntry == null) {
+                throw new IllegalStateException("Must progress to the next entry to remove");
+            } else {
+                lockManager.lock(lastEntry.getKey());
+                try {
+
+                    //NOTE: there is the possibility here that the entry the application retrieved
+                    //may have been replaced / expired or already removed since it retrieved it.
+
+                    //we simply don't care here as multiple-threads are ok to remove and see
+                    //such side-effects
+                    iterator.remove();
+
+                    //raise "remove" event
+                    RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
+                    dispatcher.addEvent(CacheEntryRemovedListener.class,
+                                        new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(), lastEntry.getValue()));
+                    dispatcher.dispatch(cacheEntryListenerRegistrations.values());
+
+                } finally {
+                    lockManager.unLock(lastEntry.getKey());
+
+                    //reset lastEntry (we can't attempt to remove it again)
+                    lastEntry = null;
+                }
+            }
         }
     }
 

@@ -50,11 +50,21 @@ public class RICachedValue {
     private long accessTime;
 
     /**
+     * The number of times the interval value has been accessed.
+     */
+    private long accessCount;
+
+    /**
      * The time (since the Epoc) in milliseconds since the internal value was 
      * last modified.
      */
     private long modificationTime;
-    
+
+    /**
+     * The number of times the internal value has been modified.
+     */
+    private long modificationCount;
+
     /**
      * The time (since the Epoc) in milliseconds when the Cache Entry associated
      * with this value should be considered expired.  
@@ -77,6 +87,8 @@ public class RICachedValue {
         this.accessTime = creationTime;
         this.modificationTime = creationTime;
         this.expiryTime = expiryTime;
+        this.accessCount = 0;
+        this.modificationCount = 0;
     }
     
     /**
@@ -98,7 +110,16 @@ public class RICachedValue {
     public long getAccessTime() {
         return accessTime;
     }
-    
+
+    /**
+     * Gets the number of times the internal value has been accessed.
+     *
+     * @return the access count
+     */
+    public long getAccessCount() {
+        return accessCount;
+    }
+
     /**
      * Gets the time (since the Epoc) in milliseconds since the internal value
      * was last modified.
@@ -108,7 +129,16 @@ public class RICachedValue {
     public long getModificationTime() {
         return modificationTime;
     }
-    
+
+    /**
+     * Gets the number of times the internal value has been modified (set)
+     *
+     * @return the modification count
+     */
+    public long getModificationCount() {
+        return modificationCount;
+    }
+
     /**
      * Gets the time (since the Epoc) in milliseconds when the Cache Entry
      * associated with this value should be considered expired.
@@ -159,18 +189,22 @@ public class RICachedValue {
     }
     
     /**
-     * Gets the internal value (and updates the access time to now)
+     * Gets the internal value with the side-effect of updating the access time
+     * to that which is specified and incrementing the access count.
      * 
      * @param accessTime the time when the internal value was accessed
      * @return the internal value
      */
     public Object getInternalValue(long accessTime) {
         this.accessTime = accessTime;
+        this.accessCount++;
         return internalValue;
     }
     
     /**
-     * Sets the internal value (and update the modification time to now)
+     * Sets the internal value with the additional side-effect of updating the
+     * modification time to that which is specified and incrementing the
+     * modification count.
      * 
      * @param internalValue    the new internal value
      * @param modificationTime the time when the value was modified
@@ -178,5 +212,6 @@ public class RICachedValue {
     public void setInternalValue(Object internalValue, long modificationTime) {
         this.modificationTime = modificationTime;
         this.internalValue = internalValue;
+        this.modificationCount++;
     }
 }
