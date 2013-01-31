@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * @author Brian Oliver
  * @since 1.0
  */
-public class RICacheConfiguration<K, V> implements Configuration<K, V> {
+public class RIConfiguration<K, V> implements Configuration<K, V> {
 
     /**
      * The {@link CacheEntryListenerRegistration}s for the {@link javax.cache.Configuration}.
@@ -93,9 +93,9 @@ public class RICacheConfiguration<K, V> implements Configuration<K, V> {
     protected Mode txnMode;
     
     /**
-     * Constructs an {@link RICacheConfiguration} with the standard default values.
+     * Constructs an {@link RIConfiguration} with the standard default values.
      */
-    public RICacheConfiguration() {
+    public RIConfiguration() {
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
         this.cacheLoader = null;
         this.cacheWriter = null;
@@ -110,7 +110,7 @@ public class RICacheConfiguration<K, V> implements Configuration<K, V> {
     }
     
     /**
-     * Constructs a {@link RICacheConfiguration} based on a set of parameters.
+     * Constructs a {@link RIConfiguration} based on a set of parameters.
      * 
      * @param cacheEntryListenerRegistrations the {@link CacheEntryListenerRegistration}s
      * @param cacheLoader                     the {@link CacheLoader}
@@ -125,17 +125,17 @@ public class RICacheConfiguration<K, V> implements Configuration<K, V> {
      * @param txnIsolationLevel               the {@link IsolationLevel}
      * @param txnMode                         the {@link Mode}
      */
-    public RICacheConfiguration(
+    public RIConfiguration(
             Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
             CacheLoader<K, ? extends V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
             ExpiryPolicy<? super K, ? super V> expiryPolicy,
-            boolean isReadThrough, 
+            boolean isReadThrough,
             boolean isWriteThrough,
-            boolean isStatisticsEnabled, 
+            boolean isStatisticsEnabled,
             boolean isStoreByValue,
             boolean isTransactionsEnabled,
-            IsolationLevel txnIsolationLevel, 
+            IsolationLevel txnIsolationLevel,
             Mode txnMode) {
         
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
@@ -166,11 +166,11 @@ public class RICacheConfiguration<K, V> implements Configuration<K, V> {
     }
     
     /**
-     * A copy-constructor for a {@link RICacheConfiguration}.
+     * A copy-constructor for a {@link RIConfiguration}.
      * 
      * @param configuration  the {@link javax.cache.Configuration} from which to copy
      */
-    public RICacheConfiguration(Configuration<K, V> configuration) {
+    public RIConfiguration(Configuration<K, V> configuration) {
         this(configuration.getCacheEntryListenerRegistrations(), 
              configuration.getCacheLoader(), 
              configuration.getCacheWriter(), 
@@ -319,10 +319,10 @@ public class RICacheConfiguration<K, V> implements Configuration<K, V> {
         if (object == null) {
             return false;
         }
-        if (!(object instanceof RICacheConfiguration)) {
+        if (!(object instanceof RIConfiguration)) {
             return false;
         }
-        RICacheConfiguration<?, ?> other = (RICacheConfiguration<?, ?>) object;
+        RIConfiguration<?, ?> other = (RIConfiguration<?, ?>) object;
         if (cacheEntryListenerRegistrations == null) {
             if (other.cacheEntryListenerRegistrations != null) {
                 return false;

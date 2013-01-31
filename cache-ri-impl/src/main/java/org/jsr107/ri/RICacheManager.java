@@ -133,7 +133,7 @@ public class RICacheManager implements CacheManager {
             } else {
                 //note: we must clone the provided configuration as it needs to be
                 //      the same internal type as our internal configuration
-                RICacheConfiguration<K, V> config = new RICacheConfiguration<K, V>(configuration);
+                RIConfiguration<K, V> config = new RIConfiguration<K, V>(configuration);
                 
                 //ensure that the existing cache has the same configuration as the provided one
                 if (!cache.getConfiguration().equals(config)) {

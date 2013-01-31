@@ -14,8 +14,8 @@
     <suppress checks="FanOutComplexity" files="RICache.java"/>
     <suppress checks="FileLength" files="RICache.java"/>
     
-    <suppress checks="CyclomaticComplexity" files="RICacheConfiguration.java"/>
-    <suppress checks="NPathComplexity" files="RICacheConfiguration.java"/>
+    <suppress checks="CyclomaticComplexity" files="RIConfiguration.java"/>
+    <suppress checks="NPathComplexity" files="RIConfiguration.java"/>
     
     <suppress checks="NPathComplexity" files="AbstractCacheLookupUtil.java"/>
     <suppress checks="CyclomaticComplexity" files="AbstractCacheLookupUtil.java"/>

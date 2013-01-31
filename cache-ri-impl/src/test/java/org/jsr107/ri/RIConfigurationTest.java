@@ -36,11 +36,11 @@ import static org.junit.Assert.assertTrue;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class RICacheConfigurationTest {
+public class RIConfigurationTest {
     
     public <K, V> Configuration<K, V> getCacheConfiguration()
     {
-        return new RICacheConfiguration<K, V>();
+        return new RIConfiguration<K, V>();
     }
     
     @Test
@@ -59,7 +59,7 @@ public class RICacheConfigurationTest {
 
     @Test
     public void notSameButClone() {
-        Configuration<?, ?> config1 = new RICacheConfiguration(new SimpleConfiguration());
+        Configuration<?, ?> config1 = new RIConfiguration(new SimpleConfiguration());
         Configuration<?, ?> config2 = getCacheConfiguration();
         assertNotSame(config1, config2);
         assertEquals(config1, config2);

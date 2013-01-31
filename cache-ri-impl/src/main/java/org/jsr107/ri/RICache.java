@@ -161,7 +161,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         
         //we make a copy of the configuration here so that the provided one
         //may be changed and or used independently for other caches
-        this.configuration = new RICacheConfiguration<K, V>(configuration);
+        this.configuration = new RIConfiguration<K, V>(configuration);
                 
         keyConverter = configuration.isStoreByValue() ? 
                             new RISerializingInternalConverter<K>(classLoader) : 
