@@ -21,7 +21,7 @@ import javax.cache.mbeans.CacheStatisticsMXBean;
 import java.util.Date;
 
 /**
- * Class to help implementers
+ * Class to help implementers.
  *
  * @author Yannis Cosmadopoulos
  * @since 1.0
