@@ -17,7 +17,7 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.mbeans.CacheStatisticsMXBean;
+import javax.cache.CacheStatistics;
 import java.util.Date;
 
 /**
@@ -26,7 +26,7 @@ import java.util.Date;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class DelegatingCacheStatisticsMXBean implements CacheStatisticsMXBean {
+public class DelegatingCacheStatisticsMXBean implements CacheStatistics {
     private final Cache cache;
 
     /**
