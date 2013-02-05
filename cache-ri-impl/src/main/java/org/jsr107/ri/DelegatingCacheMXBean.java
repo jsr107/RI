@@ -18,7 +18,7 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.Status;
-import javax.cache.mbeans.CacheMXBean;
+import javax.cache.CacheMXBean;
 
 /**
  * Class to help implementers

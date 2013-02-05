@@ -18,16 +18,16 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.CacheStatistics;
+import javax.cache.CacheStatisticsMXBean;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * The reference implementation of {@link CacheStatistics}.
+ * The reference implementation of {@link javax.cache.CacheStatisticsMXBean}.
  */
-public class RICacheStatistics implements CacheStatistics, Serializable {
+public class RICacheStatistics implements CacheStatisticsMXBean, Serializable {
 
     private static final long serialVersionUID = -5589437411679003894L;
     private static final long NANOSECONDS_IN_A_MILLISECOND = 1000000L;
