@@ -28,7 +28,7 @@ import javax.cache.mbeans.CacheMXBean;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class DelegatingCacheMXBean<K, V> extends DelegatingCacheStatisticsMXBean implements CacheMXBean {
+public class DelegatingCacheMXBean<K, V> implements CacheMXBean {
     private final Cache<K, V> cache;
 
     /**
@@ -36,7 +36,6 @@ public class DelegatingCacheMXBean<K, V> extends DelegatingCacheStatisticsMXBean
      * @param cache the cache
      */
     public DelegatingCacheMXBean(Cache<K, V> cache) {
-        super(cache);
         this.cache = cache;
     }
 
