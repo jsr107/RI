@@ -102,7 +102,7 @@ public class RICacheEventEventDispatcher<K, V> {
     
         //TODO: we could really optimize this implementation
 
-        //TODO: we need to apply filters here
+        //TODO: we need to handle exceptions here
         
         //TODO: we need to work out which events should be raised synchronously or asynchronously
         

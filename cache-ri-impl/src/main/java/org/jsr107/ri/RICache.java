@@ -22,6 +22,7 @@ import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
+import javax.cache.CacheWriter;
 import javax.cache.Caching;
 import javax.cache.Configuration;
 import javax.cache.Configuration.Duration;
@@ -41,6 +42,7 @@ import javax.cache.mbeans.CacheMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -119,8 +121,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * The {@link CacheEntryListenerRegistration}s for the Cache.
      */
-    private final ConcurrentHashMap<CacheEntryListener<? super K, ? super V>, 
-                                    CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations = 
+    private final ConcurrentHashMap<CacheEntryListener<? super K, ? super V>,
+                                    CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations =
         new ConcurrentHashMap<CacheEntryListener<? super K, ? super V>, CacheEntryListenerRegistration<? super K, ? super V>>();
 
     /**
@@ -504,62 +506,104 @@ public final class RICache<K, V> implements Cache<K, V> {
             throw new NullPointerException("key");
         }
 
-        //TODO: write the Cache Entries (iff Cache Write-Through is configured)
+        CacheException exception = null;
 
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
 
-        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
-            K key = entry.getKey();
-            V value = entry.getValue();
-            if (value == null) {
-                throw new NullPointerException("key " + key + " has a null value");
+        try {
+            boolean isWriteThrough = configuration.isWriteThrough() && configuration.getCacheWriter() != null;
+
+            //lock all of the keys in the map
+            ArrayList<Cache.Entry<? extends K, ? extends V>> entriesToWrite = new ArrayList<Cache.Entry<? extends K, ? extends V>>();
+            HashSet<K> keysToPut = new HashSet<K>();
+            for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+                K key = entry.getKey();
+                V value = entry.getValue();
+
+                if (value == null) {
+                    throw new NullPointerException("key " + key + " has a null value");
+                }
+
+                lockManager.lock(key);
+
+                keysToPut.add(key);
+
+                if (isWriteThrough) {
+                    entriesToWrite.add(new RIEntry<K, V>(key, value));
+                }
             }
-                
-            lockManager.lock(key);
-            try {
+
+            //write the entries
+            if (isWriteThrough) {
+                try {
+                    CacheWriter<K, V> writer = (CacheWriter<K, V>)configuration.getCacheWriter();
+                    writer.writeAll(entriesToWrite);
+                } catch (CacheException e) {
+                    exception = e;
+                }
+
+                for (Entry entry : entriesToWrite) {
+                    keysToPut.remove(entry.getKey());
+                }
+            }
+
+            //perform the put
+            for (K key : keysToPut) {
+                V value = map.get(key);
+
                 Object internalKey = keyConverter.toInternal(key);
                 Object internalValue = valueConverter.toInternal(value);
-                
+
                 RICachedValue cachedValue = entries.get(internalKey);
-                        
+
                 boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
                 if (cachedValue == null || isExpired) {
-                    
+
                     if (isExpired) {
                         V expiredValue = valueConverter.fromInternal(cachedValue.get());
                         dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
                     }
-                    
+
                     Duration duration = expiryPolicy.getTTLForCreatedEntry(new RIEntry<K, V>(key, value));
                     long expiryTime = duration.getAdjustedTime(now);
-                    
+
                     cachedValue = new RICachedValue(internalValue, now, expiryTime);
 
                     entries.put(internalKey, cachedValue);
-                    
+
                     dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
                 } else {
-                    Duration duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry<K, V>(key, value), 
-                                                                            new Duration(now, cachedValue.getExpiryTime()));
+                    Duration duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry<K, V>(key, value),
+                            new Duration(now, cachedValue.getExpiryTime()));
                     long expiryTime = duration.getAdjustedTime(now);
-                    
+
                     cachedValue.setInternalValue(internalValue, now);
                     cachedValue.setExpiryTime(expiryTime);
-                    
+
                     V oldValue = valueConverter.fromInternal(cachedValue.get());
                     dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
                 }
-                
-            } finally {
+            }
+        } finally {
+            //unlock all of the keys
+            for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+                K key = entry.getKey();
+                V value = entry.getValue();
+
                 lockManager.unLock(key);
             }
         }
 
+        //dispatch events
         dispatcher.dispatch(cacheEntryListenerRegistrations.values());
 
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(map.size());
             statistics.addPutTimeNano(System.nanoTime() - start);
+        }
+
+        if (exception != null) {
+            throw exception;
         }
     }
 
