@@ -1008,50 +1008,84 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public void removeAll() {
         checkStatusStarted();
-        
+
         //TODO: this is incorrect as the internal map may contain expired entries
         int size = (statisticsEnabled()) ? entries.size() : 0;
-        
+
         long now = System.currentTimeMillis();
 
-        //TODO: delete the Cache Entries (iff Cache Write-Through is configured)
-        //this needs to be done in four phases, i). to attempt to lock the keys
-        //ii). to use the writer to deleteAll, iii). to remove the entries,
-        //iv). to unlock the keys
+        CacheException exception = null;
+        HashSet<K> lockedKeys = new HashSet<K>();
 
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-      
-        Iterator<Map.Entry<Object, RICachedValue>> iterator = entries.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Object, RICachedValue> entry = iterator.next();
-            Object internalKey = entry.getKey();
-            K key = keyConverter.fromInternal(internalKey);
-            
-            lockManager.lock(key);
-            try {
-                RICachedValue cachedValue = entry.getValue();
-                V value = valueConverter.fromInternal(cachedValue.get());
-                
-                iterator.remove();
-                
-                RICacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, value);
 
-                if (cachedValue.isExpiredAt(now)) {
-                    dispatcher.addEvent(CacheEntryExpiredListener.class, event);
-                } else {
-                    dispatcher.addEvent(CacheEntryRemovedListener.class, event);
+        try {
+            boolean isWriteThrough = configuration.isWriteThrough() && configuration.getCacheWriter() != null;
+
+            //lock all of the keys
+            HashSet<K> keysToDelete = new HashSet<K>();
+
+            Iterator<Map.Entry<Object, RICachedValue>> iterator = entries.iterator();
+
+            while (iterator.hasNext()) {
+                Map.Entry<Object, RICachedValue> entry = iterator.next();
+
+                Object internalKey = entry.getKey();
+                K key = keyConverter.fromInternal(internalKey);
+
+                lockManager.lock(key);
+
+                lockedKeys.add(key);
+
+                if (isWriteThrough) {
+                    keysToDelete.add(key);
                 }
-                
-            } finally {
+            }
+
+            //delete the entries
+            if (isWriteThrough) {
+                try {
+                    CacheWriter<K, V> writer = (CacheWriter<K, V>)configuration.getCacheWriter();
+                    writer.deleteAll(keysToDelete);
+                } catch (CacheException e) {
+                    exception = e;
+                }
+            }
+
+            //remove the deleted keys that were successfully deleted
+            for (K key : lockedKeys) {
+                if (!keysToDelete.contains(key)) {
+                    Object internalKey = keyConverter.toInternal(key);
+                    RICachedValue cachedValue = entries.remove(internalKey);
+
+                    V value = valueConverter.fromInternal(cachedValue.get());
+
+                    RICacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, value);
+
+                    if (cachedValue.isExpiredAt(now)) {
+                        dispatcher.addEvent(CacheEntryExpiredListener.class, event);
+                    } else {
+                        dispatcher.addEvent(CacheEntryRemovedListener.class, event);
+                    }
+                }
+            }
+
+        } finally {
+            //unlock all of the keys
+            for (K key : lockedKeys) {
                 lockManager.unLock(key);
             }
         }
-        
+
         dispatcher.dispatch(cacheEntryListenerRegistrations.values());
-        
+
         //TODO: this should simple be the number of actual entries removed
         if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(size);
+        }
+
+        if (exception != null) {
+            throw exception;
         }
     }
 
