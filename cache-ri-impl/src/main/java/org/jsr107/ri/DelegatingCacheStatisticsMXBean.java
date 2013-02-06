@@ -17,7 +17,7 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.mbeans.CacheStatisticsMXBean;
+import javax.cache.CacheStatisticsMXBean;
 import java.util.Date;
 
 /**

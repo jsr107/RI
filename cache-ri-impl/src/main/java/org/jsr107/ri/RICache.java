@@ -21,7 +21,7 @@ import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheManager;
-import javax.cache.CacheStatistics;
+import javax.cache.CacheStatisticsMXBean;
 import javax.cache.CacheWriter;
 import javax.cache.Caching;
 import javax.cache.Configuration;
@@ -38,7 +38,7 @@ import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
-import javax.cache.mbeans.CacheMXBean;
+import javax.cache.CacheMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -349,7 +349,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheStatistics getStatistics() {
+    public CacheStatisticsMXBean getStatistics() {
         checkStatusStarted();
         if (statisticsEnabled()) {
             return statistics;
