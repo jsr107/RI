@@ -98,4 +98,33 @@ class RISimpleInternalMap<K, V> implements RIInternalMap<K, V> {
     public void clear() {
         internalMap.clear();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(getClass().getName());
+        builder.append("{");
+
+        boolean isFirst = true;
+        for (K key : internalMap.keySet()) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                builder.append(", ");
+            }
+
+            builder.append("<");
+            builder.append(key);
+            builder.append(", ");
+            builder.append(internalMap.get(key));
+            builder.append(">");
+        }
+
+        builder.append("}");
+        return builder.toString();
+    }
 }
