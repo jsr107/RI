@@ -965,40 +965,71 @@ public final class RICache<K, V> implements Cache<K, V> {
         
         long now = System.currentTimeMillis();
 
+        CacheException exception = null;
+        HashSet<K> lockedKeys = new HashSet<K>();
+
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
 
-        //TODO: delete the Cache Entries (iff Cache Write-Through is configured)
-        //this needs to be done in four phases, i). to attempt to lock the keys
-        //ii). to use the writer to deleteAll, iii). to remove the entries,
-        //iv). to unlock the keys
+        try {
+            boolean isWriteThrough = configuration.isWriteThrough() && configuration.getCacheWriter() != null;
 
-        for (K key : keys) {
-            lockManager.lock(key);
-            try {
-                RICachedValue cachedValue = entries.remove(keyConverter.toInternal(key));
-                
-                if (cachedValue != null) {
+            //lock all of the keys
+            HashSet<K> keysToDelete = new HashSet<K>();
+
+            for (K key : keys) {
+                lockManager.lock(key);
+
+                lockedKeys.add(key);
+
+                if (isWriteThrough) {
+                    keysToDelete.add(key);
+                }
+            }
+
+            //delete the entries
+            if (isWriteThrough) {
+                try {
+                    CacheWriter<K, V> writer = (CacheWriter<K, V>)configuration.getCacheWriter();
+                    writer.deleteAll(keysToDelete);
+                } catch (CacheException e) {
+                    exception = e;
+                }
+            }
+
+            //remove the deleted keys that were successfully deleted
+            for (K key : lockedKeys) {
+                if (!keysToDelete.contains(key)) {
+                    Object internalKey = keyConverter.toInternal(key);
+                    RICachedValue cachedValue = entries.remove(internalKey);
+
                     V value = valueConverter.fromInternal(cachedValue.get());
+
                     RICacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, value);
-                    
+
                     if (cachedValue.isExpiredAt(now)) {
                         dispatcher.addEvent(CacheEntryExpiredListener.class, event);
                     } else {
                         dispatcher.addEvent(CacheEntryRemovedListener.class, event);
                     }
                 }
-                
-            } finally {
+            }
+
+        } finally {
+            //unlock all of the keys
+            for (K key : lockedKeys) {
                 lockManager.unLock(key);
             }
         }
-        
+
         dispatcher.dispatch(cacheEntryListenerRegistrations.values());
 
+        //TODO: this should simply be the number of actual entries removed (not including expired)
         if (statisticsEnabled()) {
-            //TODO: this is incorrect as some of the keys removed may have expired
-            // but they should not be counted as removals
             statistics.increaseCacheRemovals(keys.size());
+        }
+
+        if (exception != null) {
+            throw exception;
         }
     }
 
@@ -1052,7 +1083,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 }
             }
 
-            //remove the deleted keys that were successfully deleted
+            //remove the deleted keys that were successfully deleted from the set
             for (K key : lockedKeys) {
                 if (!keysToDelete.contains(key)) {
                     Object internalKey = keyConverter.toInternal(key);
