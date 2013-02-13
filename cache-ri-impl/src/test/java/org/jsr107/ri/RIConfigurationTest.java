@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import javax.cache.Configuration;
 import javax.cache.Configuration.Duration;
-import javax.cache.SimpleConfiguration;
+import javax.cache.MutableConfiguration;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -59,7 +59,7 @@ public class RIConfigurationTest {
 
     @Test
     public void notSameButClone() {
-        Configuration<?, ?> config1 = new RIConfiguration(new SimpleConfiguration());
+        Configuration<?, ?> config1 = new RIConfiguration(new MutableConfiguration());
         Configuration<?, ?> config2 = getCacheConfiguration();
         assertNotSame(config1, config2);
         assertEquals(config1, config2);
