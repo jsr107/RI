@@ -262,11 +262,10 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     public boolean isStatisticsEnabled() {
         return this.isStatisticsEnabled;
     }
-    
+
     /**
-     * {@inheritDoc}
+     * Sets statistics
      */
-    @Override
     public void setStatisticsEnabled(boolean isStatisticsEnabled) {
         this.isStatisticsEnabled = isStatisticsEnabled;
     }

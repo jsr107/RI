@@ -216,6 +216,17 @@ public class RICacheManager implements CacheManager {
         return Caching.isSupported(optionalFeature);
     }
 
+    @Override
+    public void enableStatistics(String cacheName, boolean enabled) {
+        if (status != Status.STARTED) {
+            throw new IllegalStateException();
+        }
+        if (cacheName == null) {
+            throw new NullPointerException();
+        }
+        ((RIConfiguration)caches.get(cacheName).getConfiguration()).setStatisticsEnabled(enabled);
+    }
+
     /**
      * {@inheritDoc}
      */
