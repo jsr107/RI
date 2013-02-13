@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jsr107.ri</groupId>
         <artifactId>cache-ri</artifactId>
-        <version>0.7-SNAPSHOT</version>
+        <version>0.61</version>
     </parent>
     <artifactId>cache-annotations-ri</artifactId>
     <packaging>pom</packaging>
