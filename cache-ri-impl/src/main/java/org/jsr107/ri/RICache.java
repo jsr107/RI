@@ -39,6 +39,7 @@ import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
+import javax.cache.event.CompletionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,7 +52,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -302,47 +302,45 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public Future<V> load(K key) {
-        checkStatusStarted();
-        if (key == null) {
-            throw new NullPointerException("key");
-        }
-        
-        CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
-        
-        if (cacheLoader == null) {
-            return null;
-        }
-        if (containsKey(key)) {
-            return null;
-        }
-        FutureTask<V> task = new FutureTask<V>(new RICacheLoaderLoadCallable<K, V>(this, cacheLoader, key));
-        submit(task);
-        return task;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Future<Map<K, ? extends V>> loadAll(Set<? extends K> keys) {
+    public void loadAll(final Iterable<? extends K> keys, final CompletionListener listener) {
         checkStatusStarted();
         if (keys == null) {
             throw new NullPointerException("keys");
         }
         
-        CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
+        final CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
 
         if (cacheLoader == null) {
-            return null;
+            if (listener != null) {
+                listener.onCompletion();
+            }
+        } else {
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        ArrayList<K> keysToLoad = new ArrayList<K>();
+                        for (K key : keys) {
+                            if (!containsKey(key)) {
+                                keysToLoad.add(key);
+                            }
+                        }
+
+                        Map<? extends K, ? extends V> loaded = cacheLoader.loadAll(keysToLoad);
+
+                        putAll(loaded);
+
+                        if (listener != null) {
+                            listener.onCompletion();
+                        }
+                    } catch (Exception e) {
+                        if (listener != null) {
+                            listener.onException(e);
+                        }
+                    }
+                }
+            });
         }
-        if (keys.contains(null)) {
-            throw new NullPointerException("key");
-        }
-        Callable<Map<K, ? extends V>> callable = new RICacheLoaderLoadAllCallable<K, V>(this, cacheLoader, keys);
-        FutureTask<Map<K, ? extends V>> task = new FutureTask<Map<K, ? extends V>>(callable);
-        submit(task);
-        return task;
     }
 
     /**
@@ -1628,31 +1626,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                     lastEntry = null;
                 }
             }
-        }
-    }
-
-    /**
-     * Callable used for cache loader.
-     *
-     * @param <K> the type of the key
-     * @param <V> the type of the value
-     */
-    private static class RICacheLoaderLoadCallable<K, V> implements Callable<V> {
-        private final RICache<K, V> cache;
-        private final CacheLoader<K, ? extends V> cacheLoader;
-        private final K key;
-
-        RICacheLoaderLoadCallable(RICache<K, V> cache, CacheLoader<K, ? extends V> cacheLoader, K key) {
-            this.cache = cache;
-            this.cacheLoader = cacheLoader;
-            this.key = key;
-        }
-
-        @Override
-        public V call() throws Exception {
-            Entry<K, ? extends V> entry = cacheLoader.load(key);
-            cache.put(entry.getKey(), entry.getValue());
-            return entry.getValue();
         }
     }
 
