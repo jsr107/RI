@@ -28,14 +28,14 @@ import javax.cache.Status;
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
-public class DelegatingCacheMXBean<K, V> implements CacheMXBean {
+public class RICacheMXBean<K, V> implements CacheMXBean {
     private final Cache<K, V> cache;
 
     /**
      * Constructor
      * @param cache the cache
      */
-    public DelegatingCacheMXBean(Cache<K, V> cache) {
+    public RICacheMXBean(Cache<K, V> cache) {
         this.cache = cache;
     }
 

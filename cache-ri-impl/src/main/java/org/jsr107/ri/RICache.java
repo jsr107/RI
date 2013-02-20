@@ -95,7 +95,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * The {@link Configuration} for the {@link Cache}.
      */
-    private final Configuration<K, V> configuration;
+    private final RIConfiguration<K, V> configuration;
     
     /**
      * The {@link RIInternalConverter} for keys.
@@ -129,9 +129,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      * The status of the Cache.
      */
     private volatile Status status;
-    
-    private final RICacheStatistics statistics;
-    private final CacheMXBean mBean;
+
+    private final RICacheMXBean cacheMXBean;
+    private final RICacheStatisticsMXBean statistics;
 
     /**
      * A {@link LockManager} to control concurrent access to cache entries.
@@ -178,10 +178,17 @@ public final class RICache<K, V> implements Cache<K, V> {
         status = Status.UNINITIALISED;
  
         entries = new RISimpleInternalMap<Object, RICachedValue>();
-                                             
-        statistics = new RICacheStatistics(this);
-        
-        mBean = new DelegatingCacheMXBean<K, V>(this);
+
+        cacheMXBean = new RICacheMXBean<K, V>(this);
+        statistics = new RICacheStatisticsMXBean(this);
+
+        if (configuration.isManagementEnabled()) {
+            setManagementEnabled(true);
+        }
+
+        if (configuration.isStatisticsEnabled()) {
+            setStatisticsEnabled(true);
+        }
 
         for (CacheEntryListenerRegistration<? super K, ? super V> r : configuration.getCacheEntryListenerRegistrations()) {
             
@@ -340,18 +347,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                     }
                 }
             });
-        }
-    }
-
-    /**
-     * Returns statistics MXBean
-     */
-    public CacheStatisticsMXBean getStatistics() {
-        checkStatusStarted();
-        if (statisticsEnabled()) {
-            return statistics;
-        } else {
-            return null;
         }
     }
 
@@ -1268,8 +1263,44 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * @return the managemtn bean
      */
-    public CacheMXBean getMBean() {
-        return mBean;
+    public CacheMXBean getCacheMXBean() {
+        return cacheMXBean;
+    }
+
+
+    /**
+     * @return the managemtn bean
+     */
+    public CacheStatisticsMXBean getCacheStatisticsMXBean() {
+        return statistics;
+    }
+
+
+    /**
+     * Sets statistics
+     */
+    public void setStatisticsEnabled(boolean enabled) {
+        if (enabled) {
+            MBeanServerRegistrationUtility.registerCacheStatistics(this);
+        } else {
+            MBeanServerRegistrationUtility.unregisterCacheStatistics(this);
+        }
+        configuration.isStatisticsEnabled = enabled;
+    }
+
+
+    /**
+     * Sets management enablement
+     * todo change to management methods
+     * @param enabled true if management should be enabled
+     */
+    public void setManagementEnabled(boolean enabled) {
+        if (enabled) {
+            MBeanServerRegistrationUtility.registerCacheStatistics(this);
+        } else {
+            MBeanServerRegistrationUtility.unregisterCacheStatistics(this);
+        }
+        configuration.isManagementEnabled = enabled;
     }
 
     /**

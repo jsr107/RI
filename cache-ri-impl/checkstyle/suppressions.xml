@@ -14,6 +14,7 @@
     <suppress checks="FanOutComplexity" files="RICache.java"/>
     <suppress checks="FileLength" files="RICache.java"/>
     <suppress checks="CyclomaticComplexity" files="RICache.java"/>
+    <suppress checks="ExecutableStatementCount" files="RICache.java"/>
 
     <suppress checks="CyclomaticComplexity" files="RIConfiguration.java"/>
     <suppress checks="NPathComplexity" files="RIConfiguration.java"/>

@@ -227,7 +227,7 @@ public class RICacheManager implements CacheManager {
         if (cacheName == null) {
             throw new NullPointerException();
         }
-        ((RIConfiguration)caches.get(cacheName).getConfiguration()).setStatisticsEnabled(enabled);
+        ((RICache)caches.get(cacheName)).setStatisticsEnabled(enabled);
     }
 
     /**
@@ -241,7 +241,7 @@ public class RICacheManager implements CacheManager {
         if (cacheName == null) {
             throw new NullPointerException();
         }
-        ((RIConfiguration)caches.get(cacheName).getConfiguration()).setStatisticsEnabled(enabled);
+        ((RICache)caches.get(cacheName)).setManagementEnabled(enabled);
     }
 
     /**

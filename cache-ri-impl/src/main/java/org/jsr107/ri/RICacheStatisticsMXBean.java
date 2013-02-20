@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * The reference implementation of {@link javax.cache.CacheStatisticsMXBean}.
  */
-public class RICacheStatistics implements CacheStatisticsMXBean, Serializable {
+public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializable {
 
     private static final long serialVersionUID = -5589437411679003894L;
     private static final long NANOSECONDS_IN_A_MILLISECOND = 1000000L;
@@ -52,8 +52,13 @@ public class RICacheStatistics implements CacheStatisticsMXBean, Serializable {
      *
      * @param cache the associated cache
      */
-    public RICacheStatistics(Cache<?, ?> cache) {
+    public RICacheStatisticsMXBean(Cache<?, ?> cache) {
         this.cache = cache;
+    }
+
+    @Override
+    public String getName() {
+        return cache.getName();
     }
 
     /**

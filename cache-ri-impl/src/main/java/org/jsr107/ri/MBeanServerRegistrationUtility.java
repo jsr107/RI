@@ -19,7 +19,7 @@
 package org.jsr107.ri;
 
 import javax.cache.CacheException;
-import javax.cache.CacheMXBean;
+import javax.cache.CacheStatisticsMXBean;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -46,13 +46,13 @@ public final class MBeanServerRegistrationUtility {
      * @param cache the cache to register
      */
     static void registerCacheStatistics(RICache cache) {
-        CacheMXBean mBean =  cache.getMBean();
-        if (mBean != null) {
+        CacheStatisticsMXBean cacheStatisticsMXBean =  cache.getCacheStatisticsMXBean();
+        if (cacheStatisticsMXBean != null) {
             //these can change during runtime, so always look it up
             MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            ObjectName registeredObjectName = calculateCacheStatisticsObjectName(cache.getCacheManager().getName(), mBean.getName());
+            ObjectName registeredObjectName = calculateCacheStatisticsObjectName(cache.getCacheManager().getName(), cacheStatisticsMXBean.getName());
             try {
-                mBeanServer.registerMBean(mBean, registeredObjectName);
+                mBeanServer.registerMBean(cacheStatisticsMXBean, registeredObjectName);
             } catch (Exception e) {
                 throw new CacheException("Error registering cache MXBeans for CacheManager "
                         + registeredObjectName + " . Error was " + e.getMessage(), e);
@@ -63,24 +63,24 @@ public final class MBeanServerRegistrationUtility {
 
 
     /**
-     * Remove MXBeans on shutdown.
-     * todo should be done cache by cache
      * Removes registered ObjectNames
      *
      * @throws CacheException - all exceptions are wrapped in CacheException
      */
-    static void unregisterAllCaches(String cacheManagerName) {
+    static void unregisterCacheStatistics(RICache cache) {
 
         Set<ObjectName> registeredObjectNames = null;
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 
         try {
             registeredObjectNames = mBeanServer.queryNames(
-                    new ObjectName("javax.cache:*,CacheManager=" + cacheManagerName), null);
+                    new ObjectName("javax.cache:type=CacheStatistics*,CacheManager=" + cache.getCacheManager().getName() + ",Cache="
+                            + cache.getName(), null), null);
         } catch (MalformedObjectNameException e) {
             // this should not happen
             throw new CacheException("Error querying MBeanServer. Error was " + e.getMessage(), e);
         }
+        //should just be one
         for (ObjectName registeredObjectName : registeredObjectNames) {
             try {
                 mBeanServer.unregisterMBean(registeredObjectName);
@@ -93,12 +93,11 @@ public final class MBeanServerRegistrationUtility {
 
     /**
      * Creates an object name using the scheme "javax.cache:type=CacheStatistics,CacheManager=<cacheManagerName>,name=<cacheName>"
-     * todo work out name scheme once examined in JConsole
      */
     private static ObjectName calculateCacheStatisticsObjectName(String cacheManagerName, String cacheName) {
         try {
             return new ObjectName("javax.cache:type=CacheStatistics,CacheManager="
-                    + cacheManagerName + ",name=" + mbeanSafe(cacheName));
+                    + cacheManagerName + ",Cache=" + mbeanSafe(cacheName));
         } catch (MalformedObjectNameException e) {
             throw new CacheException(e);
         }
@@ -110,7 +109,7 @@ public final class MBeanServerRegistrationUtility {
     private static ObjectName calculateCacheObjectName(String cacheManagerName, String cacheName) {
         try {
             return new ObjectName("javax.cache:type=Cache,CacheManager="
-                    + cacheManagerName + ",name=" + mbeanSafe(cacheName));
+                    + cacheManagerName + ",Cache=" + mbeanSafe(cacheName));
         } catch (MalformedObjectNameException e) {
             throw new CacheException(e);
         }
@@ -126,9 +125,6 @@ public final class MBeanServerRegistrationUtility {
     private static String mbeanSafe(String string) {
         return string == null ? "" : string.replaceAll(":|=|\n", ".");
     }
-
-
-
 
 }
 

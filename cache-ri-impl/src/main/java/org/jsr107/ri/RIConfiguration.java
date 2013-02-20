@@ -91,7 +91,13 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * The transaction {@link Mode}.
      */
     protected Mode txnMode;
-    
+
+
+    /**
+     * Whether management is enabled for this cache
+     */
+    protected boolean isManagementEnabled;
+
     /**
      * Constructs an {@link RIConfiguration} with the standard default values.
      */
@@ -103,6 +109,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         this.isReadThrough = false;
         this.isWriteThrough = false;
         this.isStatisticsEnabled = false;
+        this.isManagementEnabled = false;
         this.isStoreByValue = true;
         this.isTransactionsEnabled = false;
         this.txnIsolationLevel = IsolationLevel.NONE;
@@ -119,6 +126,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * @param isReadThrough                   is read-through caching supported
      * @param isWriteThrough                  is write-through caching supported
      * @param isStatisticsEnabled             are statistics enabled
+     * @param isManagementEnabled             is management enabled
      * @param isStoreByValue                  <code>true</code> if the "store-by-value" more
      *                                        or <code>false</code> for "store-by-reference"
      * @param isTransactionsEnabled           <code>true</code> if transactions are enabled                                       
@@ -133,6 +141,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
             boolean isReadThrough,
             boolean isWriteThrough,
             boolean isStatisticsEnabled,
+            boolean isManagementEnabled,
             boolean isStoreByValue,
             boolean isTransactionsEnabled,
             IsolationLevel txnIsolationLevel,
@@ -157,6 +166,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         this.isWriteThrough = isWriteThrough;
         
         this.isStatisticsEnabled = isStatisticsEnabled;
+        this.isManagementEnabled = isManagementEnabled;
         
         this.isStoreByValue = isStoreByValue;
         
@@ -177,7 +187,8 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
              configuration.getExpiryPolicy(),
              configuration.isReadThrough(), 
              configuration.isWriteThrough(),
-             configuration.isStatisticsEnabled(), 
+             configuration.isStatisticsEnabled(),
+             configuration.isManagementEnabled(),
              configuration.isStoreByValue(),
              configuration.isTransactionsEnabled(),
              configuration.getTransactionIsolationLevel(), 
@@ -263,11 +274,13 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         return this.isStatisticsEnabled;
     }
 
+
     /**
-     * Sets statistics
+     * {@inheritDoc}
      */
-    public void setStatisticsEnabled(boolean isStatisticsEnabled) {
-        this.isStatisticsEnabled = isStatisticsEnabled;
+    @Override
+    public boolean isManagementEnabled() {
+        return this.isManagementEnabled;
     }
     
     /**
@@ -356,6 +369,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         if (isStatisticsEnabled != other.isStatisticsEnabled) {
             return false;
         }
+        if (isManagementEnabled != other.isManagementEnabled) {
+            return false;
+        }
         if (isStoreByValue != other.isStoreByValue) {
             return false;
         }
@@ -373,4 +389,5 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         }
         return true;
     }
+
 }

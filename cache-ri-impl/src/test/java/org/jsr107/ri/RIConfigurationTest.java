@@ -80,23 +80,6 @@ public class RIConfigurationTest {
     }
 
     @Test
-    public void equalsNotEquals() {
-        Configuration<?, ?> config1 = getCacheConfiguration();
-        ((RIConfiguration)config1).setStatisticsEnabled(!config1.isStatisticsEnabled());
-        
-        Configuration<?, ?> config2 = getCacheConfiguration();
-        assertFalse(config1.equals(config2));
-    }
-
-    @Test
-    public void setStatisticsEnabled() {
-        Configuration<?, ?> config = getCacheConfiguration();
-        boolean isStatisticsEnabled = config.isStatisticsEnabled();
-        ((RIConfiguration)config).setStatisticsEnabled(!isStatisticsEnabled);
-        assertEquals(!isStatisticsEnabled, config.isStatisticsEnabled());
-    }
-
-    @Test
     public void DurationEquals() {
         Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
         Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.DAYS, 2);
