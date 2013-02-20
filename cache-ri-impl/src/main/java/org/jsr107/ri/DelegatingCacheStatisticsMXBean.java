@@ -16,7 +16,6 @@
  */
 package org.jsr107.ri;
 
-import javax.cache.Cache;
 import javax.cache.CacheStatisticsMXBean;
 import java.util.Date;
 
@@ -27,13 +26,13 @@ import java.util.Date;
  * @since 1.0
  */
 public class DelegatingCacheStatisticsMXBean implements CacheStatisticsMXBean {
-    private final Cache cache;
+    private final RICache cache;
 
     /**
      * Constructor
      * @param cache the cache
      */
-    public DelegatingCacheStatisticsMXBean(Cache cache) {
+    public DelegatingCacheStatisticsMXBean(RICache cache) {
         this.cache = cache;
     }
 

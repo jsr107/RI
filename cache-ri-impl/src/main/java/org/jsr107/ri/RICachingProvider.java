@@ -27,6 +27,7 @@ import javax.cache.spi.CachingProvider;
  * @since 1.0
  */
 public class RICachingProvider implements CachingProvider {
+
     @Override
     public CacheManagerFactory getCacheManagerFactory() {
         return RICacheManagerFactory.getInstance();

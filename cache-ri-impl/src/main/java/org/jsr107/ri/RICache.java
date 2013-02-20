@@ -344,9 +344,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns statistics MXBean
      */
-    @Override
     public CacheStatisticsMXBean getStatistics() {
         checkStatusStarted();
         if (statisticsEnabled()) {
@@ -1266,7 +1265,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         return new RIEntryIterator(entries.iterator(), now);
     }
 
-    @Override
+    /**
+     * @return the managemtn bean
+     */
     public CacheMXBean getMBean() {
         return mBean;
     }
