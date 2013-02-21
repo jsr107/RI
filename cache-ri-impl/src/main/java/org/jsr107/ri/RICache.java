@@ -56,6 +56,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
+import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
+
 /**
  * The reference implementation for JSR107.
  * <p/>
@@ -1281,26 +1284,25 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     public void setStatisticsEnabled(boolean enabled) {
         if (enabled) {
-            MBeanServerRegistrationUtility.registerCacheStatistics(this);
+            MBeanServerRegistrationUtility.registerCacheObject(this, Statistics);
         } else {
-            MBeanServerRegistrationUtility.unregisterCacheStatistics(this);
+            MBeanServerRegistrationUtility.unregisterCacheObject(this, Statistics);
         }
-        configuration.isStatisticsEnabled = enabled;
+        configuration.setStatisticsEnabled(enabled);
     }
 
 
     /**
      * Sets management enablement
-     * todo change to management methods
      * @param enabled true if management should be enabled
      */
     public void setManagementEnabled(boolean enabled) {
         if (enabled) {
-            MBeanServerRegistrationUtility.registerCacheStatistics(this);
+            MBeanServerRegistrationUtility.registerCacheObject(this, Configuration);
         } else {
-            MBeanServerRegistrationUtility.unregisterCacheStatistics(this);
+            MBeanServerRegistrationUtility.unregisterCacheObject(this, Configuration);
         }
-        configuration.isManagementEnabled = enabled;
+        configuration.setManagementEnabled(enabled);
     }
 
     /**

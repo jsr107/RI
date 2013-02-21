@@ -66,9 +66,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * A flag indicating if "write-through" mode is required.
      */
     protected boolean isWriteThrough;
-    
+
     /**
-     * A flag indicating if statistics gathering is enabled.
+     * A flag indicating if statistics are enabled
      */
     protected boolean isStatisticsEnabled;
 
@@ -92,9 +92,8 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      */
     protected Mode txnMode;
 
-
     /**
-     * Whether management is enabled for this cache
+     * A flag indicating if management is enabled
      */
     protected boolean isManagementEnabled;
 
@@ -108,8 +107,8 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         this.expiryPolicy = new ExpiryPolicy.Default<K, V>();
         this.isReadThrough = false;
         this.isWriteThrough = false;
-        this.isStatisticsEnabled = false;
-        this.isManagementEnabled = false;
+        this.setStatisticsEnabled(false);
+        this.setManagementEnabled(false);
         this.isStoreByValue = true;
         this.isTransactionsEnabled = false;
         this.txnIsolationLevel = IsolationLevel.NONE;
@@ -165,8 +164,8 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         this.isReadThrough = isReadThrough;
         this.isWriteThrough = isWriteThrough;
         
-        this.isStatisticsEnabled = isStatisticsEnabled;
-        this.isManagementEnabled = isManagementEnabled;
+        this.setStatisticsEnabled(isStatisticsEnabled);
+        this.setManagementEnabled(isManagementEnabled);
         
         this.isStoreByValue = isStoreByValue;
         
@@ -267,6 +266,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     }
     
     /**
+     * A flag indicating if statistics gathering is enabled.
      * {@inheritDoc}
      */
     @Override
@@ -276,6 +276,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
 
 
     /**
+     * Whether management is enabled for this cache
      * {@inheritDoc}
      */
     @Override
@@ -309,7 +310,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         result = prime * result
                 + ((expiryPolicy == null) ? 0 : expiryPolicy.hashCode());
         result = prime * result + (isReadThrough ? 1231 : 1237);
-        result = prime * result + (isStatisticsEnabled ? 1231 : 1237);
+        result = prime * result + (isStatisticsEnabled() ? 1231 : 1237);
         result = prime * result + (isStoreByValue ? 1231 : 1237);
         result = prime * result + (isWriteThrough ? 1231 : 1237);
         result = prime
@@ -366,10 +367,10 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         if (isReadThrough != other.isReadThrough) {
             return false;
         }
-        if (isStatisticsEnabled != other.isStatisticsEnabled) {
+        if (isStatisticsEnabled() != other.isStatisticsEnabled()) {
             return false;
         }
-        if (isManagementEnabled != other.isManagementEnabled) {
+        if (isManagementEnabled() != other.isManagementEnabled()) {
             return false;
         }
         if (isStoreByValue != other.isStoreByValue) {
@@ -390,4 +391,22 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         return true;
     }
 
+
+    /**
+     * Sets whether statistics gathering is enabled on a cache.
+     * <p/>
+     * @param enabled true to enable statistics, false to disable.
+     */
+    public void setStatisticsEnabled(boolean enabled) {
+        isStatisticsEnabled = enabled;
+    }
+
+    /**
+     * Sets whether management is enabled on a cache.
+     * <p/>
+     * @param enabled true to enable, false to disable.
+     */
+    public void setManagementEnabled(boolean enabled) {
+        isManagementEnabled = enabled;
+    }
 }

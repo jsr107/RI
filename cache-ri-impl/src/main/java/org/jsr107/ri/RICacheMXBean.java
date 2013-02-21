@@ -18,7 +18,8 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.CacheMXBean;
-import javax.cache.Status;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 
 /**
  * Class to help implementers
@@ -33,23 +34,79 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
 
     /**
      * Constructor
+     *
      * @param cache the cache
      */
     public RICacheMXBean(Cache<K, V> cache) {
         this.cache = cache;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getName() {
-        return cache.getName();
+    public boolean isReadThrough() {
+        return cache.getConfiguration().isReadThrough();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Status getStatus() {
-        return cache.getStatus();
+    public boolean isWriteThrough() {
+        return cache.getConfiguration().isWriteThrough();
     }
 
-    private String mbeanSafe(String string) {
-        return string == null ? "" : string.replaceAll(":|=|\n", ".");
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isStoreByValue() {
+        return cache.getConfiguration().isStoreByValue();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isStatisticsEnabled() {
+        return cache.getConfiguration().isStatisticsEnabled();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isManagementEnabled() {
+        return cache.getConfiguration().isManagementEnabled();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isTransactionsEnabled() {
+        return cache.getConfiguration().isTransactionsEnabled();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IsolationLevel getTransactionIsolationLevel() {
+        return cache.getConfiguration().getTransactionIsolationLevel();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Mode getTransactionMode() {
+        return cache.getConfiguration().getTransactionMode();
+    }
+
+//    @Override
+//    public ExpiryPolicy getExpiryPolicy() {
+//        return null;  //To change body of implemented methods use File | Settings | File Templates.
+//    }
 }

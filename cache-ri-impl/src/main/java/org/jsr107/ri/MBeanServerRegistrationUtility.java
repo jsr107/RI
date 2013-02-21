@@ -18,8 +18,8 @@
 
 package org.jsr107.ri;
 
+import javax.cache.Cache;
 import javax.cache.CacheException;
-import javax.cache.CacheStatisticsMXBean;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -35,6 +35,23 @@ import java.util.Set;
  */
 public final class MBeanServerRegistrationUtility {
 
+    /**
+     * The type of registered Object
+     */
+    enum ObjectNameType {
+
+        /**
+         * Cache Statistics
+         */
+        Statistics,
+
+        /**
+         * Cache Configuration
+         */
+        Configuration
+
+    }
+
 
     private MBeanServerRegistrationUtility() {
         //prevent construction
@@ -43,31 +60,32 @@ public final class MBeanServerRegistrationUtility {
 
     /**
      * Utility method for registering CacheStatistics with the platform MBeanServer
+     *
      * @param cache the cache to register
      */
-    static void registerCacheStatistics(RICache cache) {
-        CacheStatisticsMXBean cacheStatisticsMXBean =  cache.getCacheStatisticsMXBean();
-        if (cacheStatisticsMXBean != null) {
-            //these can change during runtime, so always look it up
-            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            ObjectName registeredObjectName = calculateCacheStatisticsObjectName(cache.getCacheManager().getName(), cacheStatisticsMXBean.getName());
-            try {
-                mBeanServer.registerMBean(cacheStatisticsMXBean, registeredObjectName);
-            } catch (Exception e) {
-                throw new CacheException("Error registering cache MXBeans for CacheManager "
-                        + registeredObjectName + " . Error was " + e.getMessage(), e);
+    static void registerCacheObject(RICache cache, ObjectNameType objectNameType) {
+        //these can change during runtime, so always look it up
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        ObjectName registeredObjectName = calculateObjectName(cache, objectNameType);
+        try {
+            if (objectNameType.equals(ObjectNameType.Configuration)) {
+                mBeanServer.registerMBean(cache.getCacheMXBean(), registeredObjectName);
+            } else if (objectNameType.equals(ObjectNameType.Statistics)) {
+                mBeanServer.registerMBean(cache.getCacheStatisticsMXBean(), registeredObjectName);
             }
+        } catch (Exception e) {
+            throw new CacheException("Error registering cache MXBeans for CacheManager "
+                    + registeredObjectName + " . Error was " + e.getMessage(), e);
         }
     }
 
 
-
     /**
-     * Removes registered ObjectNames
+     * Removes registered CacheStatistics for a Cache
      *
      * @throws CacheException - all exceptions are wrapped in CacheException
      */
-    static void unregisterCacheStatistics(RICache cache) {
+    static void unregisterCacheObject(RICache cache, ObjectNameType objectNameType) {
 
         Set<ObjectName> registeredObjectNames = null;
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
@@ -92,24 +110,13 @@ public final class MBeanServerRegistrationUtility {
     }
 
     /**
-     * Creates an object name using the scheme "javax.cache:type=CacheStatistics,CacheManager=<cacheManagerName>,name=<cacheName>"
+     * Creates an object name using the scheme
+     * "javax.cache:type=Cache&lt;Statistics|Configuration&gt;,CacheManager=&lt;cacheManagerName&gt;,name=&lt;cacheName&gt;"
      */
-    private static ObjectName calculateCacheStatisticsObjectName(String cacheManagerName, String cacheName) {
+    private static ObjectName calculateObjectName(Cache cache, ObjectNameType objectNameType) {
         try {
-            return new ObjectName("javax.cache:type=CacheStatistics,CacheManager="
-                    + cacheManagerName + ",Cache=" + mbeanSafe(cacheName));
-        } catch (MalformedObjectNameException e) {
-            throw new CacheException(e);
-        }
-    }
-
-    /**
-     * Creates an object name using the scheme "javax.cache:type=CacheStatistics,CacheManager=<cacheManagerName>,name=<cacheName>"
-     */
-    private static ObjectName calculateCacheObjectName(String cacheManagerName, String cacheName) {
-        try {
-            return new ObjectName("javax.cache:type=Cache,CacheManager="
-                    + cacheManagerName + ",Cache=" + mbeanSafe(cacheName));
+            return new ObjectName("javax.cache:type=Cache" + objectNameType + ",CacheManager="
+                    + mbeanSafe(cache.getCacheManager().getName()) + ",Cache=" + mbeanSafe(cache.getName()));
         } catch (MalformedObjectNameException e) {
             throw new CacheException(e);
         }
