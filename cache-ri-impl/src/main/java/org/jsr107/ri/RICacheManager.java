@@ -261,7 +261,7 @@ public class RICacheManager implements CacheManager {
             try {
                 cache.stop();
             } catch (Exception e) {
-                getLogger().log(Level.WARNING, "Error stopping cache: " + cache);
+                getLogger().log(Level.WARNING, "Error stopping cache: " + cache, e);
             }
         }
         status = Status.STOPPED;

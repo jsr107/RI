@@ -1326,6 +1326,11 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
         
         entries.clear();
+
+        //Remove MBean registrations
+        setStatisticsEnabled(false);
+        setManagementEnabled(false);
+
         status = Status.STOPPED;
     }
 

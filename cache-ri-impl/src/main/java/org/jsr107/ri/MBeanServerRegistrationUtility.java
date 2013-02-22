@@ -69,14 +69,34 @@ public final class MBeanServerRegistrationUtility {
         ObjectName registeredObjectName = calculateObjectName(cache, objectNameType);
         try {
             if (objectNameType.equals(ObjectNameType.Configuration)) {
-                mBeanServer.registerMBean(cache.getCacheMXBean(), registeredObjectName);
+                if (!isRegistered(cache, objectNameType)) {
+                    mBeanServer.registerMBean(cache.getCacheMXBean(), registeredObjectName);
+                }
             } else if (objectNameType.equals(ObjectNameType.Statistics)) {
-                mBeanServer.registerMBean(cache.getCacheStatisticsMXBean(), registeredObjectName);
+                if (!isRegistered(cache, objectNameType)) {
+                    mBeanServer.registerMBean(cache.getCacheStatisticsMXBean(), registeredObjectName);
+                }
             }
         } catch (Exception e) {
             throw new CacheException("Error registering cache MXBeans for CacheManager "
                     + registeredObjectName + " . Error was " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Checks whether an ObjectName is already registered.
+     *
+     * @throws CacheException - all exceptions are wrapped in CacheException
+     */
+    static boolean isRegistered(RICache cache, ObjectNameType objectNameType) {
+
+        Set<ObjectName> registeredObjectNames = null;
+        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+
+        ObjectName objectName = calculateObjectName(cache, objectNameType);
+        registeredObjectNames = mBeanServer.queryNames(objectName, null);
+
+        return !registeredObjectNames.isEmpty();
     }
 
 
@@ -90,14 +110,9 @@ public final class MBeanServerRegistrationUtility {
         Set<ObjectName> registeredObjectNames = null;
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 
-        try {
-            registeredObjectNames = mBeanServer.queryNames(
-                    new ObjectName("javax.cache:type=CacheStatistics*,CacheManager=" + cache.getCacheManager().getName() + ",Cache="
-                            + cache.getName(), null), null);
-        } catch (MalformedObjectNameException e) {
-            // this should not happen
-            throw new CacheException("Error querying MBeanServer. Error was " + e.getMessage(), e);
-        }
+        ObjectName objectName = calculateObjectName(cache, objectNameType);
+        registeredObjectNames = mBeanServer.queryNames(objectName, null);
+
         //should just be one
         for (ObjectName registeredObjectName : registeredObjectNames) {
             try {
