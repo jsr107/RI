@@ -358,12 +358,12 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void put(K key, V value) {
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         checkStatusStarted();
         if (value == null) {
             throw new NullPointerException("null value specified for key " + key);
         }
-        
-        long start = statisticsEnabled() ? System.nanoTime() : 0;
+
         lockManager.lock(key);
         try {
             RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
@@ -425,7 +425,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         long now = System.currentTimeMillis();
-        
+
         V result;
         lockManager.lock(key);
         try {
@@ -483,6 +483,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
             statistics.addPutTimeNano(System.nanoTime() - start);
+        }
+        if (result != null) {
+            statistics.increaseCacheHits(1);
+            statistics.addGetTimeNano(System.nanoTime() - start);
         }
         return result;
     }
