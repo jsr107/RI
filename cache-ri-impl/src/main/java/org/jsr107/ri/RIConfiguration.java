@@ -45,7 +45,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     /**
      * The {@link CacheLoader} for the built {@link javax.cache.Configuration}.
      */
-    protected CacheLoader<K, ? extends V> cacheLoader;
+    protected CacheLoader<K, V> cacheLoader;
     
     /**
      * The {@link CacheWriter} for the built {@link javax.cache.Configuration}.
@@ -134,7 +134,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      */
     public RIConfiguration(
             Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
-            CacheLoader<K, ? extends V> cacheLoader,
+            CacheLoader<K, V> cacheLoader,
             CacheWriter<? super K, ? super V> cacheWriter,
             ExpiryPolicy<? super K, ? super V> expiryPolicy,
             boolean isReadThrough,
@@ -206,7 +206,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheLoader<K, ? extends V> getCacheLoader() {
+    public CacheLoader<K, V> getCacheLoader() {
         return this.cacheLoader;
     }
     
