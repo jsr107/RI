@@ -21,6 +21,7 @@ import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.Configuration;
 import javax.cache.ExpiryPolicy;
+import javax.cache.Factory;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
@@ -43,19 +44,19 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
 
     /**
-     * The {@link CacheLoader} for the built {@link javax.cache.Configuration}.
+     * The {@link CacheLoader} {@link Factory} for the {@link javax.cache.Configuration}.
      */
-    protected CacheLoader<K, V> cacheLoader;
-    
+    protected Factory<CacheLoader<K, V>> cacheLoaderFactory;
+
     /**
-     * The {@link CacheWriter} for the built {@link javax.cache.Configuration}.
+     * The {@link CacheWriter} {@link Factory} for the {@link javax.cache.Configuration}.
      */
-    protected CacheWriter<? super K, ? super V> cacheWriter;
+    protected Factory<CacheWriter<? super K, ? super V>> cacheWriterFactory;
     
     /**
      * The {@link javax.cache.ExpiryPolicy} for the {@link javax.cache.Configuration}.
      */
-    protected ExpiryPolicy<? super K, ? super V> expiryPolicy;
+    protected Factory<ExpiryPolicy<? super K, ? super V>> expiryPolicyFactory;
     
     /**
      * A flag indicating if "read-through" mode is required.
@@ -102,9 +103,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      */
     public RIConfiguration() {
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
-        this.cacheLoader = null;
-        this.cacheWriter = null;
-        this.expiryPolicy = new ExpiryPolicy.Default<K, V>();
+        this.cacheLoaderFactory = null;
+        this.cacheWriterFactory = null;
+        this.expiryPolicyFactory = ExpiryPolicy.Default.<K, V>getFactory();
         this.isReadThrough = false;
         this.isWriteThrough = false;
         this.setStatisticsEnabled(false);
@@ -119,9 +120,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * Constructs a {@link RIConfiguration} based on a set of parameters.
      * 
      * @param cacheEntryListenerRegistrations the {@link CacheEntryListenerRegistration}s
-     * @param cacheLoader                     the {@link CacheLoader}
-     * @param cacheWriter                     the {@link CacheWriter}
-     * @param expiryPolicy          the {@link javax.cache.ExpiryPolicy}
+     * @param cacheLoaderFactory              the {@link CacheLoader} {@link Factory}
+     * @param cacheWriterFactory              the {@link CacheWriter} {@link Factory}
+     * @param expiryPolicyFactory             the {@link javax.cache.ExpiryPolicy} {@link Factory}
      * @param isReadThrough                   is read-through caching supported
      * @param isWriteThrough                  is write-through caching supported
      * @param isStatisticsEnabled             are statistics enabled
@@ -134,9 +135,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      */
     public RIConfiguration(
             Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
-            CacheLoader<K, V> cacheLoader,
-            CacheWriter<? super K, ? super V> cacheWriter,
-            ExpiryPolicy<? super K, ? super V> expiryPolicy,
+            Factory<CacheLoader<K, V>> cacheLoaderFactory,
+            Factory<CacheWriter<? super K, ? super V>> cacheWriterFactory,
+            Factory<ExpiryPolicy<? super K, ? super V>> expiryPolicyFactory,
             boolean isReadThrough,
             boolean isWriteThrough,
             boolean isStatisticsEnabled,
@@ -156,10 +157,14 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
             this.cacheEntryListenerRegistrations.add(registration);
         }
         
-        this.cacheLoader = cacheLoader;
-        this.cacheWriter = cacheWriter;
-        
-        this.expiryPolicy = expiryPolicy;
+        this.cacheLoaderFactory = cacheLoaderFactory;
+        this.cacheWriterFactory = cacheWriterFactory;
+
+        if (expiryPolicyFactory == null) {
+            this.expiryPolicyFactory = ExpiryPolicy.Default.<K, V>getFactory();
+        } else {
+            this.expiryPolicyFactory = expiryPolicyFactory;
+        }
         
         this.isReadThrough = isReadThrough;
         this.isWriteThrough = isWriteThrough;
@@ -181,9 +186,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      */
     public RIConfiguration(Configuration<K, V> configuration) {
         this(configuration.getCacheEntryListenerRegistrations(), 
-             configuration.getCacheLoader(), 
-             configuration.getCacheWriter(), 
-             configuration.getExpiryPolicy(),
+             configuration.getCacheLoaderFactory(),
+             configuration.getCacheWriterFactory(),
+             configuration.getExpiryPolicyFactory(),
              configuration.isReadThrough(), 
              configuration.isWriteThrough(),
              configuration.isStatisticsEnabled(),
@@ -206,23 +211,23 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public CacheLoader<K, V> getCacheLoader() {
-        return this.cacheLoader;
+    public Factory<CacheLoader<K, V>> getCacheLoaderFactory() {
+        return this.cacheLoaderFactory;
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public CacheWriter<? super K, ? super V> getCacheWriter() {
-        return this.cacheWriter;
+    public Factory<CacheWriter<? super K, ? super V>> getCacheWriterFactory() {
+        return this.cacheWriterFactory;
     }
     
     /**
      * {@inheritDoc}
      */
-    public ExpiryPolicy<? super K, ? super V> getExpiryPolicy() {
-        return this.expiryPolicy;
+    public Factory<ExpiryPolicy<? super K, ? super V>> getExpiryPolicyFactory() {
+        return this.expiryPolicyFactory;
     }
     
     /**
@@ -304,11 +309,11 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
                 + ((cacheEntryListenerRegistrations == null) ? 0 : cacheEntryListenerRegistrations
                         .hashCode());
         result = prime * result
-                + ((cacheLoader == null) ? 0 : cacheLoader.hashCode());
+                + ((cacheLoaderFactory == null) ? 0 : cacheLoaderFactory.hashCode());
         result = prime * result
-                + ((cacheWriter == null) ? 0 : cacheWriter.hashCode());
+                + ((cacheWriterFactory == null) ? 0 : cacheWriterFactory.hashCode());
         result = prime * result
-                + ((expiryPolicy == null) ? 0 : expiryPolicy.hashCode());
+                + ((expiryPolicyFactory == null) ? 0 : expiryPolicyFactory.hashCode());
         result = prime * result + (isReadThrough ? 1231 : 1237);
         result = prime * result + (isStatisticsEnabled() ? 1231 : 1237);
         result = prime * result + (isStoreByValue ? 1231 : 1237);
@@ -343,25 +348,25 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         } else if (!cacheEntryListenerRegistrations.equals(other.cacheEntryListenerRegistrations)) {
             return false;
         }
-        if (cacheLoader == null) {
-            if (other.cacheLoader != null) {
+        if (cacheLoaderFactory == null) {
+            if (other.cacheLoaderFactory != null) {
                 return false;
             }
-        } else if (!cacheLoader.equals(other.cacheLoader)) {
+        } else if (!cacheLoaderFactory.equals(other.cacheLoaderFactory)) {
             return false;
         }
-        if (cacheWriter == null) {
-            if (other.cacheWriter != null) {
+        if (cacheWriterFactory == null) {
+            if (other.cacheWriterFactory != null) {
                 return false;
             }
-        } else if (!cacheWriter.equals(other.cacheWriter)) {
+        } else if (!cacheWriterFactory.equals(other.cacheWriterFactory)) {
             return false;
         }
-        if (expiryPolicy == null) {
-            if (other.expiryPolicy != null) {
+        if (expiryPolicyFactory == null) {
+            if (other.expiryPolicyFactory != null) {
                 return false;
             }
-        } else if (!expiryPolicy.equals(other.expiryPolicy)) {
+        } else if (!expiryPolicyFactory.equals(other.expiryPolicyFactory)) {
             return false;
         }
         if (isReadThrough != other.isReadThrough) {

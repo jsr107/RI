@@ -106,7 +106,7 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
     }
 
 //    @Override
-//    public ExpiryPolicy getExpiryPolicy() {
+//    public ExpiryPolicy getExpiryPolicyFactory() {
 //        return null;  //To change body of implemented methods use File | Settings | File Templates.
 //    }
 }

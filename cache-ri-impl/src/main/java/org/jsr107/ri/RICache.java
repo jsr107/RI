@@ -99,7 +99,17 @@ public final class RICache<K, V> implements Cache<K, V> {
      * The {@link Configuration} for the {@link Cache}.
      */
     private final RIConfiguration<K, V> configuration;
-    
+
+    /**
+     * The {@link CacheLoader} for the {@link Cache}.
+     */
+    private CacheLoader<K, V> cacheLoader;
+
+    /**
+     * The {@link CacheWriter} for the {@link Cache}.
+     */
+    private CacheWriter<K, V> cacheWriter;
+
     /**
      * The {@link RIInternalConverter} for keys.
      */
@@ -117,19 +127,19 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final RIInternalMap<Object, RICachedValue> entries;
 
     /**
-     * The {@link javax.cache.ExpiryPolicy} for the Cache.
+     * The {@link javax.cache.ExpiryPolicy} for the {@link Cache}.
      */
     private final ExpiryPolicy<? super K, ? super V> expiryPolicy;
     
     /**
-     * The {@link CacheEntryListenerRegistration}s for the Cache.
+     * The {@link CacheEntryListenerRegistration}s for the {@link Cache}.
      */
     private final ConcurrentHashMap<CacheEntryListener<? super K, ? super V>,
                                     CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations =
         new ConcurrentHashMap<CacheEntryListener<? super K, ? super V>, CacheEntryListenerRegistration<? super K, ? super V>>();
 
     /**
-     * The status of the Cache.
+     * The status of the {@link Cache}.
      */
     private volatile Status status;
 
@@ -165,9 +175,18 @@ public final class RICache<K, V> implements Cache<K, V> {
         this.classLoader = classLoader;
         
         //we make a copy of the configuration here so that the provided one
-        //may be changed and or used independently for other caches
+        //may be changed and or used independently for other caches.  we do this
+        //as we don't know if the provided configuration is mutable
         this.configuration = new RIConfiguration<K, V>(configuration);
-                
+
+        if (this.configuration.getCacheLoaderFactory() != null) {
+            this.cacheLoader = (CacheLoader<K, V>)this.configuration.getCacheLoaderFactory().create();
+        }
+
+        if (this.configuration.getCacheWriterFactory() != null) {
+            this.cacheWriter = (CacheWriter<K, V>)this.configuration.getCacheWriterFactory().create();
+        }
+
         keyConverter = configuration.isStoreByValue() ? 
                             new RISerializingInternalConverter<K>(classLoader) : 
                             new RIReferenceInternalConverter<K>();
@@ -176,7 +195,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                              new RISerializingInternalConverter<V>(classLoader) :
                              new RIReferenceInternalConverter<V>();
         
-        this.expiryPolicy = configuration.getExpiryPolicy();
+        this.expiryPolicy = configuration.getExpiryPolicyFactory().create();
         
         status = Status.UNINITIALISED;
  
@@ -318,8 +337,6 @@ public final class RICache<K, V> implements Cache<K, V> {
             throw new NullPointerException("keys");
         }
         
-        final CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
-
         if (cacheLoader == null) {
             if (listener != null) {
                 listener.onCompletion();
@@ -510,7 +527,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
 
         try {
-            boolean isWriteThrough = configuration.isWriteThrough() && configuration.getCacheWriter() != null;
+            boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
 
             //lock all of the keys in the map
             ArrayList<Cache.Entry<? extends K, ? extends V>> entriesToWrite = new ArrayList<Cache.Entry<? extends K, ? extends V>>();
@@ -535,8 +552,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             //write the entries
             if (isWriteThrough) {
                 try {
-                    CacheWriter<K, V> writer = (CacheWriter<K, V>)configuration.getCacheWriter();
-                    writer.writeAll(entriesToWrite);
+                    cacheWriter.writeAll(entriesToWrite);
                 } catch (CacheException e) {
                     exception = e;
                 }
@@ -970,7 +986,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
 
         try {
-            boolean isWriteThrough = configuration.isWriteThrough() && configuration.getCacheWriter() != null;
+            boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
 
             //lock all of the keys
             HashSet<K> keysToDelete = new HashSet<K>();
@@ -988,8 +1004,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             //delete the entries
             if (isWriteThrough) {
                 try {
-                    CacheWriter<K, V> writer = (CacheWriter<K, V>)configuration.getCacheWriter();
-                    writer.deleteAll(keysToDelete);
+                    cacheWriter.deleteAll(keysToDelete);
                 } catch (CacheException e) {
                     exception = e;
                 }
@@ -1050,7 +1065,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
 
         try {
-            boolean isWriteThrough = configuration.isWriteThrough() && configuration.getCacheWriter() != null;
+            boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
 
             //lock all of the keys
             HashSet<K> keysToDelete = new HashSet<K>();
@@ -1075,8 +1090,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             //delete the entries
             if (isWriteThrough) {
                 try {
-                    CacheWriter<K, V> writer = (CacheWriter<K, V>)configuration.getCacheWriter();
-                    writer.deleteAll(keysToDelete);
+                    cacheWriter.deleteAll(keysToDelete);
                 } catch (CacheException e) {
                     exception = e;
                 }
@@ -1354,7 +1368,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     @Override
     public <T> T unwrap(java.lang.Class<T> cls) {
-        if (cls.isAssignableFrom(this.getClass())) {
+        if (cls.isAssignableFrom(((Object)this).getClass())) {
             return cls.cast(this);
         }
         
@@ -1373,7 +1387,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     private void writeCacheEntry(RIEntry<K, V> entry) {
         if (configuration.isWriteThrough()) {
-            configuration.getCacheWriter().write(entry);
+            cacheWriter.write(entry);
         }
     }
 
@@ -1384,7 +1398,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     private void deleteCacheEntry(K key) {
         if (configuration.isWriteThrough()) {
-            configuration.getCacheWriter().delete(key);
+            cacheWriter.delete(key);
         }
     }
 
@@ -1421,8 +1435,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 if (statisticsEnabled()) {
                     statistics.increaseCacheMisses(1);
                 }
-                
-                CacheLoader<K, ? extends V> cacheLoader = configuration.getCacheLoader();
                 
                 if (cacheLoader == null) {
                     return null;
@@ -1515,7 +1527,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (o == null || ((Object)this).getClass() != o.getClass()) return false;
 
             RIEntry<?, ?> e2 = (RIEntry<?, ?>) o;
 

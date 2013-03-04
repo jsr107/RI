@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import javax.cache.Configuration;
 import javax.cache.Configuration.Duration;
+import javax.cache.ExpiryPolicy;
 import javax.cache.MutableConfiguration;
 import java.util.concurrent.TimeUnit;
 
@@ -52,9 +53,12 @@ public class RIConfigurationTest {
         assertTrue(config.isStoreByValue());
         
         Duration duration = new Duration(TimeUnit.MINUTES, 10);
-        assertEquals(Duration.ETERNAL, config.getExpiryPolicy().getTTLForCreatedEntry(null));
-        assertEquals(duration, config.getExpiryPolicy().getTTLForAccessedEntry(null, duration));
-        assertEquals(duration, config.getExpiryPolicy().getTTLForModifiedEntry(null, duration));
+
+        ExpiryPolicy<?, ?> expiryPolicy = config.getExpiryPolicyFactory().create();
+
+        assertEquals(Duration.ETERNAL, expiryPolicy.getTTLForCreatedEntry(null));
+        assertEquals(duration, expiryPolicy.getTTLForAccessedEntry(null, duration));
+        assertEquals(duration, expiryPolicy.getTTLForModifiedEntry(null, duration));
     }
 
     @Test
