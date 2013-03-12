@@ -193,7 +193,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
      * @return the time in milliseconds
      */
     @Override
-    public float getAverageGetMillis() {
+    public float getAverageGetTime() {
         if (cacheGetTimeTakenNanos.longValue() == 0 || getCacheGets() == 0) {
             return 0;
         }
@@ -206,7 +206,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
      * @return the time in milliseconds
      */
     @Override
-    public float getAveragePutMillis() {
+    public float getAveragePutTime() {
         if (cachePutTimeTakenNanos.longValue() == 0 || getCacheGets() == 0) {
             return 0;
         }
@@ -219,7 +219,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
      * @return the time in milliseconds
      */
     @Override
-    public float getAverageRemoveMillis() {
+    public float getAverageRemoveTime() {
         if (cacheRemoveTimeTakenNanos.longValue() == 0 || getCacheGets() == 0) {
             return 0;
         }
