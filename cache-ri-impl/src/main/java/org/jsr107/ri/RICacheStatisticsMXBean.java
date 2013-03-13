@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializable {
 
     private static final long serialVersionUID = -5589437411679003894L;
-    private static final long NANOSECONDS_IN_A_MILLISECOND = 1000000L;
+    private static final long NANOSECONDS_IN_A_MICROSECOND = 1000L;
 
 
     private transient Cache<?, ?> cache;
@@ -197,7 +197,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
         if (cacheGetTimeTakenNanos.longValue() == 0 || getCacheGets() == 0) {
             return 0;
         }
-        return (cacheGetTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
+        return (cacheGetTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MICROSECOND;
     }
 
     /**
@@ -210,7 +210,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
         if (cachePutTimeTakenNanos.longValue() == 0 || getCacheGets() == 0) {
             return 0;
         }
-        return (cachePutTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
+        return (cachePutTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MICROSECOND;
     }
 
     /**
@@ -223,7 +223,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
         if (cacheRemoveTimeTakenNanos.longValue() == 0 || getCacheGets() == 0) {
             return 0;
         }
-        return (cacheRemoveTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MILLISECOND;
+        return (cacheRemoveTimeTakenNanos.longValue() / getCacheGets()) / NANOSECONDS_IN_A_MICROSECOND;
     }
 
     //package local incrementers

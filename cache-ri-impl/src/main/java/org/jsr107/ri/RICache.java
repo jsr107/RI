@@ -1195,7 +1195,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (key == entryProcessor) {
             throw new NullPointerException();
         }
-        
+
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
+
+
         T result = null;
         lockManager.lock(key);
         try {
@@ -1205,7 +1208,19 @@ public final class RICache<K, V> implements Cache<K, V> {
 
             Object internalKey = keyConverter.toInternal(key);
             RICachedValue cachedValue = entries.get(internalKey);
-            
+            if (statisticsEnabled()) {
+                if (cachedValue == null) {
+                    statistics.increaseCacheMisses(1);
+                } else {
+                    statistics.increaseCacheHits(1);
+                }
+            }
+            if (statisticsEnabled()) {
+                statistics.addGetTimeNano(System.nanoTime() - start);
+            }
+            //restart start as fetch finished
+            start = statisticsEnabled() ? System.nanoTime() : 0;
+
             EntryProcessorEntry entry = new EntryProcessorEntry(key, cachedValue, now, dispatcher);
             result = entryProcessor.process(entry);
 
@@ -1230,8 +1245,14 @@ public final class RICache<K, V> implements Cache<K, V> {
                 }
                 
                 entries.put(internalKey, cachedValue);
-                
+
                 dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value));
+
+                if (statisticsEnabled()) {
+                    statistics.increaseCachePuts(1);
+                    statistics.addPutTimeNano(System.nanoTime() - start);
+                }
+
                 break;
                 
             case UPDATE:
@@ -1246,6 +1267,13 @@ public final class RICache<K, V> implements Cache<K, V> {
                 cachedValue.setExpiryTime(expiryTime);
                 
                 dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, previousValue));
+
+
+                if (statisticsEnabled()) {
+                    statistics.increaseCachePuts(1);
+                    statistics.addPutTimeNano(System.nanoTime() - start);
+                }
+
                 break;
                 
             case REMOVE:
@@ -1255,6 +1283,13 @@ public final class RICache<K, V> implements Cache<K, V> {
                 entries.remove(internalKey);
                
                 dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
+
+
+                if (statisticsEnabled()) {
+                    statistics.increaseCacheRemovals(1);
+                    statistics.addRemoveTimeNano(System.nanoTime() - start);
+                }
+
                 break;
                 
             default:
@@ -1414,7 +1449,9 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     private V getValue(K key, RICacheEventEventDispatcher<K, V> dispatcher) {
         long now = System.currentTimeMillis();
-        
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
+
+
         Object internalKey = keyConverter.toInternal(key);
         RICachedValue cachedValue = null;
         V value = null;
@@ -1482,8 +1519,10 @@ public final class RICache<K, V> implements Cache<K, V> {
             
         } finally {
             lockManager.unLock(key);
+            if (statisticsEnabled()) {
+                statistics.addGetTimeNano(System.nanoTime() - start);
+            }
         }
-        
         return value;
     }
 
