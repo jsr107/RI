@@ -56,11 +56,6 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
         this.cache = cache;
     }
 
-    @Override
-    public String getName() {
-        return cache.getName();
-    }
-
     /**
      * {@inheritDoc}
      * <p/>
