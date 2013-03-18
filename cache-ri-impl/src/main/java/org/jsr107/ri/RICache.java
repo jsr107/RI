@@ -1187,7 +1187,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public <T> T invokeEntryProcessor(K key, EntryProcessor<K, V, T> entryProcessor) {
+    public <T> T invokeEntryProcessor(K key, EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
         checkStatusStarted();
         if (key == null) {
             throw new NullPointerException();
@@ -1222,7 +1222,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             start = statisticsEnabled() ? System.nanoTime() : 0;
 
             EntryProcessorEntry entry = new EntryProcessorEntry(key, cachedValue, now, dispatcher);
-            result = entryProcessor.process(entry);
+            result = entryProcessor.process(entry, arguments);
 
             Duration duration;
             long expiryTime;
