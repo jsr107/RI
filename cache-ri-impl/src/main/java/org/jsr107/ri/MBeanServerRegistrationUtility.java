@@ -129,11 +129,15 @@ public final class MBeanServerRegistrationUtility {
      * "javax.cache:type=Cache&lt;Statistics|Configuration&gt;,CacheManager=&lt;cacheManagerName&gt;,name=&lt;cacheName&gt;"
      */
     private static ObjectName calculateObjectName(Cache cache, ObjectNameType objectNameType) {
+        String cacheManagerName = mbeanSafe(cache.getCacheManager().getURI().toString());
+        String cacheName = mbeanSafe(cache.getName());
+
         try {
             return new ObjectName("javax.cache:type=Cache" + objectNameType + ",CacheManager="
-                    + mbeanSafe(cache.getCacheManager().getName()) + ",Cache=" + mbeanSafe(cache.getName()));
+                    + cacheManagerName + ",Cache=" + cacheName);
         } catch (MalformedObjectNameException e) {
-            throw new CacheException(e);
+            throw new CacheException("Illegal ObjectName for Management Bean. " +
+                    "CacheManager=[" + cacheManagerName + "], Cache=[" + cacheName + "]", e);
         }
     }
 
@@ -145,7 +149,7 @@ public final class MBeanServerRegistrationUtility {
      * @return A valid JMX ObjectName attribute value.
      */
     private static String mbeanSafe(String string) {
-        return string == null ? "" : string.replaceAll(":|=|\n", ".");
+        return string == null ? "" : string.replaceAll(",|:|=|\n", ".");
     }
 
 }

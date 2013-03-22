@@ -24,7 +24,6 @@ import javax.cache.CacheMXBean;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMXBean;
 import javax.cache.CacheWriter;
-import javax.cache.Caching;
 import javax.cache.Configuration;
 import javax.cache.Configuration.Duration;
 import javax.cache.ExpiryPolicy;
@@ -40,6 +39,7 @@ import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -83,18 +83,19 @@ public final class RICache<K, V> implements Cache<K, V> {
      * Cache Manager.
      */
     private final String cacheName;
-    
-    /**
-     * The name of the Cache Manager as used with in the scope of the
-     * Cache Manager Factory.
-     */
-    private final String cacheManagerName;
-    
+
     /**
      * The {@link ClassLoader} to use for deserializing classes (when necessary).
+     * <p/>
+     * This is a WeakReference to prevent ClassLoader memory leaks.
      */
-    private final ClassLoader classLoader;
-    
+    private final WeakReference<ClassLoader> classLoaderReference;
+
+    /**
+     * The {@link CacheManager} that created this implementation
+     */
+    private final RICacheManager cacheManager;
+
     /**
      * The {@link Configuration} for the {@link Cache}.
      */
@@ -160,19 +161,19 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * Constructs a cache.
      *
-     * @param cacheName          the cache name
-     * @param cacheManagerName   the cache manager name
-     * @param classLoader        the class loader
-     * @param configuration      the configuration
+     * @param cacheManager       the CacheManager that's creating the RICache
+     * @param cacheName          the name of the Cache
+     * @param classLoader        the ClassLoader the RICache will use for loading classes
+     * @param configuration      the Configuration of the Cache
      */
-    RICache(String cacheName, 
-            String cacheManagerName,
+    RICache(RICacheManager cacheManager,
+            String cacheName,
             ClassLoader classLoader,
             Configuration<K, V> configuration) {
-        
+
+        this.cacheManager = cacheManager;
         this.cacheName = cacheName;
-        this.cacheManagerName = cacheManagerName;
-        this.classLoader = classLoader;
+        this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
         
         //we make a copy of the configuration here so that the provided one
         //may be changed and or used independently for other caches.  we do this
@@ -248,7 +249,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public CacheManager getCacheManager() {
-        return Caching.getCacheManager(classLoader, cacheManagerName);
+        return cacheManager;
     }
     
     /**

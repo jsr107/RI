@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 /**
@@ -38,10 +39,11 @@ import java.util.Arrays;
 class RISerializingInternalConverter<T> implements RIInternalConverter<T> {
     
     /**
-     * The {@link ClassLoader} to use for locating classes to serialize/
-     * deserialize.
+     * The {@link ClassLoader} to use for locating classes to serialize/deserialize.
+     * <p/>
+     * This is a WeakReference to prevent ClassLoader memory leaks.
      */
-    private ClassLoader classLoader;
+    private WeakReference<ClassLoader> classLoaderReference;
 
     /**
      * Constructs a {@link RISerializingInternalConverter}.
@@ -51,7 +53,7 @@ class RISerializingInternalConverter<T> implements RIInternalConverter<T> {
      */
     public RISerializingInternalConverter(ClassLoader classLoader) {
         
-        this.classLoader = classLoader;
+        this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
     }
     
     /**
@@ -61,7 +63,7 @@ class RISerializingInternalConverter<T> implements RIInternalConverter<T> {
      * @return the {@link ClassLoader}
      */
     public ClassLoader getClassLoader() {
-        return classLoader;
+        return classLoaderReference.get();
     }
 
     /**
@@ -80,7 +82,7 @@ class RISerializingInternalConverter<T> implements RIInternalConverter<T> {
         if (internal == null) {
             return null;
         } else if (internal instanceof Serialized) {
-            return (T)((Serialized)internal).deserialize(classLoader);
+            return (T)((Serialized)internal).deserialize(getClassLoader());
         } else {
             throw new IllegalArgumentException("internal value is not a Serialized instance [" + internal + "]");
         }

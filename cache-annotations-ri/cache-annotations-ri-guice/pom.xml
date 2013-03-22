@@ -8,7 +8,7 @@
     </parent>
 
     <groupId>org.jsr107.ri</groupId>
-     <artifactId>cache-annotations-ri-guice</artifactId>
+    <artifactId>cache-annotations-ri-guice</artifactId>
 
     <packaging>jar</packaging>
 

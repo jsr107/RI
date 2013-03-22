@@ -29,4 +29,6 @@
     <suppress checks="CyclomaticComplexity" files="RICacheEventEventDispatcher.java"/>
     
     <suppress checks="NPathComplexity" files="RICacheEntryListenerRegistration.java"/>
+
+    <suppress checks="NPathComplexity" files="RICachingProvider.java"/>
 </suppressions>

@@ -160,9 +160,18 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         if (staticCacheInvocationContext != null) {
             return staticCacheInvocationContext;
         }
-        
-        final CacheDefaults cacheDefaultsAnnotation = targetClass.getAnnotation(CacheDefaults.class);
-        
+
+        //attempt to find the CacheDefaults annotation on the targetClass or one of it parent classes
+        Class<?> clazz = targetClass;
+        CacheDefaults annotation = null;
+        while (annotation == null && clazz != null) {
+            annotation = clazz.getAnnotation(CacheDefaults.class);
+            if (annotation == null) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        final CacheDefaults cacheDefaultsAnnotation = annotation;
+
         //Grab all possible annotations from the method, needed to enforce valid use of the annotations
         final CacheResult cacheResultAnnotation = getAnnotation(CacheResult.class, method, targetClass);
         final CachePut cachePutAnnotation = getAnnotation(CachePut.class, method, targetClass);
@@ -580,7 +589,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
      */
     protected String resolveCacheName(String methodCacheName, CacheDefaults cacheDefaultsAnnotation, 
             Method method, Class<? extends Object> targetClass) {
-        
+
         if (!"".equals(methodCacheName)) {
             return methodCacheName;
         }

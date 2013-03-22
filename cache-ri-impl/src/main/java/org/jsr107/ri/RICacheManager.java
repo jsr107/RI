@@ -20,17 +20,20 @@ package org.jsr107.ri;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
-import javax.cache.Caching;
 import javax.cache.Configuration;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;
+import javax.cache.spi.CachingProvider;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 import javax.transaction.UserTransaction;
+import java.lang.ref.WeakReference;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,29 +47,44 @@ public class RICacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
     private final HashMap<String, Cache<?, ?>> caches = new HashMap<String, Cache<?, ?>>();
-    
-    private final String name;
-    private final ClassLoader classLoader;
-    
+
+    private final RICachingProvider cachingProvider;
+
+    private final URI uri;
+    private final WeakReference<ClassLoader> classLoaderReference;
+    private final Properties properties;
+
     private volatile Status status;
 
     /**
      * Constructs a new RICacheManager with the specified name.
      *
-     * @param classLoader the ClassLoader that should be used in converting values into Java Objects.
-     * @param name        the name of this cache manager
-     * @throws NullPointerException if classLoader or name is null.
+     * @param cachingProvider  the CachingProvider that created the CacheManager
+     * @param uri              the name of this cache manager
+     * @param classLoader      the ClassLoader that should be used in converting values into Java Objects.
+     * @param properties       the vendor specific Properties for the CacheManager
+     *
+     * @throws NullPointerException if the URI and/or classLoader is null.
      */
-    public RICacheManager(String name, ClassLoader classLoader) {
-        this.name = name;
-        this.classLoader = classLoader;
-        status = Status.UNINITIALISED;
+    public RICacheManager(RICachingProvider cachingProvider, URI uri, ClassLoader classLoader, Properties properties) {
+        if (cachingProvider == null) {
+            throw new NullPointerException("No CachingProvider specified");
+        }
+        this.cachingProvider = cachingProvider;
+
+        if (uri == null) {
+            throw new NullPointerException("No CacheManager URI specified");
+        }
+        this.uri = uri;
+
         if (classLoader == null) {
-            throw new NullPointerException("No classLoader specified");
+            throw new NullPointerException("No ClassLoader specified");
         }
-        if (name == null) {
-            throw new NullPointerException("No name specified");
-        }
+        this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
+
+        this.properties = properties == null ? new Properties() : new Properties(properties);
+
+        status = Status.UNINITIALISED;
         status = Status.STARTED;
     }
 
@@ -74,8 +92,24 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public String getName() {
-        return name;
+    public CachingProvider getCachingProvider() {
+        return cachingProvider;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public URI getURI() {
+        return uri;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Properties getProperties() {
+        return properties;
     }
 
     /**
@@ -83,7 +117,7 @@ public class RICacheManager implements CacheManager {
      * @return the class loader
      */
     protected ClassLoader getClassLoader() {
-        return classLoader;
+        return classLoaderReference.get();
     }
 
     /**
@@ -126,7 +160,7 @@ public class RICacheManager implements CacheManager {
             Cache<?, ?> cache = caches.get(cacheName);
             
             if (cache == null) {
-                cache = new RICache<K, V>(cacheName, getName(), getClassLoader(), configuration);
+                cache = new RICache<K, V>(this, cacheName, getClassLoader(), configuration);
                 caches.put(cache.getName(), cache);
                 
                 cache.start();
@@ -213,7 +247,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public boolean isSupported(OptionalFeature optionalFeature) {
-        return Caching.isSupported(optionalFeature);
+        return getCachingProvider().isSupported(optionalFeature);
     }
 
     /**
@@ -248,7 +282,11 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public void shutdown() {
+    public void close() {
+        //first release the CacheManager from the CacheProvider so that
+        //future requests for this CacheManager won't return this one
+        cachingProvider.release(getURI(), getClassLoader());
+
         if (status != Status.STARTED) {
             throw new IllegalStateException();
         }
@@ -269,7 +307,7 @@ public class RICacheManager implements CacheManager {
 
     @Override
     public <T> T unwrap(java.lang.Class<T> cls) {
-        if (cls.isAssignableFrom(this.getClass())) {
+        if (cls.isAssignableFrom(getClass())) {
             return cls.cast(this);
         }
 

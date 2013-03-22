@@ -24,6 +24,7 @@ import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
+import javax.cache.spi.CachingProvider;
 import java.lang.annotation.Annotation;
 import java.util.logging.Logger;
 
@@ -53,7 +54,8 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
      * Constructs the resolver
      */
     public DefaultCacheResolverFactory() {
-        this.cacheManager = Caching.getCacheManager();
+        CachingProvider provider = Caching.getCachingProvider();
+        this.cacheManager = provider.getCacheManager(provider.getDefaultURI(), provider.getDefaultClassLoader());
     }
 
     /* (non-Javadoc)
