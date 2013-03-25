@@ -35,7 +35,6 @@ import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryListenerRegistration;
-import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
@@ -479,8 +478,6 @@ public final class RICache<K, V> implements Cache<K, V> {
             } else {
                 V oldValue = valueConverter.fromInternal(cachedValue.getInternalValue(now));
 
-                dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue));
-                
                 Duration duration = expiryPolicy.getTTLForModifiedEntry(entry,
                                                                         new Duration(now, cachedValue.getExpiryTime()));
                 long expiryTime = duration.getAdjustedTime(now);
@@ -798,7 +795,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 
                 CacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, result);
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryReadListener.class, event);
                 dispatcher.addEvent(CacheEntryRemovedListener.class, event);
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             }
@@ -954,7 +950,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 cachedValue.setExpiryTime(expiryTime);
 
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(this, key, result));
                 dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, result));
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             }
@@ -1495,13 +1490,9 @@ public final class RICache<K, V> implements Cache<K, V> {
                 if (cachedValue.isExpiredAt(now)) {
                     return null;
                 } else {
-
-                    
                     entries.put(internalKey, cachedValue);
                     
                     dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
-                    
-                    dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(this, key, value));
                 }
             } else {
                 value = valueConverter.fromInternal(cachedValue.getInternalValue(now));
@@ -1510,8 +1501,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 Duration duration = expiryPolicy.getTTLForAccessedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
                 long expiryTime = duration.getAdjustedTime(now);
                 cachedValue.setExpiryTime(expiryTime);
-                
-                dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(this, key, value));
                 
                 if (statisticsEnabled()) {
                     statistics.increaseCacheHits(1);
@@ -1672,12 +1661,6 @@ public final class RICache<K, V> implements Cache<K, V> {
             if (hasNext()) {
                 //remember the lastEntry (so that we call allow for removal)
                 lastEntry = nextEntry;
-
-                //raise "read" event
-                RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryReadListener.class,
-                                    new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(), lastEntry.getValue()));
-                dispatcher.dispatch(cacheEntryListenerRegistrations.values());
 
                 //reset nextEntry to force fetching the next available entry
                 nextEntry = null;
@@ -1927,10 +1910,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 } else if (value == null) {
                     Object internalValue = cachedValue.getInternalValue(now);
                     value = internalValue == null ? null : (V)RICache.this.valueConverter.fromInternal(internalValue);
-                    
-                    if (value != null) {
-                        dispatcher.addEvent(CacheEntryReadListener.class, new RICacheEntryEvent<K, V>(RICache.this, key, value));
-                    }
                 }
             }
             

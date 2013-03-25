@@ -22,7 +22,6 @@ import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerRegistration;
-import javax.cache.event.CacheEntryReadListener;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import java.util.ArrayList;
@@ -139,22 +138,7 @@ public class RICacheEventEventDispatcher<K, V> {
                 }
             }
         }
-        
-        //notify read listeners
-        events = eventMap.get(CacheEntryReadListener.class);
-        if (events != null) {
-            for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
-                CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
-                Iterable<CacheEntryEvent<K, V>> iterable = 
-                        filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
 
-                CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
-                if (listener instanceof CacheEntryReadListener) {
-                    ((CacheEntryReadListener) listener).onRead(iterable);
-                }
-            }
-        }
-        
         //notify update listeners
         events = eventMap.get(CacheEntryUpdatedListener.class);
         if (events != null) {
