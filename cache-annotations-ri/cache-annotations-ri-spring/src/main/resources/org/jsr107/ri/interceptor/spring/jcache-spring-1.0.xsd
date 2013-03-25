@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<xsd:schema xmlns="https=://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
+<xsd:schema xmlns="https://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:tool="http://www.springframework.org/schema/tool"
         targetNamespace="https://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"

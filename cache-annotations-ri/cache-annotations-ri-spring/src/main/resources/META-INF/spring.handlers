@@ -1,1 +1,1 @@
-https\://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring=javax.cache.annotation.impl.spring.config.JCacheNamespaceHandler
+https\://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring=org.jsr107.ri.annotations.spring.config.JCacheNamespaceHandler
