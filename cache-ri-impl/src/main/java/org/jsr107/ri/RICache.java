@@ -236,6 +236,15 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
+     * The default Duration to use when a Duration can't be determined.
+     *
+     * @return the default Duration
+     */
+    protected Duration getDefaultDuration() {
+        return Duration.ETERNAL;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -403,7 +412,12 @@ public final class RICache<K, V> implements Cache<K, V> {
                     dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
                 }
 
-                Duration duration = expiryPolicy.getTTLForCreatedEntry(entry);
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForCreatedEntry(entry);
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
 
                 cachedValue = new RICachedValue(internalValue, now, expiryTime);
@@ -412,7 +426,12 @@ public final class RICache<K, V> implements Cache<K, V> {
                 
                 dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
             } else {
-                Duration duration = expiryPolicy.getTTLForModifiedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForModifiedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
                 
                 V oldValue = valueConverter.fromInternal(cachedValue.get());
@@ -464,7 +483,12 @@ public final class RICache<K, V> implements Cache<K, V> {
                     dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
                 }
 
-                Duration duration = expiryPolicy.getTTLForCreatedEntry(entry);
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForCreatedEntry(entry);
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
                 
                 cachedValue = new RICachedValue(internalValue, now, expiryTime);
@@ -478,8 +502,12 @@ public final class RICache<K, V> implements Cache<K, V> {
             } else {
                 V oldValue = valueConverter.fromInternal(cachedValue.getInternalValue(now));
 
-                Duration duration = expiryPolicy.getTTLForModifiedEntry(entry,
-                                                                        new Duration(now, cachedValue.getExpiryTime()));
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForModifiedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
                     
                 cachedValue.setInternalValue(internalValue, now);
@@ -589,7 +617,12 @@ public final class RICache<K, V> implements Cache<K, V> {
                         dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
                     }
 
-                    Duration duration = expiryPolicy.getTTLForCreatedEntry(new RIEntry<K, V>(key, value));
+                    Duration duration;
+                    try {
+                        duration = expiryPolicy.getTTLForCreatedEntry(new RIEntry<K, V>(key, value));
+                    } catch (Throwable t) {
+                        duration = getDefaultDuration();
+                    }
                     long expiryTime = duration.getAdjustedTime(now);
 
                     cachedValue = new RICachedValue(internalValue, now, expiryTime);
@@ -598,8 +631,13 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                     dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
                 } else if (replaceExistingValues) {
-                    Duration duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry<K, V>(key, value),
+                    Duration duration;
+                    try {
+                        duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry<K, V>(key, value),
                             new Duration(now, cachedValue.getExpiryTime()));
+                    } catch (Throwable t) {
+                        duration = getDefaultDuration();
+                    }
                     long expiryTime = duration.getAdjustedTime(now);
 
                     cachedValue.setInternalValue(internalValue, now);
@@ -667,7 +705,12 @@ public final class RICache<K, V> implements Cache<K, V> {
                     dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
                 }
 
-                Duration duration = expiryPolicy.getTTLForCreatedEntry(entry);
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForCreatedEntry(entry);
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
                 
                 cachedValue = new RICachedValue(internalValue, now, expiryTime);
@@ -854,8 +897,12 @@ public final class RICache<K, V> implements Cache<K, V> {
                     RIEntry<K, V> entry = new RIEntry<K, V>(key, newValue);
                     writeCacheEntry(entry);
 
-                    Duration duration = expiryPolicy.getTTLForModifiedEntry(entry,
-                                                                            new Duration(now, cachedValue.getExpiryTime()));
+                    Duration duration;
+                    try {
+                        duration = expiryPolicy.getTTLForModifiedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                    } catch (Throwable t) {
+                        duration = getDefaultDuration();
+                    }
                     long expiryTime = duration.getAdjustedTime(now);
                     
                     Object newInternalValue = valueConverter.toInternal(newValue);
@@ -905,8 +952,12 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 V previousValue = valueConverter.fromInternal(cachedValue.get());
                         
-                Duration duration = expiryPolicy.getTTLForModifiedEntry(entry,
-                                                                        new Duration(now, cachedValue.getExpiryTime()));
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForModifiedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
 
                 Object internalValue = valueConverter.toInternal(value);
@@ -952,9 +1003,13 @@ public final class RICache<K, V> implements Cache<K, V> {
                 writeCacheEntry(entry);
 
                 result = valueConverter.fromInternal(cachedValue.getInternalValue(now));
-                
-                Duration duration = expiryPolicy.getTTLForModifiedEntry(entry,
-                                                                        new Duration(now, cachedValue.getExpiryTime()));
+
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForModifiedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
                 
                 Object internalValue = valueConverter.toInternal(value);
@@ -1246,7 +1301,11 @@ public final class RICache<K, V> implements Cache<K, V> {
                 RIEntry<K, V> e = new RIEntry<K, V>(key, entry.value);
                 writeCacheEntry(e);
 
-                duration = expiryPolicy.getTTLForCreatedEntry(e);
+                try {
+                    duration = expiryPolicy.getTTLForCreatedEntry(e);
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 expiryTime = duration.getAdjustedTime(now);
 
                 cachedValue = new RICachedValue(valueConverter.toInternal(entry.value), now, expiryTime);
@@ -1271,7 +1330,11 @@ public final class RICache<K, V> implements Cache<K, V> {
                 e = new RIEntry<K, V>(key, entry.value);
                 writeCacheEntry(e);
 
-                duration = expiryPolicy.getTTLForModifiedEntry(e, new Duration(now, cachedValue.getExpiryTime()));
+                try {
+                    duration = expiryPolicy.getTTLForModifiedEntry(e, new Duration(now, cachedValue.getExpiryTime()));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 expiryTime = duration.getAdjustedTime(now);
 
                 V previousValue = valueConverter.fromInternal(cachedValue.get());
@@ -1295,7 +1358,6 @@ public final class RICache<K, V> implements Cache<K, V> {
                 entries.remove(internalKey);
 
                 dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
-
 
                 if (statisticsEnabled()) {
                     statistics.increaseCacheRemovals(1);
@@ -1496,8 +1558,13 @@ public final class RICache<K, V> implements Cache<K, V> {
                 } 
                 
                 value = entry.getValue();
-                
-                Duration duration = expiryPolicy.getTTLForCreatedEntry(new RIEntry<K, V>(key, value));
+
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForCreatedEntry(new RIEntry<K, V>(key, value));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
                 
                 Object internalValue = valueConverter.toInternal(value);
@@ -1513,9 +1580,15 @@ public final class RICache<K, V> implements Cache<K, V> {
             } else {
                 value = valueConverter.fromInternal(cachedValue.getInternalValue(now));
                 RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
-                
-                Duration duration = expiryPolicy.getTTLForAccessedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+
+                Duration duration;
+                try {
+                    duration = expiryPolicy.getTTLForAccessedEntry(entry, new Duration(now, cachedValue.getExpiryTime()));
+                } catch (Throwable t) {
+                    duration = getDefaultDuration();
+                }
                 long expiryTime = duration.getAdjustedTime(now);
+
                 cachedValue.setExpiryTime(expiryTime);
                 
                 if (statisticsEnabled()) {
@@ -1648,7 +1721,13 @@ public final class RICache<K, V> implements Cache<K, V> {
                         V value = (V)RICache.this.valueConverter.fromInternal(cachedValue.getInternalValue(now));
                         nextEntry = new RIEntry<K, V>(key, value);
 
-                        Duration duration = expiryPolicy.getTTLForAccessedEntry(nextEntry, new Duration(now, cachedValue.getExpiryTime()));
+                        Duration duration;
+                        try {
+                            duration = expiryPolicy.getTTLForAccessedEntry(nextEntry,
+                                    new Duration(now, cachedValue.getExpiryTime()));
+                        } catch (Throwable t) {
+                            duration = getDefaultDuration();
+                        }
                         long expiryTime = duration.getAdjustedTime(now);
                         cachedValue.setExpiryTime(expiryTime);
                     }
