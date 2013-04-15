@@ -331,7 +331,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * {@inheritDoc}
      */
     @Override
-    public void loadAll(final Iterable<? extends K> keys, final CompletionListener listener) {
+    public void loadAll(final Iterable<? extends K> keys, final boolean replaceExistingValues, final CompletionListener listener) {
         checkStatusStarted();
         if (keys == null) {
             throw new NullPointerException("keys");
@@ -355,7 +355,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                         Map<? extends K, ? extends V> loaded = cacheLoader.loadAll(keysToLoad);
 
-                        putAll(loaded);
+                        putAll(loaded, replaceExistingValues);
 
                         if (listener != null) {
                             listener.onCompletion();
@@ -511,6 +511,18 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void putAll(Map<? extends K, ? extends V> map) {
+        putAll(map, true);
+    }
+
+    /**
+     * A implementation of PutAll that allows optional replacement of existing
+     * values.
+     *
+     * @param map                    the Map of entries to put
+     * @param replaceExistingValues  should existing values be replaced by those
+     *                               in the map?
+     */
+    public void putAll(Map<? extends K, ? extends V> map, final boolean replaceExistingValues) {
         checkStatusStarted();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         
@@ -585,7 +597,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                     entries.put(internalKey, cachedValue);
 
                     dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
-                } else {
+                } else if (replaceExistingValues) {
                     Duration duration = expiryPolicy.getTTLForModifiedEntry(new RIEntry<K, V>(key, value),
                             new Duration(now, cachedValue.getExpiryTime()));
                     long expiryTime = duration.getAdjustedTime(now);
