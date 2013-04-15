@@ -18,7 +18,7 @@ package org.jsr107.ri.annotations;
 
 
 import javax.cache.Cache;
-import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.GeneratedCacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResult;
@@ -60,7 +60,7 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
 
         //Generate the cache key
         final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
-        final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
+        final GeneratedCacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
         
         final CacheResult cacheResultAnnotation = methodDetails.getCacheAnnotation();
         
@@ -107,7 +107,7 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
      * @param cacheKey The cache key
      * @throws Throwable The cached exception
      */
-    protected void checkForCachedException(final Cache<Object, Throwable> exceptionCache, final CacheKey cacheKey)
+    protected void checkForCachedException(final Cache<Object, Throwable> exceptionCache, final GeneratedCacheKey cacheKey)
             throws Throwable {
         if (exceptionCache == null) {
             return;
@@ -128,7 +128,7 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
      * @param cacheResultAnnotation The cache result annotation
      * @param t The exception to cache
      */
-    protected void cacheException(final Cache<Object, Throwable> exceptionCache, final CacheKey cacheKey,
+    protected void cacheException(final Cache<Object, Throwable> exceptionCache, final GeneratedCacheKey cacheKey,
             final CacheResult cacheResultAnnotation, Throwable t) {
         if (exceptionCache == null) {
             return;

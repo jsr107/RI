@@ -17,8 +17,8 @@
 package org.jsr107.ri.annotations;
 
 import javax.cache.annotation.CacheDefaults;
+import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheKeyParam;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CachePut;
 import javax.cache.annotation.CacheRemoveAll;
@@ -460,13 +460,13 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
         for (int pIdx = 0; pIdx < parameterTypes.length; pIdx++) {
             final Class<?> rawType = parameterTypes[pIdx];
             
-            //Create Set of annotations on Method and check for @CacheKeyParam
+            //Create Set of annotations on Method and check for @CacheKey
             boolean isKey = false;
             boolean isValue = false;
             final Set<Annotation> annotations = new LinkedHashSet<Annotation>();
             for (final Annotation parameterAnnotation : parameterAnnotations[pIdx]) {
                 annotations.add(parameterAnnotation);
-                if (!isKey && CacheKeyParam.class.isAssignableFrom(parameterAnnotation.annotationType())) {
+                if (!isKey && CacheKey.class.isAssignableFrom(parameterAnnotation.annotationType())) {
                     isKey = true;
                 } else if (CacheValue.class.isAssignableFrom(parameterAnnotation.annotationType())) {
                     if (!cacheValueAllowed) {

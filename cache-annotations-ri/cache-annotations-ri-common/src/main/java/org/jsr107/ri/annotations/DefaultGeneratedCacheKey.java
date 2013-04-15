@@ -17,7 +17,7 @@
 
 package org.jsr107.ri.annotations;
 
-import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.GeneratedCacheKey;
 import java.util.Arrays;
 
 /**
@@ -32,7 +32,7 @@ import java.util.Arrays;
  * @author Eric Dalquist
  * @since 1.0
  */
-public class DefaultCacheKey implements CacheKey {
+public class DefaultGeneratedCacheKey implements GeneratedCacheKey {
 
     private static final long serialVersionUID = 1L;
 
@@ -44,7 +44,7 @@ public class DefaultCacheKey implements CacheKey {
      *
      * @param parameters the paramters to use
      */
-    public DefaultCacheKey(Object[] parameters) {
+    public DefaultGeneratedCacheKey(Object[] parameters) {
         this.parameters = parameters;
         this.hashCode = Arrays.deepHashCode(parameters);
     }
@@ -64,7 +64,7 @@ public class DefaultCacheKey implements CacheKey {
             return false;
         if (this.hashCode != obj.hashCode()) 
             return false;
-        DefaultCacheKey other = (DefaultCacheKey) obj;
+        DefaultGeneratedCacheKey other = (DefaultGeneratedCacheKey) obj;
         return Arrays.deepEquals(this.parameters, other.parameters);
     }
 }

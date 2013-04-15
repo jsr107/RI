@@ -18,7 +18,7 @@ package org.jsr107.ri.annotations;
 
 
 import javax.cache.Cache;
-import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.GeneratedCacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheRemoveEntry;
 import javax.cache.annotation.CacheResolver;
@@ -100,7 +100,7 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
         final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
 
         final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
-        final CacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
+        final GeneratedCacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
         
         cache.remove(cacheKey);
     }
