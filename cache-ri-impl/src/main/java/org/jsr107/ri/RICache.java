@@ -1200,7 +1200,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         if (key == null) {
             throw new NullPointerException();
         }
-        if (key == entryProcessor) {
+        if (entryProcessor == null) {
             throw new NullPointerException();
         }
 
@@ -1230,28 +1230,32 @@ public final class RICache<K, V> implements Cache<K, V> {
             start = statisticsEnabled() ? System.nanoTime() : 0;
 
             EntryProcessorEntry entry = new EntryProcessorEntry(key, cachedValue, now, dispatcher);
-            result = entryProcessor.process(entry, arguments);
+            try {
+                result = entryProcessor.process(entry, arguments);
+            } catch (Throwable t) {
+                throw new CacheException(t);
+            }
 
             Duration duration;
             long expiryTime;
             switch(entry.operation) {
             case NONE:
                 break;
-                
+
             case CREATE:
                 RIEntry<K, V> e = new RIEntry<K, V>(key, entry.value);
                 writeCacheEntry(e);
 
                 duration = expiryPolicy.getTTLForCreatedEntry(e);
                 expiryTime = duration.getAdjustedTime(now);
-                
+
                 cachedValue = new RICachedValue(valueConverter.toInternal(entry.value), now, expiryTime);
-                
+
                 if (cachedValue.isExpiredAt(now)) {
                     V previousValue = valueConverter.fromInternal(cachedValue.get());
                     dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
                 }
-                
+
                 entries.put(internalKey, cachedValue);
 
                 dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value));
@@ -1262,18 +1266,18 @@ public final class RICache<K, V> implements Cache<K, V> {
                 }
 
                 break;
-                
+
             case UPDATE:
                 e = new RIEntry<K, V>(key, entry.value);
                 writeCacheEntry(e);
 
                 duration = expiryPolicy.getTTLForModifiedEntry(e, new Duration(now, cachedValue.getExpiryTime()));
                 expiryTime = duration.getAdjustedTime(now);
-                
+
                 V previousValue = valueConverter.fromInternal(cachedValue.get());
                 cachedValue.setInternalValue(valueConverter.toInternal(entry.value), now);
                 cachedValue.setExpiryTime(expiryTime);
-                
+
                 dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, previousValue));
 
 
@@ -1283,13 +1287,13 @@ public final class RICache<K, V> implements Cache<K, V> {
                 }
 
                 break;
-                
+
             case REMOVE:
                 deleteCacheEntry(key);
 
                 previousValue = valueConverter.fromInternal(cachedValue.get());
                 entries.remove(internalKey);
-               
+
                 dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
 
 
@@ -1299,11 +1303,11 @@ public final class RICache<K, V> implements Cache<K, V> {
                 }
 
                 break;
-                
+
             default:
                 break;
             }
-            
+
             dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             
         } finally {
