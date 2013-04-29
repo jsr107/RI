@@ -55,8 +55,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
      * Create lookup utility
      */
     public AbstractCacheLookupUtil() {
-        //Mark that annotations have been initialized
-        AnnotationProviderImpl.setAnnotationsInitialized();
+        //empty
     }
 
     /**
