@@ -69,9 +69,7 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
     }
 
     /**
-     * Returns the key of the cache entry with the event
-     *
-     * @return the key
+     * {@inheritDoc}
      */
     @Override
     public K getKey() {
@@ -79,9 +77,7 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
     }
 
     /**
-     * Returns the value of the cache entry with the event
-     *
-     * @return the value
+     * {@inheritDoc}
      */
     @Override
     public V getValue() {
@@ -89,10 +85,7 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
     }
 
     /**
-     * Returns the value of the cache entry with the event
-     *
-     * @return the value
-     * @throws UnsupportedOperationException if the old value is not available
+     * {@inheritDoc}
      */
     @Override
     public V getOldValue() throws UnsupportedOperationException {
@@ -104,9 +97,19 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
     }
 
     /**
-     * Whether the old value is available
-     *
-     * @return true if the old value is populated
+     * {@inheritDoc}
+     */
+    @Override
+    public <T> T unwrap(Class<T> clazz) {
+        if (clazz != null && clazz.isInstance(this)) {
+            return (T) this;
+        } else {
+            throw new IllegalArgumentException("The class " + clazz + " is unknown to this implementation");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     public boolean isOldValueAvailable() {
