@@ -45,8 +45,6 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
     private final AtomicLong cacheGetTimeTakenNanos = new AtomicLong();
     private final AtomicLong cacheRemoveTimeTakenNanos = new AtomicLong();
 
-    private Date lastCollectionStartDate = new Date();
-
     /**
      * Constructs a cache statistics object
      *
@@ -72,18 +70,6 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
         cacheGetTimeTakenNanos.set(0);
         cachePutTimeTakenNanos.set(0);
         cacheRemoveTimeTakenNanos.set(0);
-        lastCollectionStartDate = new Date();
-    }
-
-    /**
-     * The date from which statistics have been accumulated. Because statistics can be cleared, this is not necessarily
-     * since the cache was started.
-     *
-     * @return the date statistics started being accumulated
-     */
-    @Override
-    public Date getStartAccumulationDate() {
-        return lastCollectionStartDate;
     }
 
     /**

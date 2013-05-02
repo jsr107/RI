@@ -1630,6 +1630,15 @@ public final class RICache<K, V> implements Cache<K, V> {
             return value;
         }
 
+        @Override
+        public <T> T unwrap(Class<T> clazz) {
+            if (clazz != null && clazz.isInstance(this)) {
+                return (T)this;
+            } else {
+                throw new IllegalArgumentException("Class " + clazz + " is unknown to this implementation");
+            }
+        }
+
         /**
          * {@inheritDoc}
          */
@@ -2028,6 +2037,14 @@ public final class RICache<K, V> implements Cache<K, V> {
             }
             operation = cachedValue == null || cachedValue.isExpiredAt(now) ? MutableEntryOperation.CREATE : MutableEntryOperation.UPDATE;
             this.value = value;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public <T> T unwrap(Class<T> clazz) {
+            throw new IllegalArgumentException("Can't unwrap an EntryProcessor Entry");
         }
     }
 }
