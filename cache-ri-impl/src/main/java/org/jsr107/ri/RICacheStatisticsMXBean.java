@@ -20,7 +20,6 @@ package org.jsr107.ri;
 import javax.cache.Cache;
 import javax.cache.CacheStatisticsMXBean;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 

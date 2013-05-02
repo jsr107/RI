@@ -17,9 +17,9 @@
 package org.jsr107.ri.annotations;
 
 import javax.cache.annotation.CacheInvocationParameter;
-import javax.cache.annotation.GeneratedCacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheKeyInvocationContext;
+import javax.cache.annotation.GeneratedCacheKey;
 import java.lang.annotation.Annotation;
 
 /**

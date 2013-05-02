@@ -16,17 +16,15 @@
  */
 package org.jsr107.ri;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.WeakHashMap;
-
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.OptionalFeature;
 import javax.cache.spi.CachingProvider;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.WeakHashMap;
 
 /**
  * The reference implementation of the {@link CachingProvider}.
