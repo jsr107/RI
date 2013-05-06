@@ -37,7 +37,6 @@ import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,13 +80,6 @@ public final class RICache<K, V> implements Cache<K, V> {
      * Cache Manager.
      */
     private final String cacheName;
-
-    /**
-     * The {@link ClassLoader} to use for deserializing classes (when necessary).
-     * <p/>
-     * This is a WeakReference to prevent ClassLoader memory leaks.
-     */
-    private final WeakReference<ClassLoader> classLoaderReference;
 
     /**
      * The {@link CacheManager} that created this implementation
@@ -171,8 +163,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         this.cacheManager = cacheManager;
         this.cacheName = cacheName;
-        this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
-        
+
         //we make a copy of the configuration here so that the provided one
         //may be changed and or used independently for other caches.  we do this
         //as we don't know if the provided configuration is mutable
