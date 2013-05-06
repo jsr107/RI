@@ -171,7 +171,11 @@ public class RICacheManager implements CacheManager {
         if (configuration == null) {
             throw new NullPointerException("configuration must not be null");
         }
-        
+
+        if ((!configuration.isStoreByValue()) && configuration.isTransactionsEnabled()) {
+            throw new IllegalArgumentException("can't use store-by-reference and transactions together");
+        }
+
         if (configuration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
             configuration.getTransactionMode() != Mode.NONE) {
             throw new IllegalArgumentException("isolation level expected when mode specified");
@@ -181,7 +185,7 @@ public class RICacheManager implements CacheManager {
             configuration.getTransactionMode() == Mode.NONE) {
             throw new IllegalArgumentException("mode expected when isolation level specified");
         }
-        
+
         synchronized (caches) {
             Cache<?, ?> cache = caches.get(cacheName);
             
