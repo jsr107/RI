@@ -22,7 +22,6 @@ import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.Configuration;
 import javax.cache.OptionalFeature;
-import javax.cache.Status;
 import javax.cache.spi.CachingProvider;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
@@ -41,6 +40,8 @@ import java.util.logging.Logger;
  * The reference implementation of the {@link CacheManager}.
  *
  * @author Yannis Cosmadopoulos
+ * @author Brian Oliver
+ *
  * @since 1.0
  */
 public class RICacheManager implements CacheManager {
@@ -54,7 +55,7 @@ public class RICacheManager implements CacheManager {
     private final WeakReference<ClassLoader> classLoaderReference;
     private final Properties properties;
 
-    private volatile Status status;
+    private volatile boolean isClosed;
 
     /**
      * Constructs a new RICacheManager with the specified name.
@@ -84,8 +85,7 @@ public class RICacheManager implements CacheManager {
 
         this.properties = properties == null ? new Properties() : new Properties(properties);
 
-        status = Status.UNINITIALISED;
-        status = Status.STARTED;
+        isClosed = false;
     }
 
     /**
@@ -94,6 +94,41 @@ public class RICacheManager implements CacheManager {
     @Override
     public CachingProvider getCachingProvider() {
         return cachingProvider;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void close() {
+        if (!isClosed()) {
+            //first releaseCacheManager the CacheManager from the CacheProvider so that
+            //future requests for this CacheManager won't return this one
+            cachingProvider.releaseCacheManager(getURI(), getClassLoader());
+
+            isClosed = true;
+
+            ArrayList<Cache<?, ?>> cacheList;
+            synchronized (caches) {
+                cacheList = new ArrayList<Cache<?, ?>>(caches.values());
+                caches.clear();
+            }
+            for (Cache<?, ?> cache : cacheList) {
+                try {
+                    cache.close();
+                } catch (Exception e) {
+                    getLogger().log(Level.WARNING, "Error stopping cache: " + cache, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isClosed() {
+        return isClosed;
     }
 
     /**
@@ -124,17 +159,8 @@ public class RICacheManager implements CacheManager {
      * {@inheritDoc}
      */
     @Override
-    public Status getStatus() {
-        return status;
-    }
-
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public <K, V> Cache<K, V> configureCache(String cacheName, Configuration<K, V> configuration) {
-        if (status != Status.STARTED) {
+        if (isClosed()) {
             throw new IllegalStateException();
         }
 
@@ -162,8 +188,6 @@ public class RICacheManager implements CacheManager {
             if (cache == null) {
                 cache = new RICache<K, V>(this, cacheName, getClassLoader(), configuration);
                 caches.put(cache.getName(), cache);
-                
-                cache.start();
             } else {
                 //note: we must clone the provided configuration as it needs to be
                 //      the same internal type as our internal configuration
@@ -184,7 +208,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public <K, V> Cache<K, V> getCache(String cacheName) {
-        if (status != Status.STARTED) {
+        if (isClosed()) {
             throw new IllegalStateException();
         }
         synchronized (caches) {
@@ -217,21 +241,36 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public boolean removeCache(String cacheName) {
-        if (status != Status.STARTED) {
+        if (isClosed()) {
             throw new IllegalStateException();
         }
         if (cacheName == null) {
             throw new NullPointerException();
         }
-        Cache<?, ?> oldCache;
-        synchronized (caches) {
-            oldCache = caches.remove(cacheName);
-        }
-        if (oldCache != null) {
-            oldCache.stop();
-        }
 
-        return oldCache != null;
+        Cache<?, ?> cache = getCache(cacheName);
+
+        if (cache == null) {
+            return false;
+        } else {
+            cache.close();
+            return true;
+        }
+    }
+
+    /**
+     * Releases the Cache with the specified name from being managed by
+     * this CacheManager.
+     *
+     * @param cacheName  the name of the Cache to releaseCacheManager
+     */
+    void releaseCache(String cacheName) {
+        if (cacheName == null) {
+            throw new NullPointerException();
+        }
+        synchronized (caches) {
+            caches.remove(cacheName);
+        }
     }
 
     /**
@@ -255,7 +294,7 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public void enableStatistics(String cacheName, boolean enabled) {
-        if (status != Status.STARTED) {
+        if (isClosed()) {
             throw new IllegalStateException();
         }
         if (cacheName == null) {
@@ -269,40 +308,13 @@ public class RICacheManager implements CacheManager {
      */
     @Override
     public void enableManagement(String cacheName, boolean enabled) {
-        if (status != Status.STARTED) {
+        if (isClosed()) {
             throw new IllegalStateException();
         }
         if (cacheName == null) {
             throw new NullPointerException();
         }
         ((RICache)caches.get(cacheName)).setManagementEnabled(enabled);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() {
-        //first release the CacheManager from the CacheProvider so that
-        //future requests for this CacheManager won't return this one
-        cachingProvider.release(getURI(), getClassLoader());
-
-        if (status != Status.STARTED) {
-            throw new IllegalStateException();
-        }
-        ArrayList<Cache<?, ?>> cacheList;
-        synchronized (caches) {
-            cacheList = new ArrayList<Cache<?, ?>>(caches.values());
-            caches.clear();
-        }
-        for (Cache<?, ?> cache : cacheList) {
-            try {
-                cache.stop();
-            } catch (Exception e) {
-                getLogger().log(Level.WARNING, "Error stopping cache: " + cache, e);
-            }
-        }
-        status = Status.STOPPED;
     }
 
     @Override

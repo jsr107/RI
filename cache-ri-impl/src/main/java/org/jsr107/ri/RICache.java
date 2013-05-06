@@ -27,7 +27,6 @@ import javax.cache.CacheWriter;
 import javax.cache.Configuration;
 import javax.cache.Configuration.Duration;
 import javax.cache.ExpiryPolicy;
-import javax.cache.Status;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
@@ -139,9 +138,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         new ConcurrentHashMap<CacheEntryListener<? super K, ? super V>, CacheEntryListenerRegistration<? super K, ? super V>>();
 
     /**
-     * The status of the {@link Cache}.
+     * The open/closed state of the Cache.
      */
-    private volatile Status status;
+    private volatile boolean isClosed;
 
     private final RICacheMXBean cacheMXBean;
     private final RICacheStatisticsMXBean statistics;
@@ -196,13 +195,15 @@ public final class RICache<K, V> implements Cache<K, V> {
                              new RIReferenceInternalConverter<V>();
         
         this.expiryPolicy = configuration.getExpiryPolicyFactory().create();
-        
-        status = Status.UNINITIALISED;
- 
+
         entries = new RISimpleInternalMap<Object, RICachedValue>();
 
         cacheMXBean = new RICacheMXBean<K, V>(this);
         statistics = new RICacheStatisticsMXBean(this);
+
+        //it's important that we set the status BEFORE we let management,
+        //statistics and listeners know about the cache.
+        isClosed = false;
 
         if (configuration.isManagementEnabled()) {
             setManagementEnabled(true);
@@ -259,7 +260,44 @@ public final class RICache<K, V> implements Cache<K, V> {
     public CacheManager getCacheManager() {
         return cacheManager;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized void close() {
+        if (!isClosed) {
+            //ensure that any further access to this Cache will raise an IllegalStateException
+            isClosed = true;
+
+            //ensure that the cache may no longer be accessed via the CacheManager
+            cacheManager.releaseCache(cacheName);
+
+            //disable statistics and management
+            setStatisticsEnabled(false);
+            setManagementEnabled(false);
+
+            //attempt to shutdown (and wait for the cache to shutdown)
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                throw new CacheException(e);
+            }
+
+            //drop all entries from the cache
+            entries.clear();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isClosed() {
+        return isClosed;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -273,7 +311,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public V get(K key) {
-        checkStatusStarted();
+        ensureOpen();
         if (key == null) {
             throw new NullPointerException();
         }
@@ -292,7 +330,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public Map<K, V> getAll(Set<? extends K> keys) {
-        checkStatusStarted();
+        ensureOpen();
         if (keys.contains(null)) {
             throw new NullPointerException("key");
         }
@@ -318,7 +356,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean containsKey(K key) {
-        checkStatusStarted();
+        ensureOpen();
         if (key == null) {
             throw new NullPointerException();
         }
@@ -341,7 +379,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void loadAll(final Iterable<? extends K> keys, final boolean replaceExistingValues, final CompletionListener listener) {
-        checkStatusStarted();
+        ensureOpen();
         if (keys == null) {
             throw new NullPointerException("keys");
         }
@@ -385,7 +423,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     @Override
     public void put(K key, V value) {
         long start = statisticsEnabled() ? System.nanoTime() : 0;
-        checkStatusStarted();
+        ensureOpen();
         if (value == null) {
             throw new NullPointerException("null value specified for key " + key);
         }
@@ -453,7 +491,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     @Override
     public V getAndPut(K key, V value) {
-        checkStatusStarted();
+        ensureOpen();
         if (value == null) {
             throw new NullPointerException("null value specified for key " + key);
         }
@@ -548,7 +586,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      *                               in the map?
      */
     public void putAll(Map<? extends K, ? extends V> map, final boolean replaceExistingValues) {
-        checkStatusStarted();
+        ensureOpen();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         
         long now = System.currentTimeMillis();
@@ -671,7 +709,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean putIfAbsent(K key, V value) {
-        checkStatusStarted();
+        ensureOpen();
         if (value == null) {
             throw new NullPointerException("null value specified for key " + key);
         }
@@ -737,7 +775,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean remove(K key) {
-        checkStatusStarted();
+        ensureOpen();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         
         long now = System.currentTimeMillis();
@@ -779,7 +817,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean remove(K key, V oldValue) {
-        checkStatusStarted();
+        ensureOpen();
         if (oldValue == null) {
             throw new NullPointerException("null oldValue specified for key " + key);
         }
@@ -827,7 +865,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public V getAndRemove(K key) {
-        checkStatusStarted();
+        ensureOpen();
         
         long now = System.currentTimeMillis();
         
@@ -868,7 +906,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-        checkStatusStarted();
+        ensureOpen();
         if (newValue == null) {
             throw new NullPointerException("null newValue specified for key " + key);
         }
@@ -927,7 +965,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public boolean replace(K key, V value) {
-        checkStatusStarted();
+        ensureOpen();
         if (value == null) {
             throw new NullPointerException("null value specified for key " + key);
         }
@@ -978,7 +1016,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public V getAndReplace(K key, V value) {
-        checkStatusStarted();
+        ensureOpen();
         if (value == null) {
             throw new NullPointerException("null value specified for key " + key);
         }
@@ -1032,7 +1070,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void removeAll(Set<? extends K> keys) {
-        checkStatusStarted();
+        ensureOpen();
         
         long now = System.currentTimeMillis();
 
@@ -1108,7 +1146,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void removeAll() {
-        checkStatusStarted();
+        ensureOpen();
 
         //TODO: this is incorrect as the internal map may contain expired entries
         int size = (statisticsEnabled()) ? entries.size() : 0;
@@ -1194,7 +1232,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void clear() {
-        checkStatusStarted();
+        ensureOpen();
 
         Iterator<Map.Entry<Object, RICachedValue>> iterator = entries.iterator();
         while (iterator.hasNext()) {
@@ -1244,7 +1282,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public <T> T invokeEntryProcessor(K key, EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
-        checkStatusStarted();
+        ensureOpen();
         if (key == null) {
             throw new NullPointerException();
         }
@@ -1376,7 +1414,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public Iterator<Entry<K, V>> iterator() {
-        checkStatusStarted();
+        ensureOpen();
 
         long now = System.currentTimeMillis();
         
@@ -1425,47 +1463,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         configuration.setManagementEnabled(enabled);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void start() {
-        status = Status.STARTED;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void stop() {
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new CacheException(e);
+    private void ensureOpen() {
+        if (isClosed()) {
+            throw new IllegalStateException("Cache operations can not be performed. The cache closed");
         }
-        
-        entries.clear();
-
-        //Remove MBean registrations
-        setStatisticsEnabled(false);
-        setManagementEnabled(false);
-
-        status = Status.STOPPED;
-    }
-
-    private void checkStatusStarted() {
-        if (!status.equals(Status.STARTED)) {
-            throw new IllegalStateException("The cache status is not STARTED");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Status getStatus() {
-        return status;
     }
 
     @Override

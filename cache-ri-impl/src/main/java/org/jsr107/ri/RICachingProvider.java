@@ -185,7 +185,7 @@ public class RICachingProvider implements CachingProvider {
      * @param uri          the URI of the CacheManager
      * @param classLoader  the ClassLoader of the CacheManager
      */
-    public synchronized void release(URI uri, ClassLoader classLoader) {
+    public synchronized void releaseCacheManager(URI uri, ClassLoader classLoader) {
         URI managerURI = uri == null ? getDefaultURI() : uri;
         ClassLoader managerClassLoader = classLoader == null ? getDefaultClassLoader() : classLoader;
 
