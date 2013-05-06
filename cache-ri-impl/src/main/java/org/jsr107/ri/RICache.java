@@ -402,7 +402,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                         Map<? extends K, ? extends V> loaded = cacheLoader.loadAll(keysToLoad);
 
-                        putAll(loaded, replaceExistingValues);
+                        putAll(loaded, replaceExistingValues, false);
 
                         if (listener != null) {
                             listener.onCompletion();
@@ -590,14 +590,21 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public void putAll(Map<? extends K, ? extends V> map, boolean replaceExistingValues) {
+        putAll(map, replaceExistingValues, true);
+    }
+
+    /**
      * A implementation of PutAll that allows optional replacement of existing
-     * values.
+     * values and optionally writing values when Write Through is configured.
      *
      * @param map                    the Map of entries to put
-     * @param replaceExistingValues  should existing values be replaced by those
-     *                               in the map?
+     * @param replaceExistingValues  should existing values be replaced by those in the map?
+     * @param useWriteThrough        should write-through be used if it is configured
      */
-    public void putAll(Map<? extends K, ? extends V> map, final boolean replaceExistingValues) {
+    public void putAll(Map<? extends K, ? extends V> map, final boolean replaceExistingValues, boolean useWriteThrough) {
         ensureOpen();
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         
@@ -612,7 +619,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
 
         try {
-            boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
+            boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null && useWriteThrough;
 
             //lock all of the keys in the map
             ArrayList<Cache.Entry<? extends K, ? extends V>> entriesToWrite = new ArrayList<Cache.Entry<? extends K, ? extends V>>();
