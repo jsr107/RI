@@ -18,7 +18,6 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.Configuration;
 import javax.cache.OptionalFeature;
@@ -192,15 +191,6 @@ public class RICacheManager implements CacheManager {
             if (cache == null) {
                 cache = new RICache<K, V>(this, cacheName, getClassLoader(), configuration);
                 caches.put(cache.getName(), cache);
-            } else {
-                //note: we must clone the provided configuration as it needs to be
-                //      the same internal type as our internal configuration
-                RIConfiguration<K, V> config = new RIConfiguration<K, V>(configuration);
-                
-                //ensure that the existing cache has the same configuration as the provided one
-                if (!cache.getConfiguration().equals(config)) {
-                    throw new CacheException("Cache " + cache.getName() + " already registered but with a different configuration");
-                }                
             }
         
             return (Cache<K, V>)cache;
