@@ -25,7 +25,11 @@ import javax.cache.ExpiryPolicy;
 import javax.cache.MutableConfiguration;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for a {@link javax.cache.Configuration}.

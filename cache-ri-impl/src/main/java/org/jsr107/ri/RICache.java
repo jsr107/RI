@@ -28,7 +28,6 @@ import javax.cache.Configuration;
 import javax.cache.Configuration.Duration;
 import javax.cache.ExpiryPolicy;
 import javax.cache.event.CacheEntryCreatedListener;
-import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
@@ -37,6 +36,7 @@ import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
+import javax.cache.event.EventType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,6 +53,10 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static javax.cache.event.EventType.CREATED;
+import static javax.cache.event.EventType.EXPIRED;
+import static javax.cache.event.EventType.REMOVED;
+import static javax.cache.event.EventType.UPDATED;
 import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
 import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
 
@@ -438,7 +442,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 if (isExpired) {
                     V expiredValue = valueConverter.fromInternal(cachedValue.get());
-                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
                 }
 
                 Duration duration;
@@ -453,7 +457,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 entries.put(internalKey, cachedValue);
                 
-                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, EventType.CREATED));
 
             } else {
 
@@ -474,7 +478,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 cachedValue.setInternalValue(internalValue, now);
 
-                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, EventType.UPDATED));
             }
             
             dispatcher.dispatch(cacheEntryListenerRegistrations.values());
@@ -516,7 +520,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 if (isExpired) {
                     V expiredValue = valueConverter.fromInternal(cachedValue.get());
-                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
                 }
 
                 Duration duration;
@@ -531,7 +535,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 entries.put(internalKey, cachedValue);
                 result = null;
                 
-                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
                                 
                 //TODO: count the "miss" in the statistics
                 
@@ -553,7 +557,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 result = oldValue;
                 
-                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
             }
             
             dispatcher.dispatch(cacheEntryListenerRegistrations.values());
@@ -659,7 +663,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                     if (isExpired) {
                         V expiredValue = valueConverter.fromInternal(cachedValue.get());
-                        dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                        dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
                     }
 
                     Duration duration;
@@ -674,7 +678,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                     entries.put(internalKey, cachedValue);
 
-                    dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                    dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
                 } else if (replaceExistingValues) {
                     V oldValue = valueConverter.fromInternal(cachedValue.get());
 
@@ -690,7 +694,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                     cachedValue.setInternalValue(internalValue, now);
 
-                    dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                    dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
                 }
             }
         } finally {
@@ -748,7 +752,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 if (isExpired) {
                     V expiredValue = valueConverter.fromInternal(cachedValue.get());
-                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
                 }
 
                 Duration duration;
@@ -763,7 +767,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 entries.put(internalKey, cachedValue);
                 result = true;
                 
-                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
             } else {
                 result = false;
             }
@@ -809,7 +813,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 V value = valueConverter.fromInternal(cachedValue.get());
                 
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                 
                 result = true;
@@ -854,7 +858,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                     entries.remove(internalKey);
                     
                     RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                    dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue));
+                    dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
                     dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                     
                     result = true;
@@ -894,9 +898,8 @@ public final class RICache<K, V> implements Cache<K, V> {
                 entries.remove(internalKey);
                 result = valueConverter.fromInternal(cachedValue.getInternalValue(now));
                 
-                CacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, result);
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryRemovedListener.class, event);
+                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, result, REMOVED));
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
             }
         } finally {
@@ -958,7 +961,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                     cachedValue.setInternalValue(newInternalValue, now);
 
                     RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                    dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, newValue, oldValue));
+                    dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, newValue, oldValue, UPDATED));
                     dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                     
                     result = true;
@@ -1014,7 +1017,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 cachedValue.setInternalValue(internalValue, now);
 
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
                 
                 result = true;
@@ -1066,7 +1069,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 cachedValue.setInternalValue(internalValue, now);
 
                 RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
-                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue));
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
                 dispatcher.dispatch(cacheEntryListenerRegistrations.values());
 
                 result = oldValue;
@@ -1132,12 +1135,10 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                     V value = valueConverter.fromInternal(cachedValue.get());
 
-                    RICacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, value);
-
                     if (cachedValue.isExpiredAt(now)) {
-                        dispatcher.addEvent(CacheEntryExpiredListener.class, event);
+                        dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, value, EXPIRED));
                     } else {
-                        dispatcher.addEvent(CacheEntryRemovedListener.class, event);
+                        dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
                     }
                 }
             }
@@ -1218,12 +1219,11 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                     V value = valueConverter.fromInternal(cachedValue.get());
 
-                    RICacheEntryEvent<K, V> event = new RICacheEntryEvent<K, V>(this, key, value);
 
                     if (cachedValue.isExpiredAt(now)) {
-                        dispatcher.addEvent(CacheEntryExpiredListener.class, event);
+                        dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, value, EXPIRED));
                     } else {
-                        dispatcher.addEvent(CacheEntryRemovedListener.class, event);
+                        dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
                     }
                 }
             }
@@ -1363,12 +1363,12 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 if (cachedValue.isExpiredAt(now)) {
                     V previousValue = valueConverter.fromInternal(cachedValue.get());
-                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue));
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue, EXPIRED));
                 }
 
                 entries.put(internalKey, cachedValue);
 
-                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value));
+                dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, CREATED));
 
                 if (statisticsEnabled()) {
                     statistics.increaseCachePuts(1);
@@ -1395,7 +1395,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
                 cachedValue.setInternalValue(valueConverter.toInternal(entry.value), now);
 
-                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, oldValue));
+                dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, oldValue, UPDATED));
 
                 if (statisticsEnabled()) {
                     statistics.increaseCachePuts(1);
@@ -1410,7 +1410,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 oldValue = valueConverter.fromInternal(cachedValue.get());
                 entries.remove(internalKey);
 
-                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue));
+                dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
 
                 if (statisticsEnabled()) {
                     statistics.increaseCacheRemovals(1);
@@ -1556,7 +1556,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 V expiredValue = isExpired ? valueConverter.fromInternal(cachedValue.get()) : null;
 
                 if (isExpired) {
-                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue));
+                    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
                 }
 
                 if (statisticsEnabled()) {
@@ -1591,7 +1591,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 } else {
                     entries.put(internalKey, cachedValue);
                     
-                    dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value));
+                    dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
                 }
             } else {
                 value = valueConverter.fromInternal(cachedValue.getInternalValue(now));
@@ -1843,7 +1843,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                     //raise "remove" event
                     RICacheEventEventDispatcher<K, V> dispatcher = new RICacheEventEventDispatcher<K, V>();
                     dispatcher.addEvent(CacheEntryRemovedListener.class,
-                                        new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(), lastEntry.getValue()));
+                                        new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(), lastEntry.getValue(), REMOVED));
                     dispatcher.dispatch(cacheEntryListenerRegistrations.values());
 
                 } finally {

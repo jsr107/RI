@@ -19,6 +19,7 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.event.CacheEntryEvent;
+import javax.cache.event.EventType;
 
 /**
  * The reference implementation of the {@link CacheEntryEvent}.
@@ -43,8 +44,8 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
      * @param key    the key
      * @param value  the value
      */
-    public RICacheEntryEvent(Cache<K, V> source, K key, V value) {
-        super(source);
+    public RICacheEntryEvent(Cache<K, V> source, K key, V value, EventType eventType) {
+        super(source, eventType);
         this.key = key;
         this.value = value;
         this.oldValue = null;
@@ -60,8 +61,8 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
      * @param value    the value
      * @param oldValue the oldValue
      */
-    public RICacheEntryEvent(Cache<K, V> source, K key, V value, V oldValue) {
-        super(source);
+    public RICacheEntryEvent(Cache<K, V> source, K key, V value, V oldValue, EventType eventType) {
+        super(source, eventType);
         this.key = key;
         this.value = value;
         this.oldValue = oldValue;
