@@ -1633,7 +1633,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     /**
      * {@inheritDoc}
      */
-    private static class RIEntry<K, V> implements MutatedEntry<K, V> {
+    private static class RIEntry<K, V> implements Entry<K, V> {
         private final K key;
         private final V value;
         private final V oldValue;
@@ -1677,7 +1677,6 @@ public final class RICache<K, V> implements Cache<K, V> {
             return value;
         }
 
-        @Override
         public V getOldValue() {
             return oldValue;
         }
