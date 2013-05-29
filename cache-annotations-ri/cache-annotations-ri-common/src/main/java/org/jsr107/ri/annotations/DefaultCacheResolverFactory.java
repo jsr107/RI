@@ -64,7 +64,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
     @Override
     public CacheResolver getCacheResolver(CacheMethodDetails<? extends Annotation> cacheMethodDetails) {
         final String cacheName = cacheMethodDetails.getCacheName();
-        Cache<Object, Object> cache = this.cacheManager.getCache(cacheName);
+        Cache<?, ?> cache = this.cacheManager.getCache(cacheName);
         
         if (cache == null) {
             this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
@@ -82,7 +82,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
             throw new IllegalArgumentException("Can only be called when CacheResult.exceptionCacheName() is specified");
         }
         
-        Cache<Object, Object> cache = this.cacheManager.getCache(exceptionCacheName);
+        Cache<?, ?> cache = this.cacheManager.getCache(exceptionCacheName);
         
         if (cache == null) {
             this.logger.warning("No Cache named '" + exceptionCacheName + 

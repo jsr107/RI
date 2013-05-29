@@ -27,14 +27,14 @@ import java.lang.annotation.Annotation;
  * @since 1.0
  */
 public class DefaultCacheResolver implements CacheResolver {
-    private final Cache<Object, Object> cache;
+    private final Cache<?, ?> cache;
 
     /**
      * Create a new default cache resolver that always returns the specified cache
      * 
      * @param cache The cache to return for all calls to {@link #resolveCache(CacheInvocationContext)}
      */
-    public DefaultCacheResolver(Cache<Object, Object> cache) {
+    public DefaultCacheResolver(Cache<?, ?> cache) {
         if (cache == null) {
             throw new IllegalArgumentException("The Cache can not be null");
         }

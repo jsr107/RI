@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 public class RICacheManager implements CacheManager {
 
     private static final Logger LOGGER = Logger.getLogger("javax.cache");
-    private final HashMap<String, Cache<?, ?>> caches = new HashMap<String, Cache<?, ?>>();
+    private final HashMap<String, RICache<?, ?>> caches = new HashMap<String, RICache<?, ?>>();
 
     private final RICachingProvider cachingProvider;
 
@@ -186,17 +186,52 @@ public class RICacheManager implements CacheManager {
         }
 
         synchronized (caches) {
-            Cache<?, ?> cache = caches.get(cacheName);
+            RICache<?, ?> cache = caches.get(cacheName);
             
             if (cache == null) {
-                cache = new RICache<K, V>(this, cacheName, getClassLoader(), configuration);
+                cache = new RICache(this, cacheName, getClassLoader(), configuration);
                 caches.put(cache.getName(), cache);
             }
         
             return (Cache<K, V>)cache;
         }
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType) {
+        if (isClosed()) {
+            throw new IllegalStateException();
+        }
+        synchronized (caches) {
+            RICache<?, ?> cache = caches.get(cacheName);
+
+            if (cache == null) {
+                return null;
+            } else {
+                Configuration<?, ?> configuration = cache.getConfiguration();
+
+                if (configuration.getKeyType() != null &&
+                    configuration.getKeyType().equals(keyType)) {
+
+                    if (configuration.getValueType() != null &&
+                        configuration.getValueType().equals(valueType)) {
+
+                        return (Cache<K, V>)cache;
+                    } else {
+                        throw new ClassCastException("Incompatible cache value types specified, expected " +
+                                configuration.getValueType() + " but " + valueType + " was specified");
+                    }
+                } else {
+                    throw new ClassCastException("Incompatible cache key types specified, expected " +
+                            configuration.getKeyType() + " but " + keyType + " was specified");
+                }
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -206,13 +241,23 @@ public class RICacheManager implements CacheManager {
             throw new IllegalStateException();
         }
         synchronized (caches) {
-            /*
-             * Can't really verify that the K/V cast is safe but it is required by the API, using a 
-             * local variable for the cast to allow for a minimal scoping of @SuppressWarnings 
-             */
-            @SuppressWarnings("unchecked")
-            final Cache<K, V> cache = (Cache<K, V>) caches.get(cacheName);
-            return cache;
+            RICache<?, ?> cache = caches.get(cacheName);
+
+            if (cache == null) {
+                return null;
+            } else {
+                Configuration<?, ?> configuration = cache.getConfiguration();
+
+                if (configuration.getKeyType() == null &&
+                    configuration.getValueType() == null) {
+                    return (Cache<K, V>) cache;
+                } else {
+                    throw new ClassCastException("Cache " + cacheName + " was defined with specific types Cache<" +
+                            configuration.getKeyType() + ", " + configuration.getValueType() + "> " +
+                            "in which case CacheManager.getCache(String, Class, Class) must be used");
+                }
+
+            }
         }
     }
 
@@ -242,7 +287,10 @@ public class RICacheManager implements CacheManager {
             throw new NullPointerException();
         }
 
-        Cache<?, ?> cache = getCache(cacheName);
+        Cache<?, ?> cache;
+        synchronized (caches) {
+            cache = caches.get(cacheName);
+        }
 
         if (cache == null) {
             return false;

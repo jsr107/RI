@@ -39,6 +39,16 @@ import java.util.ArrayList;
 public class RIConfiguration<K, V> implements Configuration<K, V> {
 
     /**
+     * The expected type of keys (or null if no type-checking required).
+     */
+    protected Class<K> keyType;
+
+    /**
+     * The expected type of values (or null if no type-checking required).
+     */
+    protected Class<V> valueType;
+
+    /**
      * The {@link CacheEntryListenerRegistration}s for the {@link javax.cache.Configuration}.
      */
     protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
@@ -102,6 +112,8 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
      * Constructs an {@link RIConfiguration} with the standard default values.
      */
     public RIConfiguration() {
+        this.keyType = null;
+        this.valueType = null;
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
         this.cacheLoaderFactory = null;
         this.cacheWriterFactory = null;
@@ -117,38 +129,17 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     }
     
     /**
-     * Constructs a {@link RIConfiguration} based on a set of parameters.
-     * 
-     * @param cacheEntryListenerRegistrations the {@link CacheEntryListenerRegistration}s
-     * @param cacheLoaderFactory              the {@link CacheLoader} {@link Factory}
-     * @param cacheWriterFactory              the {@link CacheWriter} {@link Factory}
-     * @param expiryPolicyFactory             the {@link javax.cache.ExpiryPolicy} {@link Factory}
-     * @param isReadThrough                   is read-through caching supported
-     * @param isWriteThrough                  is write-through caching supported
-     * @param isStatisticsEnabled             are statistics enabled
-     * @param isManagementEnabled             is management enabled
-     * @param isStoreByValue                  <code>true</code> if the "store-by-value" more
-     *                                        or <code>false</code> for "store-by-reference"
-     * @param isTransactionsEnabled           <code>true</code> if transactions are enabled                                       
-     * @param txnIsolationLevel               the {@link IsolationLevel}
-     * @param txnMode                         the {@link Mode}
+     * A copy-constructor for a {@link RIConfiguration}.
+     *
+     * @param configuration  the {@link javax.cache.Configuration} from which to copy
      */
-    public RIConfiguration(
-            Iterable<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations,
-            Factory<CacheLoader<K, V>> cacheLoaderFactory,
-            Factory<CacheWriter<? super K, ? super V>> cacheWriterFactory,
-            Factory<ExpiryPolicy<? super K, ? super V>> expiryPolicyFactory,
-            boolean isReadThrough,
-            boolean isWriteThrough,
-            boolean isStatisticsEnabled,
-            boolean isManagementEnabled,
-            boolean isStoreByValue,
-            boolean isTransactionsEnabled,
-            IsolationLevel txnIsolationLevel,
-            Mode txnMode) {
-        
+    public RIConfiguration(Configuration<K, V> configuration) {
+
+        this.keyType = configuration.getKeyType();
+        this.valueType = configuration.getValueType();
+
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
-        for (CacheEntryListenerRegistration<? super K, ? super V> r : cacheEntryListenerRegistrations) {
+        for (CacheEntryListenerRegistration<? super K, ? super V> r : configuration.getCacheEntryListenerRegistrations()) {
             RICacheEntryListenerRegistration<? super K, ? super V> registration = 
                 new RICacheEntryListenerRegistration<K, V>(r.getCacheEntryListener(), 
                                                            r.getCacheEntryFilter(), 
@@ -157,46 +148,42 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
             this.cacheEntryListenerRegistrations.add(registration);
         }
         
-        this.cacheLoaderFactory = cacheLoaderFactory;
-        this.cacheWriterFactory = cacheWriterFactory;
+        this.cacheLoaderFactory = configuration.getCacheLoaderFactory();
+        this.cacheWriterFactory = configuration.getCacheWriterFactory();
 
-        if (expiryPolicyFactory == null) {
+        if (configuration.getExpiryPolicyFactory() == null) {
             this.expiryPolicyFactory = ExpiryPolicy.Default.<K, V>getFactory();
         } else {
-            this.expiryPolicyFactory = expiryPolicyFactory;
+            this.expiryPolicyFactory = configuration.getExpiryPolicyFactory();
         }
         
-        this.isReadThrough = isReadThrough;
-        this.isWriteThrough = isWriteThrough;
+        this.isReadThrough = configuration.isReadThrough();
+        this.isWriteThrough = configuration.isWriteThrough();
         
-        this.setStatisticsEnabled(isStatisticsEnabled);
-        this.setManagementEnabled(isManagementEnabled);
+        this.setStatisticsEnabled(configuration.isStatisticsEnabled());
+        this.setManagementEnabled(configuration.isManagementEnabled());
         
-        this.isStoreByValue = isStoreByValue;
+        this.isStoreByValue = configuration.isStoreByValue();
         
-        this.isTransactionsEnabled = isTransactionsEnabled;
-        this.txnIsolationLevel = txnIsolationLevel;
-        this.txnMode = txnMode;
+        this.isTransactionsEnabled = configuration.isTransactionsEnabled();
+        this.txnIsolationLevel = configuration.getTransactionIsolationLevel();
+        this.txnMode = configuration.getTransactionMode();
     }
-    
+
     /**
-     * A copy-constructor for a {@link RIConfiguration}.
-     * 
-     * @param configuration  the {@link javax.cache.Configuration} from which to copy
+     * {@inheritDoc}
      */
-    public RIConfiguration(Configuration<K, V> configuration) {
-        this(configuration.getCacheEntryListenerRegistrations(), 
-             configuration.getCacheLoaderFactory(),
-             configuration.getCacheWriterFactory(),
-             configuration.getExpiryPolicyFactory(),
-             configuration.isReadThrough(), 
-             configuration.isWriteThrough(),
-             configuration.isStatisticsEnabled(),
-             configuration.isManagementEnabled(),
-             configuration.isStoreByValue(),
-             configuration.isTransactionsEnabled(),
-             configuration.getTransactionIsolationLevel(), 
-             configuration.getTransactionMode());
+    @Override
+    public Class<K> getKeyType() {
+        return keyType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Class<V> getValueType() {
+        return valueType;
     }
 
     /**
@@ -304,6 +291,10 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result +
+                ((keyType == null) ? 0 : keyType.hashCode());
+        result = prime * result +
+                ((valueType == null) ? 0 : valueType.hashCode());
         result = prime
                 * result
                 + ((cacheEntryListenerRegistrations == null) ? 0 : cacheEntryListenerRegistrations
@@ -341,6 +332,20 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
             return false;
         }
         RIConfiguration<?, ?> other = (RIConfiguration<?, ?>) object;
+        if (keyType == null) {
+            if (other.keyType != null) {
+                return false;
+            }
+        } else if (!keyType.equals(other.keyType)) {
+            return false;
+        }
+        if (valueType == null) {
+            if (other.valueType != null) {
+                return false;
+            }
+        } else if (!valueType.equals(other.valueType)) {
+            return false;
+        }
         if (cacheEntryListenerRegistrations == null) {
             if (other.cacheEntryListenerRegistrations != null) {
                 return false;
