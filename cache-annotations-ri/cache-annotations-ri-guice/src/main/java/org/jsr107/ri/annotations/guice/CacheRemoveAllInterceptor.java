@@ -31,29 +31,29 @@ import javax.inject.Inject;
 public class CacheRemoveAllInterceptor extends AbstractCacheRemoveAllInterceptor<MethodInvocation>
     implements CacheMethodInterceptor {
 
-    private CacheContextSource<MethodInvocation> cacheContextSource;
+  private CacheContextSource<MethodInvocation> cacheContextSource;
 
-    /**
-     * @param cacheContextSource the CacheContextSource to use
-     */
-    @Inject
-    public void setCacheContextSource(CacheContextSource<MethodInvocation> cacheContextSource) {
-        this.cacheContextSource = cacheContextSource;
-    }
+  /**
+   * @param cacheContextSource the CacheContextSource to use
+   */
+  @Inject
+  public void setCacheContextSource(CacheContextSource<MethodInvocation> cacheContextSource) {
+    this.cacheContextSource = cacheContextSource;
+  }
 
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_REMOVE_ALL;
-    }
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_REMOVE_ALL;
+  }
 
-    @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
-        return this.cacheRemoveAll(cacheContextSource, invocation);
-    }
+  @Override
+  public Object invoke(MethodInvocation invocation) throws Throwable {
+    return this.cacheRemoveAll(cacheContextSource, invocation);
+  }
 
-    @Override
-    protected Object proceed(MethodInvocation invocation) throws Throwable {
-        return invocation.proceed();
-    }
+  @Override
+  protected Object proceed(MethodInvocation invocation) throws Throwable {
+    return invocation.proceed();
+  }
 
 }

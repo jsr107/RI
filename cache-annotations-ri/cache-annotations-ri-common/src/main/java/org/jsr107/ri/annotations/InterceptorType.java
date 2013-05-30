@@ -19,25 +19,25 @@ package org.jsr107.ri.annotations;
 
 /**
  * Possible types of cache related advice
- * 
+ *
  * @author Eric Dalquist
  * @since 1.0
  */
 public enum InterceptorType {
-    /**
-     * {@link javax.cache.annotation.CacheResult} advice
-     */
-    CACHE_RESULT,
-    /**
-     * {@link javax.cache.annotation.CachePut} advice
-     */
-    CACHE_PUT,
-    /**
-     * {@link javax.cache.annotation.CacheRemoveEntry} advice
-     */
-    CACHE_REMOVE_ENTRY,
-    /**
-     * {@link javax.cache.annotation.CacheRemoveAll} advice
-     */
-    CACHE_REMOVE_ALL;
+  /**
+   * {@link javax.cache.annotation.CacheResult} advice
+   */
+  CACHE_RESULT,
+  /**
+   * {@link javax.cache.annotation.CachePut} advice
+   */
+  CACHE_PUT,
+  /**
+   * {@link javax.cache.annotation.CacheRemoveEntry} advice
+   */
+  CACHE_REMOVE_ENTRY,
+  /**
+   * {@link javax.cache.annotation.CacheRemoveAll} advice
+   */
+  CACHE_REMOVE_ALL;
 }

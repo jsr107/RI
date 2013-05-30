@@ -16,14 +16,16 @@
     limitations under the License.
 
 -->
-<xsd:schema xmlns="https://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
+<xsd:schema
+        xmlns="https://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:tool="http://www.springframework.org/schema/tool"
         targetNamespace="https://raw.github.com/jsr107/jcache-annotations/schema/jcache-spring"
         elementFormDefault="qualified"
         attributeFormDefault="unqualified">
 
-    <xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-2.5.xsd"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"
+                schemaLocation="http://www.springframework.org/schema/tool/spring-tool-2.5.xsd"/>
 
     <xsd:annotation>
         <xsd:documentation><![CDATA[
@@ -31,12 +33,13 @@
     caching infrastructure.
         ]]></xsd:documentation>
     </xsd:annotation>
-    
+
     <xsd:element name="annotation-driven">
         <xsd:complexType>
             <xsd:attribute name="cache-manager" type="xsd:string">
                 <xsd:annotation>
-                    <xsd:documentation source="java:javax.cache.CacheManager"><![CDATA[
+                    <xsd:documentation source="java:javax.cache.CacheManager">
+                        <![CDATA[
 The bean name of the CacheManager that is to be used to drive caching.
 
 This attribute is not required, and only needs to be specified
@@ -50,7 +53,8 @@ is not 'cacheManager'.
                     </xsd:appinfo>
                 </xsd:annotation>
             </xsd:attribute>
-            <xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false">
+            <xsd:attribute name="proxy-target-class" type="xsd:boolean"
+                           default="false">
                 <xsd:annotation>
                     <xsd:documentation><![CDATA[
 Are class-based (CGLIB) proxies to be created? By default, standard
@@ -64,12 +68,14 @@ in that case (they will rather only work with interface-based proxies)!
             </xsd:attribute>
             <xsd:attribute name="order" type="xsd:int">
                 <xsd:annotation>
-                    <xsd:documentation source="java:org.springframework.core.Ordered"><![CDATA[
+                    <xsd:documentation
+                            source="java:org.springframework.core.Ordered">
+                        <![CDATA[
 Controls the ordering of the execution of the transaction advisor
 when multiple advice executes at a specific joinpoint.
                     ]]></xsd:documentation>
                 </xsd:annotation>
-            </xsd:attribute>                
+            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 </xsd:schema>

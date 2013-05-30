@@ -40,340 +40,339 @@ import java.util.logging.Logger;
  *
  * @author Yannis Cosmadopoulos
  * @author Brian Oliver
- *
  * @since 1.0
  */
 public class RICacheManager implements CacheManager {
 
-    private static final Logger LOGGER = Logger.getLogger("javax.cache");
-    private final HashMap<String, RICache<?, ?>> caches = new HashMap<String, RICache<?, ?>>();
+  private static final Logger LOGGER = Logger.getLogger("javax.cache");
+  private final HashMap<String, RICache<?, ?>> caches = new HashMap<String, RICache<?, ?>>();
 
-    private final RICachingProvider cachingProvider;
+  private final RICachingProvider cachingProvider;
 
-    private final URI uri;
-    private final WeakReference<ClassLoader> classLoaderReference;
-    private final Properties properties;
+  private final URI uri;
+  private final WeakReference<ClassLoader> classLoaderReference;
+  private final Properties properties;
 
-    private volatile boolean isClosed;
+  private volatile boolean isClosed;
 
-    /**
-     * Constructs a new RICacheManager with the specified name.
-     *
-     * @param cachingProvider  the CachingProvider that created the CacheManager
-     * @param uri              the name of this cache manager
-     * @param classLoader      the ClassLoader that should be used in converting values into Java Objects.
-     * @param properties       the vendor specific Properties for the CacheManager
-     *
-     * @throws NullPointerException if the URI and/or classLoader is null.
-     */
-    public RICacheManager(RICachingProvider cachingProvider, URI uri, ClassLoader classLoader, Properties properties) {
-        if (cachingProvider == null) {
-            throw new NullPointerException("No CachingProvider specified");
+  /**
+   * Constructs a new RICacheManager with the specified name.
+   *
+   * @param cachingProvider the CachingProvider that created the CacheManager
+   * @param uri             the name of this cache manager
+   * @param classLoader     the ClassLoader that should be used in converting values into Java Objects.
+   * @param properties      the vendor specific Properties for the CacheManager
+   * @throws NullPointerException if the URI and/or classLoader is null.
+   */
+  public RICacheManager(RICachingProvider cachingProvider, URI uri, ClassLoader classLoader, Properties properties) {
+    if (cachingProvider == null) {
+      throw new NullPointerException("No CachingProvider specified");
+    }
+    this.cachingProvider = cachingProvider;
+
+    if (uri == null) {
+      throw new NullPointerException("No CacheManager URI specified");
+    }
+    this.uri = uri;
+
+    if (classLoader == null) {
+      throw new NullPointerException("No ClassLoader specified");
+    }
+    this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
+
+    this.properties = properties == null ? new Properties() : new Properties(properties);
+
+    isClosed = false;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public CachingProvider getCachingProvider() {
+    return cachingProvider;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public synchronized void close() {
+    if (!isClosed()) {
+      //first releaseCacheManager the CacheManager from the CacheProvider so that
+      //future requests for this CacheManager won't return this one
+      cachingProvider.releaseCacheManager(getURI(), getClassLoader());
+
+      isClosed = true;
+
+      ArrayList<Cache<?, ?>> cacheList;
+      synchronized (caches) {
+        cacheList = new ArrayList<Cache<?, ?>>(caches.values());
+        caches.clear();
+      }
+      for (Cache<?, ?> cache : cacheList) {
+        try {
+          cache.close();
+        } catch (Exception e) {
+          getLogger().log(Level.WARNING, "Error stopping cache: " + cache, e);
         }
-        this.cachingProvider = cachingProvider;
+      }
+    }
+  }
 
-        if (uri == null) {
-            throw new NullPointerException("No CacheManager URI specified");
-        }
-        this.uri = uri;
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isClosed() {
+    return isClosed;
+  }
 
-        if (classLoader == null) {
-            throw new NullPointerException("No ClassLoader specified");
-        }
-        this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public URI getURI() {
+    return uri;
+  }
 
-        this.properties = properties == null ? new Properties() : new Properties(properties);
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Properties getProperties() {
+    return properties;
+  }
 
-        isClosed = false;
+  /**
+   * Getter
+   *
+   * @return the class loader
+   */
+  protected ClassLoader getClassLoader() {
+    return classLoaderReference.get();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <K, V> Cache<K, V> configureCache(String cacheName, Configuration<K, V> configuration) {
+    if (isClosed()) {
+      throw new IllegalStateException();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public CachingProvider getCachingProvider() {
-        return cachingProvider;
+    if (cacheName == null) {
+      throw new NullPointerException("cacheName must not be null");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public synchronized void close() {
-        if (!isClosed()) {
-            //first releaseCacheManager the CacheManager from the CacheProvider so that
-            //future requests for this CacheManager won't return this one
-            cachingProvider.releaseCacheManager(getURI(), getClassLoader());
-
-            isClosed = true;
-
-            ArrayList<Cache<?, ?>> cacheList;
-            synchronized (caches) {
-                cacheList = new ArrayList<Cache<?, ?>>(caches.values());
-                caches.clear();
-            }
-            for (Cache<?, ?> cache : cacheList) {
-                try {
-                    cache.close();
-                } catch (Exception e) {
-                    getLogger().log(Level.WARNING, "Error stopping cache: " + cache, e);
-                }
-            }
-        }
+    if (configuration == null) {
+      throw new NullPointerException("configuration must not be null");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isClosed() {
-        return isClosed;
+    if ((!configuration.isStoreByValue()) && configuration.isTransactionsEnabled()) {
+      throw new IllegalArgumentException("can't use store-by-reference and transactions together");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public URI getURI() {
-        return uri;
+    if (configuration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
+        configuration.getTransactionMode() != Mode.NONE) {
+      throw new IllegalArgumentException("isolation level expected when mode specified");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Properties getProperties() {
-        return properties;
+    if (configuration.getTransactionIsolationLevel() != IsolationLevel.NONE &&
+        configuration.getTransactionMode() == Mode.NONE) {
+      throw new IllegalArgumentException("mode expected when isolation level specified");
     }
 
-    /**
-     * Getter
-     * @return the class loader
-     */
-    protected ClassLoader getClassLoader() {
-        return classLoaderReference.get();
+    synchronized (caches) {
+      RICache<?, ?> cache = caches.get(cacheName);
+
+      if (cache == null) {
+        cache = new RICache(this, cacheName, getClassLoader(), configuration);
+        caches.put(cache.getName(), cache);
+      }
+
+      return (Cache<K, V>) cache;
     }
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <K, V> Cache<K, V> configureCache(String cacheName, Configuration<K, V> configuration) {
-        if (isClosed()) {
-            throw new IllegalStateException();
-        }
-
-        if (cacheName == null) {
-            throw new NullPointerException("cacheName must not be null");
-        }
-        
-        if (configuration == null) {
-            throw new NullPointerException("configuration must not be null");
-        }
-
-        if ((!configuration.isStoreByValue()) && configuration.isTransactionsEnabled()) {
-            throw new IllegalArgumentException("can't use store-by-reference and transactions together");
-        }
-
-        if (configuration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
-            configuration.getTransactionMode() != Mode.NONE) {
-            throw new IllegalArgumentException("isolation level expected when mode specified");
-        }
-        
-        if (configuration.getTransactionIsolationLevel() != IsolationLevel.NONE &&
-            configuration.getTransactionMode() == Mode.NONE) {
-            throw new IllegalArgumentException("mode expected when isolation level specified");
-        }
-
-        synchronized (caches) {
-            RICache<?, ?> cache = caches.get(cacheName);
-            
-            if (cache == null) {
-                cache = new RICache(this, cacheName, getClassLoader(), configuration);
-                caches.put(cache.getName(), cache);
-            }
-        
-            return (Cache<K, V>)cache;
-        }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType) {
+    if (isClosed()) {
+      throw new IllegalStateException();
     }
+    synchronized (caches) {
+      RICache<?, ?> cache = caches.get(cacheName);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType) {
-        if (isClosed()) {
-            throw new IllegalStateException();
-        }
-        synchronized (caches) {
-            RICache<?, ?> cache = caches.get(cacheName);
+      if (cache == null) {
+        return null;
+      } else {
+        Configuration<?, ?> configuration = cache.getConfiguration();
 
-            if (cache == null) {
-                return null;
-            } else {
-                Configuration<?, ?> configuration = cache.getConfiguration();
+        if (configuration.getKeyType() != null &&
+            configuration.getKeyType().equals(keyType)) {
 
-                if (configuration.getKeyType() != null &&
-                    configuration.getKeyType().equals(keyType)) {
+          if (configuration.getValueType() != null &&
+              configuration.getValueType().equals(valueType)) {
 
-                    if (configuration.getValueType() != null &&
-                        configuration.getValueType().equals(valueType)) {
-
-                        return (Cache<K, V>)cache;
-                    } else {
-                        throw new ClassCastException("Incompatible cache value types specified, expected " +
-                                configuration.getValueType() + " but " + valueType + " was specified");
-                    }
-                } else {
-                    throw new ClassCastException("Incompatible cache key types specified, expected " +
-                            configuration.getKeyType() + " but " + keyType + " was specified");
-                }
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <K, V> Cache<K, V> getCache(String cacheName) {
-        if (isClosed()) {
-            throw new IllegalStateException();
-        }
-        synchronized (caches) {
-            RICache<?, ?> cache = caches.get(cacheName);
-
-            if (cache == null) {
-                return null;
-            } else {
-                Configuration<?, ?> configuration = cache.getConfiguration();
-
-                if (configuration.getKeyType() == null &&
-                    configuration.getValueType() == null) {
-                    return (Cache<K, V>) cache;
-                } else {
-                    throw new ClassCastException("Cache " + cacheName + " was defined with specific types Cache<" +
-                            configuration.getKeyType() + ", " + configuration.getValueType() + "> " +
-                            "in which case CacheManager.getCache(String, Class, Class) must be used");
-                }
-
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterable<Cache<?, ?>> getCaches() {
-        synchronized (caches) {
-            HashSet<Cache<?, ?>> set = new HashSet<Cache<?, ?>>();
-            for (Cache<?, ?> cache : caches.values()) {
-                set.add(cache);
-            }
-            return Collections.unmodifiableSet(set);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean removeCache(String cacheName) {
-        if (isClosed()) {
-            throw new IllegalStateException();
-        }
-        if (cacheName == null) {
-            throw new NullPointerException();
-        }
-
-        Cache<?, ?> cache;
-        synchronized (caches) {
-            cache = caches.get(cacheName);
-        }
-
-        if (cache == null) {
-            return false;
+            return (Cache<K, V>) cache;
+          } else {
+            throw new ClassCastException("Incompatible cache value types specified, expected " +
+                configuration.getValueType() + " but " + valueType + " was specified");
+          }
         } else {
-            cache.close();
-            return true;
+          throw new ClassCastException("Incompatible cache key types specified, expected " +
+              configuration.getKeyType() + " but " + keyType + " was specified");
         }
+      }
     }
+  }
 
-    /**
-     * Releases the Cache with the specified name from being managed by
-     * this CacheManager.
-     *
-     * @param cacheName  the name of the Cache to releaseCacheManager
-     */
-    void releaseCache(String cacheName) {
-        if (cacheName == null) {
-            throw new NullPointerException();
-        }
-        synchronized (caches) {
-            caches.remove(cacheName);
-        }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <K, V> Cache<K, V> getCache(String cacheName) {
+    if (isClosed()) {
+      throw new IllegalStateException();
     }
+    synchronized (caches) {
+      RICache<?, ?> cache = caches.get(cacheName);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public UserTransaction getUserTransaction() {
-        throw new UnsupportedOperationException("Transactions are not supported.");
-    }
+      if (cache == null) {
+        return null;
+      } else {
+        Configuration<?, ?> configuration = cache.getConfiguration();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isSupported(OptionalFeature optionalFeature) {
-        return getCachingProvider().isSupported(optionalFeature);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void enableStatistics(String cacheName, boolean enabled) {
-        if (isClosed()) {
-            throw new IllegalStateException();
-        }
-        if (cacheName == null) {
-            throw new NullPointerException();
-        }
-        ((RICache)caches.get(cacheName)).setStatisticsEnabled(enabled);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void enableManagement(String cacheName, boolean enabled) {
-        if (isClosed()) {
-            throw new IllegalStateException();
-        }
-        if (cacheName == null) {
-            throw new NullPointerException();
-        }
-        ((RICache)caches.get(cacheName)).setManagementEnabled(enabled);
-    }
-
-    @Override
-    public <T> T unwrap(java.lang.Class<T> cls) {
-        if (cls.isAssignableFrom(getClass())) {
-            return cls.cast(this);
+        if (configuration.getKeyType() == null &&
+            configuration.getValueType() == null) {
+          return (Cache<K, V>) cache;
+        } else {
+          throw new ClassCastException("Cache " + cacheName + " was defined with specific types Cache<" +
+              configuration.getKeyType() + ", " + configuration.getValueType() + "> " +
+              "in which case CacheManager.getCache(String, Class, Class) must be used");
         }
 
-        throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Iterable<Cache<?, ?>> getCaches() {
+    synchronized (caches) {
+      HashSet<Cache<?, ?>> set = new HashSet<Cache<?, ?>>();
+      for (Cache<?, ?> cache : caches.values()) {
+        set.add(cache);
+      }
+      return Collections.unmodifiableSet(set);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean removeCache(String cacheName) {
+    if (isClosed()) {
+      throw new IllegalStateException();
+    }
+    if (cacheName == null) {
+      throw new NullPointerException();
     }
 
-    /**
-     * Obtain the logger.
-     *
-     * @return the logger.
-     */
-    Logger getLogger() {
-        return LOGGER;
+    Cache<?, ?> cache;
+    synchronized (caches) {
+      cache = caches.get(cacheName);
     }
+
+    if (cache == null) {
+      return false;
+    } else {
+      cache.close();
+      return true;
+    }
+  }
+
+  /**
+   * Releases the Cache with the specified name from being managed by
+   * this CacheManager.
+   *
+   * @param cacheName the name of the Cache to releaseCacheManager
+   */
+  void releaseCache(String cacheName) {
+    if (cacheName == null) {
+      throw new NullPointerException();
+    }
+    synchronized (caches) {
+      caches.remove(cacheName);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public UserTransaction getUserTransaction() {
+    throw new UnsupportedOperationException("Transactions are not supported.");
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isSupported(OptionalFeature optionalFeature) {
+    return getCachingProvider().isSupported(optionalFeature);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void enableStatistics(String cacheName, boolean enabled) {
+    if (isClosed()) {
+      throw new IllegalStateException();
+    }
+    if (cacheName == null) {
+      throw new NullPointerException();
+    }
+    ((RICache) caches.get(cacheName)).setStatisticsEnabled(enabled);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void enableManagement(String cacheName, boolean enabled) {
+    if (isClosed()) {
+      throw new IllegalStateException();
+    }
+    if (cacheName == null) {
+      throw new NullPointerException();
+    }
+    ((RICache) caches.get(cacheName)).setManagementEnabled(enabled);
+  }
+
+  @Override
+  public <T> T unwrap(java.lang.Class<T> cls) {
+    if (cls.isAssignableFrom(getClass())) {
+      return cls.cast(this);
+    }
+
+    throw new IllegalArgumentException("Unwapping to " + cls + " is not a supported by this implementation");
+  }
+
+  /**
+   * Obtain the logger.
+   *
+   * @return the logger.
+   */
+  Logger getLogger() {
+    return LOGGER;
+  }
 }

@@ -18,28 +18,27 @@
 package org.jsr107.ri;
 
 /**
- * An {@link RIInternalConverter} that simply returns a reference to the 
+ * An {@link RIInternalConverter} that simply returns a reference to the
  * provided value.
  *
- * @param <T> the type of values to convert 
- * 
+ * @param <T> the type of values to convert
  * @author Brian Oliver
  */
 public class RIReferenceInternalConverter<T> implements RIInternalConverter<T> {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public T fromInternal(Object internal) {
-        return (T)internal;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object toInternal(T value) {
-        return value;
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public T fromInternal(Object internal) {
+    return (T) internal;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Object toInternal(T value) {
+    return value;
+  }
 }

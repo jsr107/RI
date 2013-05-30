@@ -25,75 +25,75 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Eric Dalquist
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
+ * @author Eric Dalquist
  * @since 1.0
  */
 public abstract class AbstractStaticCacheInvocationContext<A extends Annotation> implements StaticCacheInvocationContext<A> {
-    private final CacheMethodDetails<A> cacheMethodDetails;
-    private final CacheResolver cacheResolver;
-    private final List<CacheParameterDetails> allParameters;
+  private final CacheMethodDetails<A> cacheMethodDetails;
+  private final CacheResolver cacheResolver;
+  private final List<CacheParameterDetails> allParameters;
 
-    /**
-     * Create a new static invocation instance
-     * 
-     * @param cacheMethodDetails Static details about the method
-     * @param cacheResolver The cache resolver to use for the method
-     * @param allParameters All parameter details
-     */
-    public AbstractStaticCacheInvocationContext(CacheMethodDetails<A> cacheMethodDetails, CacheResolver cacheResolver,
-            List<CacheParameterDetails> allParameters) {
-        
-        if (cacheMethodDetails == null) {
-            throw new IllegalArgumentException("cacheMethodDetails cannot be null");
-        }
-        if (cacheResolver == null) {
-            throw new IllegalArgumentException("cacheResolver cannot be null");
-        }
-        if (allParameters == null) {
-            throw new IllegalArgumentException("allParameters cannot be null");
-        }
-        
-        this.cacheMethodDetails = cacheMethodDetails;
-        this.cacheResolver = cacheResolver;
-        this.allParameters = allParameters;
+  /**
+   * Create a new static invocation instance
+   *
+   * @param cacheMethodDetails Static details about the method
+   * @param cacheResolver      The cache resolver to use for the method
+   * @param allParameters      All parameter details
+   */
+  public AbstractStaticCacheInvocationContext(CacheMethodDetails<A> cacheMethodDetails, CacheResolver cacheResolver,
+                                              List<CacheParameterDetails> allParameters) {
+
+    if (cacheMethodDetails == null) {
+      throw new IllegalArgumentException("cacheMethodDetails cannot be null");
+    }
+    if (cacheResolver == null) {
+      throw new IllegalArgumentException("cacheResolver cannot be null");
+    }
+    if (allParameters == null) {
+      throw new IllegalArgumentException("allParameters cannot be null");
     }
 
-    /**
-     * @return the allParameters
-     */
-    @Override
-    public List<CacheParameterDetails> getAllParameters() {
-        return this.allParameters;
-    }
+    this.cacheMethodDetails = cacheMethodDetails;
+    this.cacheResolver = cacheResolver;
+    this.allParameters = allParameters;
+  }
 
-    /**
-     * @return The {@link CacheResolver} to use to get the cache for this method
-     */
-    @Override
-    public CacheResolver getCacheResolver() {
-        return this.cacheResolver;
-    }
+  /**
+   * @return the allParameters
+   */
+  @Override
+  public List<CacheParameterDetails> getAllParameters() {
+    return this.allParameters;
+  }
 
-    @Override
-    public Method getMethod() {
-        return this.cacheMethodDetails.getMethod();
-    }
+  /**
+   * @return The {@link CacheResolver} to use to get the cache for this method
+   */
+  @Override
+  public CacheResolver getCacheResolver() {
+    return this.cacheResolver;
+  }
 
-    @Override
-    public Set<Annotation> getAnnotations() {
-        return this.cacheMethodDetails.getAnnotations();
-    }
-    
-    @Override
-    public A getCacheAnnotation() {
-        return this.cacheMethodDetails.getCacheAnnotation();
-    }
+  @Override
+  public Method getMethod() {
+    return this.cacheMethodDetails.getMethod();
+  }
 
-    @Override
-    public String getCacheName() {
-        return this.cacheMethodDetails.getCacheName();
-    }
+  @Override
+  public Set<Annotation> getAnnotations() {
+    return this.cacheMethodDetails.getAnnotations();
+  }
+
+  @Override
+  public A getCacheAnnotation() {
+    return this.cacheMethodDetails.getCacheAnnotation();
+  }
+
+  @Override
+  public String getCacheName() {
+    return this.cacheMethodDetails.getCacheName();
+  }
 }

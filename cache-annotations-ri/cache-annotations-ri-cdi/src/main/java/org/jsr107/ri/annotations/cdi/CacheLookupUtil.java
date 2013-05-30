@@ -33,85 +33,84 @@ import java.lang.reflect.Method;
 
 /**
  * Utility used by all annotations to lookup the {@link javax.cache.annotation.CacheResolver} and {@link CacheKeyGenerator} for a given method.
- * 
+ *
  * @author Rick Hightower
  * @since 1.0
  */
 public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> {
-    @Inject
-    private BeanManagerUtil beanManagerUtil;
-    
-    private CacheKeyGenerator defaultCacheKeyGenerator = new DefaultCacheKeyGenerator();
-    private CacheResolverFactory defaultCacheResolverFactory = new DefaultCacheResolverFactory();
+  @Inject
+  private BeanManagerUtil beanManagerUtil;
 
-    
-    /*
-     * Annoation type cannot be known at compile time so ignore the warning
-     * 
-     * (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Override
-    protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
-            StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
-            InvocationContext invocation) {
-        return new CdiCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
-    }
+  private CacheKeyGenerator defaultCacheKeyGenerator = new DefaultCacheKeyGenerator();
+  private CacheResolverFactory defaultCacheResolverFactory = new DefaultCacheResolverFactory();
 
-    /* 
-     * Annoation type cannot be known at compile time so ignore the warning
-     * 
-     * (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Override
-    protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
-            StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext,
-            InvocationContext invocation) {
-        return new CdiCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
-    }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getTarget(java.lang.Object)
-     */
-    @Override
-    protected Class<?> getTargetClass(InvocationContext invocation) {
-        return invocation.getMethod().getDeclaringClass();
-    }
+  /*
+   * Annoation type cannot be known at compile time so ignore the warning
+   *
+   * (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
+   */
+  @SuppressWarnings({"rawtypes", "unchecked" })
+  @Override
+  protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
+      StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
+      InvocationContext invocation) {
+    return new CdiCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getMethod(java.lang.Object)
-     */
-    @Override
-    protected Method getMethod(InvocationContext invocation) {
-        return invocation.getMethod();
-    }
-    
-    
+  /*
+   * Annoation type cannot be known at compile time so ignore the warning
+   *
+   * (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
+   */
+  @SuppressWarnings({"rawtypes", "unchecked" })
+  @Override
+  protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
+      StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext,
+      InvocationContext invocation) {
+    return new CdiCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getObjectByType(java.lang.Class)
-     */
-    @Override
-    protected <T> T getObjectByType(Class<T> type) {
-        return beanManagerUtil.getBeanByType(type);
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getTarget(java.lang.Object)
+   */
+  @Override
+  protected Class<?> getTargetClass(InvocationContext invocation) {
+    return invocation.getMethod().getDeclaringClass();
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheKeyGenerator()
-     */
-    @Override
-    protected CacheKeyGenerator getDefaultCacheKeyGenerator() {
-        return this.defaultCacheKeyGenerator;
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getMethod(java.lang.Object)
+   */
+  @Override
+  protected Method getMethod(InvocationContext invocation) {
+    return invocation.getMethod();
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheResolverFactory()
-     */
-    @Override
-    protected CacheResolverFactory getDefaultCacheResolverFactory() {
-        return this.defaultCacheResolverFactory;
-    }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getObjectByType(java.lang.Class)
+   */
+  @Override
+  protected <T> T getObjectByType(Class<T> type) {
+    return beanManagerUtil.getBeanByType(type);
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheKeyGenerator()
+   */
+  @Override
+  protected CacheKeyGenerator getDefaultCacheKeyGenerator() {
+    return this.defaultCacheKeyGenerator;
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheResolverFactory()
+   */
+  @Override
+  protected CacheResolverFactory getDefaultCacheResolverFactory() {
+    return this.defaultCacheResolverFactory;
+  }
 }

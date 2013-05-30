@@ -25,78 +25,78 @@ import java.util.Set;
 /**
  * Static details about the annotated method, used with {@link javax.cache.annotation.CacheResolverFactory} to
  * find the {@link javax.cache.annotation.CacheResolver};
- * 
- * @author Eric Dalquist
+ *
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
+ * @author Eric Dalquist
  * @since 1.0
  */
 public class CacheMethodDetailsImpl<A extends Annotation> implements CacheMethodDetails<A> {
-    private final Method targetMethod;
-    private final Set<Annotation> methodAnotations;
-    private final A cacheAnnotation;
-    private final String cacheName;
-    
-    /**
-     * Create a new set of method details
-     * 
-     * @param targetMethod The annotated method
-     * @param methodAnotations All annotations that exist on the method
-     * @param cacheAnnotation The caching related annotation
-     * @param cacheName The resolved name of the cache for the method
-     */
-    public CacheMethodDetailsImpl(Method targetMethod, 
-            Set<Annotation> methodAnotations, A cacheAnnotation, String cacheName) {
-        if (targetMethod == null) {
-            throw new IllegalArgumentException("targetMethod cannot be null");
-        }
-        if (methodAnotations == null) {
-            throw new IllegalArgumentException("methodAnotations cannot be null");
-        }
-        if (cacheAnnotation == null) {
-            throw new IllegalArgumentException("cacheAnnotation cannot be null");
-        }
-        if (cacheName == null) {
-            throw new IllegalArgumentException("cacheName cannot be null");
-        }
+  private final Method targetMethod;
+  private final Set<Annotation> methodAnotations;
+  private final A cacheAnnotation;
+  private final String cacheName;
 
-        this.targetMethod = targetMethod;
-        this.methodAnotations = methodAnotations;
-        this.cacheAnnotation = cacheAnnotation;
-        this.cacheName = cacheName;
+  /**
+   * Create a new set of method details
+   *
+   * @param targetMethod     The annotated method
+   * @param methodAnotations All annotations that exist on the method
+   * @param cacheAnnotation  The caching related annotation
+   * @param cacheName        The resolved name of the cache for the method
+   */
+  public CacheMethodDetailsImpl(Method targetMethod,
+                                Set<Annotation> methodAnotations, A cacheAnnotation, String cacheName) {
+    if (targetMethod == null) {
+      throw new IllegalArgumentException("targetMethod cannot be null");
     }
-    
-
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheMethodDetails#getMethod()
-     */
-    @Override
-    public Method getMethod() {
-        return this.targetMethod;
+    if (methodAnotations == null) {
+      throw new IllegalArgumentException("methodAnotations cannot be null");
+    }
+    if (cacheAnnotation == null) {
+      throw new IllegalArgumentException("cacheAnnotation cannot be null");
+    }
+    if (cacheName == null) {
+      throw new IllegalArgumentException("cacheName cannot be null");
     }
 
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheMethodDetails#getAnnotations()
-     */
-    @Override
-    public Set<Annotation> getAnnotations() {
-        return this.methodAnotations;
-    }
+    this.targetMethod = targetMethod;
+    this.methodAnotations = methodAnotations;
+    this.cacheAnnotation = cacheAnnotation;
+    this.cacheName = cacheName;
+  }
 
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheMethodDetails#getCacheAnnotation()
-     */
-    @Override
-    public A getCacheAnnotation() {
-        return this.cacheAnnotation;
-    }
 
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheMethodDetails#getCacheName()
-     */
-    @Override
-    public String getCacheName() {
-        return this.cacheName;
-    }
+  /* (non-Javadoc)
+   * @see javax.cache.annotation.CacheMethodDetails#getMethod()
+   */
+  @Override
+  public Method getMethod() {
+    return this.targetMethod;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.annotation.CacheMethodDetails#getAnnotations()
+   */
+  @Override
+  public Set<Annotation> getAnnotations() {
+    return this.methodAnotations;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.annotation.CacheMethodDetails#getCacheAnnotation()
+   */
+  @Override
+  public A getCacheAnnotation() {
+    return this.cacheAnnotation;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.annotation.CacheMethodDetails#getCacheName()
+   */
+  @Override
+  public String getCacheName() {
+    return this.cacheName;
+  }
 }

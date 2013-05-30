@@ -33,27 +33,28 @@ import javax.interceptor.InvocationContext;
  * @author Eric Dalquist
  * @since 1.0
  */
-@CacheResult @Interceptor
+@CacheResult
+@Interceptor
 public class CacheResultInterceptor extends AbstractCacheResultInterceptor<InvocationContext> {
-    
-    @Inject
-    private CacheLookupUtil lookup;
- 
-    /**
-     * @param invocationContext The intercepted invocation
-     * @return The result from {@link InvocationContext#proceed()}
-     * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
-     */
-    @AroundInvoke
-    public Object cacheResult(InvocationContext invocationContext) throws Throwable {
-        return this.cacheResult(this.lookup, invocationContext);
-    }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
-     */
-    @Override
-    protected Object proceed(InvocationContext invocation) throws Exception {
-        return invocation.proceed();
-    }
+  @Inject
+  private CacheLookupUtil lookup;
+
+  /**
+   * @param invocationContext The intercepted invocation
+   * @return The result from {@link InvocationContext#proceed()}
+   * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
+   */
+  @AroundInvoke
+  public Object cacheResult(InvocationContext invocationContext) throws Throwable {
+    return this.cacheResult(this.lookup, invocationContext);
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
+   */
+  @Override
+  protected Object proceed(InvocationContext invocation) throws Exception {
+    return invocation.proceed();
+  }
 }

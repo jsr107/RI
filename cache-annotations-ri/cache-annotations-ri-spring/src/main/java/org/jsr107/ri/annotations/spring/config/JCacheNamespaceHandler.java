@@ -23,11 +23,11 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class JCacheNamespaceHandler extends NamespaceHandlerSupport {
 
-    /* (non-Javadoc)
-     * @see org.springframework.beans.factory.xml.NamespaceHandler#init()
-     */
-    @Override
-    public void init() {
-        this.registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJCacheBeanDefinitionParser());
-    }
+  /* (non-Javadoc)
+   * @see org.springframework.beans.factory.xml.NamespaceHandler#init()
+   */
+  @Override
+  public void init() {
+    this.registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenJCacheBeanDefinitionParser());
+  }
 }

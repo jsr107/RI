@@ -21,16 +21,16 @@ import java.lang.annotation.Annotation;
 
 /**
  * RI Internal extension of {@link CacheInvocationContext} which provides access to the {@link AbstractStaticCacheInvocationContext}
- * 
+ *
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
  * @author Eric Dalquist
  * @since 1.0
  */
 public interface InternalCacheInvocationContext<A extends Annotation> extends CacheInvocationContext<A> {
-    /**
-     * @return The static cache invocation details for the invoked method
-     */
-    StaticCacheInvocationContext<A> getStaticCacheInvocationContext();
+  /**
+   * @return The static cache invocation details for the invoked method
+   */
+  StaticCacheInvocationContext<A> getStaticCacheInvocationContext();
 }

@@ -24,32 +24,32 @@ import java.util.List;
 
 /**
  * Details for a method annotated with {@link CacheRemoveEntry}
- * 
+ *
  * @author Eric Dalquist
  * @since 1.0
  */
 public class CacheRemoveEntryMethodDetails extends StaticCacheKeyInvocationContext<CacheRemoveEntry> {
-    
-    /**
-     * @param cacheMethodDetails
-     * @param cacheResolver
-     * @param cacheKeyGenerator The key generator to use
-     * @param allParameters All parameter details
-     * @param keyParameters Parameter details to use for key generation
-     */
-    public CacheRemoveEntryMethodDetails(CacheMethodDetails<CacheRemoveEntry> cacheMethodDetails,
-            CacheResolver cacheResolver, CacheKeyGenerator cacheKeyGenerator,
-            List<CacheParameterDetails> allParameters, List<CacheParameterDetails> keyParameters) {
 
-        super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
-    }
+  /**
+   * @param cacheMethodDetails
+   * @param cacheResolver
+   * @param cacheKeyGenerator  The key generator to use
+   * @param allParameters      All parameter details
+   * @param keyParameters      Parameter details to use for key generation
+   */
+  public CacheRemoveEntryMethodDetails(CacheMethodDetails<CacheRemoveEntry> cacheMethodDetails,
+                                       CacheResolver cacheResolver, CacheKeyGenerator cacheKeyGenerator,
+                                       List<CacheParameterDetails> allParameters, List<CacheParameterDetails> keyParameters) {
+
+    super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
+  }
 
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
-     */
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_REMOVE_ENTRY;
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
+   */
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_REMOVE_ENTRY;
+  }
 }

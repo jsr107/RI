@@ -24,47 +24,47 @@ import java.util.List;
 
 /**
  * Details for a method annotated with {@link CachePut}
- * 
+ *
  * @author Eric Dalquist
  * @since 1.0
  */
 public class CachePutMethodDetails extends StaticCacheKeyInvocationContext<CachePut> {
-    private final CacheParameterDetails cacheValueParameter;
-    
-    /**
-     * @param cacheMethodDetails
-     * @param cacheResolver
-     * @param cacheKeyGenerator The key generator to use
-     * @param allParameters All parameter details
-     * @param keyParameters Parameter details to use for key generation
-     * @param cacheValueParameter The parameter to store in the cache
-     */
-    public CachePutMethodDetails(CacheMethodDetails<CachePut> cacheMethodDetails, CacheResolver cacheResolver,
-            CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
-            List<CacheParameterDetails> keyParameters, CacheParameterDetails cacheValueParameter) {
-        
-        super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
+  private final CacheParameterDetails cacheValueParameter;
 
-        if (cacheValueParameter == null) {
-            throw new IllegalArgumentException("cacheValueParameter cannot be null");
-        }
-        
-        this.cacheValueParameter = cacheValueParameter;
+  /**
+   * @param cacheMethodDetails
+   * @param cacheResolver
+   * @param cacheKeyGenerator   The key generator to use
+   * @param allParameters       All parameter details
+   * @param keyParameters       Parameter details to use for key generation
+   * @param cacheValueParameter The parameter to store in the cache
+   */
+  public CachePutMethodDetails(CacheMethodDetails<CachePut> cacheMethodDetails, CacheResolver cacheResolver,
+                               CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
+                               List<CacheParameterDetails> keyParameters, CacheParameterDetails cacheValueParameter) {
+
+    super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
+
+    if (cacheValueParameter == null) {
+      throw new IllegalArgumentException("cacheValueParameter cannot be null");
     }
 
+    this.cacheValueParameter = cacheValueParameter;
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
-     */
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_PUT;
-    }
 
-    /**
-     * @return the cacheValueParameter
-     */
-    public CacheParameterDetails getCacheValueParameter() {
-        return this.cacheValueParameter;
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
+   */
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_PUT;
+  }
+
+  /**
+   * @return the cacheValueParameter
+   */
+  public CacheParameterDetails getCacheValueParameter() {
+    return this.cacheValueParameter;
+  }
 }

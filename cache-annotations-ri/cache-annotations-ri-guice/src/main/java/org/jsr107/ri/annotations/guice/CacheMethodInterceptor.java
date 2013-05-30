@@ -27,8 +27,8 @@ import org.jsr107.ri.annotations.InterceptorType;
  * @version $Revision$
  */
 public interface CacheMethodInterceptor extends MethodInterceptor {
-    /**
-     * @return The type of intereceptor
-     */
-    InterceptorType getInterceptorType();
+  /**
+   * @return The type of intereceptor
+   */
+  InterceptorType getInterceptorType();
 }

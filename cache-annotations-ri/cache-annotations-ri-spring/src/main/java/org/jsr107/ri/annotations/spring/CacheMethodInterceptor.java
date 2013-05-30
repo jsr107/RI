@@ -22,13 +22,13 @@ import org.jsr107.ri.annotations.InterceptorType;
 
 /**
  * Common subclass for all jcache interceptors
- * 
+ *
  * @author Eric Dalquist
  * @version $Revision$
  */
 public interface CacheMethodInterceptor extends MethodInterceptor {
-    /**
-     * @return The type of intereceptor
-     */
-    InterceptorType getInterceptorType();
+  /**
+   * @return The type of intereceptor
+   */
+  InterceptorType getInterceptorType();
 }

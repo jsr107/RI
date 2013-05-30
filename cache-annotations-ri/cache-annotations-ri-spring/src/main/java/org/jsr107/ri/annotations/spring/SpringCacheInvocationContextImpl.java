@@ -26,49 +26,49 @@ import java.lang.reflect.Method;
 
 /**
  * Spring specific cache key invocation context using {@link MethodInvocation}
- * 
+ *
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
  * @author Eric Dalquist
  * @version $Revision$
- * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
  */
 public class SpringCacheInvocationContextImpl<A extends Annotation> extends AbstractInternalCacheInvocationContext<MethodInvocation, A> {
-    
-    /**
-     * Create new cache key invocation context for the static context and invocation
-     * 
-     * @param staticCacheInvocationContext Static information about the invoked method
-     * @param invocation The AOP Alliance invocation context
-     */
-    public SpringCacheInvocationContextImpl(
-            StaticCacheInvocationContext<A> staticCacheInvocationContext, MethodInvocation invocation) {
 
-        super(staticCacheInvocationContext, invocation);
-    }
+  /**
+   * Create new cache key invocation context for the static context and invocation
+   *
+   * @param staticCacheInvocationContext Static information about the invoked method
+   * @param invocation                   The AOP Alliance invocation context
+   */
+  public SpringCacheInvocationContextImpl(
+      StaticCacheInvocationContext<A> staticCacheInvocationContext, MethodInvocation invocation) {
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getParameters(java.lang.Object)
-     */
-    @Override
-    protected Object[] getParameters(MethodInvocation invocation) {
-        return invocation.getArguments();
-    }
+    super(staticCacheInvocationContext, invocation);
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getMethod(java.lang.Object)
-     */
-    @Override
-    protected Method getMethod(MethodInvocation invocation) {
-        return invocation.getMethod();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getParameters(java.lang.Object)
+   */
+  @Override
+  protected Object[] getParameters(MethodInvocation invocation) {
+    return invocation.getArguments();
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getTarget(java.lang.Object)
-     */
-    @Override
-    protected Object getTarget(MethodInvocation invocation) {
-        return invocation.getThis();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getMethod(java.lang.Object)
+   */
+  @Override
+  protected Method getMethod(MethodInvocation invocation) {
+    return invocation.getMethod();
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getTarget(java.lang.Object)
+   */
+  @Override
+  protected Object getTarget(MethodInvocation invocation) {
+    return invocation.getThis();
+  }
 
 }

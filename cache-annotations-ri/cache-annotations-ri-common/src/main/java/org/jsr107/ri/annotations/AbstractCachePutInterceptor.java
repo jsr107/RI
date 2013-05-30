@@ -28,97 +28,97 @@ import java.lang.annotation.Annotation;
 
 /**
  * Interceptor for {@link CachePut}
- * 
+ *
+ * @param <I> The intercepted method invocation
  * @author Rick Hightower
  * @author Eric Dalquist
- * @param <I> The intercepted method invocation
  * @since 1.0
  */
 public abstract class AbstractCachePutInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CachePutMethodDetails> {
-    
-    /**
-     * Handles the {@link Cache#put(Object, Object)} as specified for the {@link CachePut} annotation
-     * 
-     * @param cacheContextSource The intercepted invocation
-     * @param invocation The intercepted invocation
-     * @return The result from {@link #proceed(Object)}
-     * @throws Throwable if {@link #proceed(Object)} threw
-     */
-    public Object cachePut(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
-        final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext = 
-                cacheContextSource.getCacheKeyInvocationContext(invocation);
-        final CachePutMethodDetails methodDetails = this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_PUT);
-        
-        final CachePut cachePutAnnotation = methodDetails.getCacheAnnotation();
-        final boolean afterInvocation = cachePutAnnotation.afterInvocation();
-        
-        final CacheInvocationParameter valueParameter = cacheKeyInvocationContext.getValueParameter();
-        final Object value = valueParameter.getValue();
 
-        if (!afterInvocation) {
-            cacheValue(cacheKeyInvocationContext, methodDetails, value);
-        }
-        
-        final Object result;
-        try {
-            //Call the annotated method
-            result = this.proceed(invocation);
-        } catch (Throwable t) {
-            if (afterInvocation) {
-                //If after invocation is true and if the throwable passes the include/exclude filters and then call put
-                final Class<? extends Throwable>[] cacheFor = cachePutAnnotation.cacheFor();
-                final Class<? extends Throwable>[] noCacheFor = cachePutAnnotation.noCacheFor();
-                
-                //Check for empty/null here since isIncluded returns true for those cases
-                final boolean cache = ClassFilter.isIncluded(t, cacheFor, noCacheFor, false);
-                
-                //Exception is included
-                if (cache) {
-                    cacheValue(cacheKeyInvocationContext, methodDetails, value);
-                }
-            }
+  /**
+   * Handles the {@link Cache#put(Object, Object)} as specified for the {@link CachePut} annotation
+   *
+   * @param cacheContextSource The intercepted invocation
+   * @param invocation         The intercepted invocation
+   * @return The result from {@link #proceed(Object)}
+   * @throws Throwable if {@link #proceed(Object)} threw
+   */
+  public Object cachePut(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
+    final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext =
+        cacheContextSource.getCacheKeyInvocationContext(invocation);
+    final CachePutMethodDetails methodDetails = this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_PUT);
 
-            throw t;
+    final CachePut cachePutAnnotation = methodDetails.getCacheAnnotation();
+    final boolean afterInvocation = cachePutAnnotation.afterInvocation();
+
+    final CacheInvocationParameter valueParameter = cacheKeyInvocationContext.getValueParameter();
+    final Object value = valueParameter.getValue();
+
+    if (!afterInvocation) {
+      cacheValue(cacheKeyInvocationContext, methodDetails, value);
+    }
+
+    final Object result;
+    try {
+      //Call the annotated method
+      result = this.proceed(invocation);
+    } catch (Throwable t) {
+      if (afterInvocation) {
+        //If after invocation is true and if the throwable passes the include/exclude filters and then call put
+        final Class<? extends Throwable>[] cacheFor = cachePutAnnotation.cacheFor();
+        final Class<? extends Throwable>[] noCacheFor = cachePutAnnotation.noCacheFor();
+
+        //Check for empty/null here since isIncluded returns true for those cases
+        final boolean cache = ClassFilter.isIncluded(t, cacheFor, noCacheFor, false);
+
+        //Exception is included
+        if (cache) {
+          cacheValue(cacheKeyInvocationContext, methodDetails, value);
         }
-        
-        if (afterInvocation) {
-            cacheValue(cacheKeyInvocationContext, methodDetails, value);
-        }
-        
-        return result;
+      }
+
+      throw t;
+    }
+
+    if (afterInvocation) {
+      cacheValue(cacheKeyInvocationContext, methodDetails, value);
+    }
+
+    return result;
+  }
+
+
+  /**
+   * Lookup the Cache, generate a GeneratedCacheKey and store the value in the cache.
+   *
+   * @param cacheKeyInvocationContext The invocation context
+   * @param methodDetails             The details about the cached method
+   * @param value                     The value to cache
+   */
+  protected void cacheValue(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
+                            final CachePutMethodDetails methodDetails, final Object value) {
+
+    final Object cachedValue;
+    if (value == null) {
+      if (methodDetails.getCacheAnnotation().cacheNull()) {
+        //Null values are cached, set value to the null placeholder
+        cachedValue = CacheContextSource.NULL_PLACEHOLDER;
+      } else {
+        //Ignore null values
+        return;
+      }
+    } else {
+      cachedValue = value;
     }
 
 
-    /**
-     * Lookup the Cache, generate a GeneratedCacheKey and store the value in the cache.
-     * 
-     * @param cacheKeyInvocationContext The invocation context 
-     * @param methodDetails The details about the cached method
-     * @param value The value to cache
-     */
-    protected void cacheValue(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
-            final CachePutMethodDetails methodDetails, final Object value) {
-        
-        final Object cachedValue;
-        if (value == null) {
-            if (methodDetails.getCacheAnnotation().cacheNull()) {
-                //Null values are cached, set value to the null placeholder 
-                cachedValue = CacheContextSource.NULL_PLACEHOLDER;
-            } else {
-                //Ignore null values
-                return;
-            }
-        } else {
-            cachedValue = value;
-        }
-        
-        
-        final CacheResolver cacheResolver = methodDetails.getCacheResolver();
-        final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
+    final CacheResolver cacheResolver = methodDetails.getCacheResolver();
+    final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
 
-        final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
-        final GeneratedCacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
-        
-        cache.put(cacheKey, cachedValue);
-    }
+    final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
+    final GeneratedCacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
+
+    cache.put(cacheKey, cachedValue);
+  }
 }

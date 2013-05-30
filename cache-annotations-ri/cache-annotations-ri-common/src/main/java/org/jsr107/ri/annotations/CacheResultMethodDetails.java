@@ -24,41 +24,42 @@ import java.util.List;
 
 /**
  * Details for a method annotated with {@link CacheResult}
- * 
+ *
  * @author Eric Dalquist
  * @since 1.0
  */
 public class CacheResultMethodDetails extends StaticCacheKeyInvocationContext<CacheResult>
-        implements StaticCacheResultInvocationContext {
-    
-    private final CacheResolver exceptionCacheResolver;
-    
-    /**
-     * @param cacheMethodDetails
-     * @param cacheResolver
-     * @param cacheKeyGenerator The key generator to use
-     * @param allParameters All parameter details
-     * @param keyParameters Parameter details to use for key generation
-     */
-    public CacheResultMethodDetails(CacheMethodDetails<CacheResult> cacheMethodDetails, CacheResolver cacheResolver,
-            CacheResolver exceptionCacheResolver, CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
-            List<CacheParameterDetails> keyParameters) {
-        
-        super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
-        
-        this.exceptionCacheResolver = exceptionCacheResolver;
-    }
+    implements StaticCacheResultInvocationContext {
 
-    @Override
-    public CacheResolver getExceptionCacheResolver() {
-        return this.exceptionCacheResolver;
-    }
+  private final CacheResolver exceptionCacheResolver;
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
-     */
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_RESULT;
-    }
+  /**
+   * @param cacheMethodDetails
+   * @param cacheResolver
+   * @param cacheKeyGenerator  The key generator to use
+   * @param allParameters      All parameter details
+   * @param keyParameters      Parameter details to use for key generation
+   */
+  public CacheResultMethodDetails(CacheMethodDetails<CacheResult> cacheMethodDetails, CacheResolver cacheResolver,
+                                  CacheResolver exceptionCacheResolver, CacheKeyGenerator cacheKeyGenerator,
+                                  List<CacheParameterDetails> allParameters,
+                                  List<CacheParameterDetails> keyParameters) {
+
+    super(cacheMethodDetails, cacheResolver, cacheKeyGenerator, allParameters, keyParameters);
+
+    this.exceptionCacheResolver = exceptionCacheResolver;
+  }
+
+  @Override
+  public CacheResolver getExceptionCacheResolver() {
+    return this.exceptionCacheResolver;
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
+   */
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_RESULT;
+  }
 }

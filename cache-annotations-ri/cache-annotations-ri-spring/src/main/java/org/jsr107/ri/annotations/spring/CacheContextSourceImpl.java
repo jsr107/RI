@@ -39,121 +39,121 @@ import java.lang.reflect.Method;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class CacheContextSourceImpl 
-        extends AbstractCacheLookupUtil<MethodInvocation> 
-        implements CacheContextSource<MethodInvocation>, BeanFactoryAware {
+public class CacheContextSourceImpl
+    extends AbstractCacheLookupUtil<MethodInvocation>
+    implements CacheContextSource<MethodInvocation>, BeanFactoryAware {
 
-    private CacheKeyGenerator defaultCacheKeyGenerator;
-    private CacheResolverFactory defaultCacheResolverFactory;
-    private BeanFactory beanFactory;
-    
-    /**
-     * @param defaultCacheKeyGenerator the defaultCacheKeyGenerator to set
-     */
-    public void setDefaultCacheKeyGenerator(CacheKeyGenerator defaultCacheKeyGenerator) {
-        this.defaultCacheKeyGenerator = defaultCacheKeyGenerator;
+  private CacheKeyGenerator defaultCacheKeyGenerator;
+  private CacheResolverFactory defaultCacheResolverFactory;
+  private BeanFactory beanFactory;
+
+  /**
+   * @param defaultCacheKeyGenerator the defaultCacheKeyGenerator to set
+   */
+  public void setDefaultCacheKeyGenerator(CacheKeyGenerator defaultCacheKeyGenerator) {
+    this.defaultCacheKeyGenerator = defaultCacheKeyGenerator;
+  }
+
+  /**
+   * @param defaultCacheResolverFactory the defaultCacheResolverFactory to set
+   */
+  public void setDefaultCacheResolverFactory(CacheResolverFactory defaultCacheResolverFactory) {
+    this.defaultCacheResolverFactory = defaultCacheResolverFactory;
+  }
+
+  /* (non-Javadoc)
+   * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+   */
+  @Override
+  public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    this.beanFactory = beanFactory;
+  }
+
+  /*
+   * Annoation type cannot be known at compile time so ignore the warning
+   *
+   * (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
+   */
+  @SuppressWarnings({"unchecked", "rawtypes" })
+  @Override
+  protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
+      StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
+      MethodInvocation invocation) {
+    return new SpringCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
+  }
+
+  /*
+   * Annoation type cannot be known at compile time so ignore the warning
+   *
+   * (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
+   */
+  @SuppressWarnings({"unchecked", "rawtypes" })
+  @Override
+  protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
+      StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, MethodInvocation invocation) {
+    return new SpringCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getTarget(java.lang.Object)
+   */
+  @Override
+  protected Class<?> getTargetClass(MethodInvocation invocation) {
+    return invocation.getThis().getClass();
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getMethod(java.lang.Object)
+   */
+  @Override
+  protected Method getMethod(MethodInvocation invocation) {
+    return invocation.getMethod();
+  }
+
+  @Override
+  protected <T extends Annotation> T getAnnotation(Class<T> annotationClass, Method method, Class<? extends Object> targetClass) {
+    // The method may be on an interface, but we need attributes from the target class.
+    // If the target class is null, the method will be unchanged.
+    Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
+    // If we are dealing with method with generic parameters, find the original method.
+    specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
+
+    final T annotation = specificMethod.getAnnotation(annotationClass);
+    if (annotation != null) {
+      return annotation;
     }
 
-    /**
-     * @param defaultCacheResolverFactory the defaultCacheResolverFactory to set
-     */
-    public void setDefaultCacheResolverFactory(CacheResolverFactory defaultCacheResolverFactory) {
-        this.defaultCacheResolverFactory = defaultCacheResolverFactory;
+    if (specificMethod != method) {
+      // Fallback is to look at the original method.
+      return method.getAnnotation(annotationClass);
     }
 
-    /* (non-Javadoc)
-     * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
-     */
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
-    }
+    return null;
+  }
 
-    /* 
-     * Annoation type cannot be known at compile time so ignore the warning
-     * 
-     * (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheKeyInvocationContextImpl(javax.cache.annotation.impl.StaticCacheKeyInvocationContext, java.lang.Object)
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
-            StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext,
-            MethodInvocation invocation) {
-        return new SpringCacheKeyInvocationContextImpl(staticCacheKeyInvocationContext, invocation);
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getObjectByType(java.lang.Class)
+   */
+  @Override
+  protected <T> T getObjectByType(Class<T> type) {
+    return this.beanFactory.getBean(type);
+  }
 
-    /* 
-     * Annoation type cannot be known at compile time so ignore the warning
-     * 
-     * (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
-            StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, MethodInvocation invocation) {
-        return new SpringCacheInvocationContextImpl(staticCacheInvocationContext, invocation);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getTarget(java.lang.Object)
-     */
-    @Override
-    protected Class<?> getTargetClass(MethodInvocation invocation) {
-        return invocation.getThis().getClass();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheKeyGenerator()
+   */
+  @Override
+  protected CacheKeyGenerator getDefaultCacheKeyGenerator() {
+    return this.defaultCacheKeyGenerator;
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getMethod(java.lang.Object)
-     */
-    @Override
-    protected Method getMethod(MethodInvocation invocation) {
-        return invocation.getMethod();
-    }
-
-    @Override
-    protected <T extends Annotation> T getAnnotation(Class<T> annotationClass, Method method, Class<? extends Object> targetClass) {
-        // The method may be on an interface, but we need attributes from the target class.
-        // If the target class is null, the method will be unchanged.
-        Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-        // If we are dealing with method with generic parameters, find the original method.
-        specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
-        
-        final T annotation = specificMethod.getAnnotation(annotationClass);
-        if (annotation != null) {
-            return annotation;
-        }
-
-        if (specificMethod != method) {
-            // Fallback is to look at the original method.
-            return method.getAnnotation(annotationClass);
-        }
-
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getObjectByType(java.lang.Class)
-     */
-    @Override
-    protected <T> T getObjectByType(Class<T> type) {
-        return this.beanFactory.getBean(type);
-    }
-
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheKeyGenerator()
-     */
-    @Override
-    protected CacheKeyGenerator getDefaultCacheKeyGenerator() {
-        return this.defaultCacheKeyGenerator;
-    }
-
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheResolverFactory()
-     */
-    @Override
-    protected CacheResolverFactory getDefaultCacheResolverFactory() {
-        return this.defaultCacheResolverFactory;
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#getDefaultCacheResolverFactory()
+   */
+  @Override
+  protected CacheResolverFactory getDefaultCacheResolverFactory() {
+    return this.defaultCacheResolverFactory;
+  }
 }

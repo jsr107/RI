@@ -31,65 +31,66 @@ import java.util.logging.Logger;
 /**
  * Default {@link CacheResolverFactory} that uses the default {@link CacheManager} and finds the {@link Cache}
  * using {@link CacheManager#getCache(String)}. Returns a {@link DefaultCacheResolver} that wraps the found
- * {@link Cache} 
+ * {@link Cache}
  *
  * @author Eric Dalquist
  * @author Rick Hightower
  * @since 1.0
  */
 public class DefaultCacheResolverFactory implements CacheResolverFactory {
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
+  private final Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private final CacheManager cacheManager;
+  private final CacheManager cacheManager;
 
-    /**
-     * Constructs the resolver
-     * @param cacheManager the cache manager to use
-     */
-    public DefaultCacheResolverFactory(CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+  /**
+   * Constructs the resolver
+   *
+   * @param cacheManager the cache manager to use
+   */
+  public DefaultCacheResolverFactory(CacheManager cacheManager) {
+    this.cacheManager = cacheManager;
+  }
+
+  /**
+   * Constructs the resolver
+   */
+  public DefaultCacheResolverFactory() {
+    CachingProvider provider = Caching.getCachingProvider();
+    this.cacheManager = provider.getCacheManager(provider.getDefaultURI(), provider.getDefaultClassLoader());
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.annotation.CacheResolverFactory#getCacheResolver(javax.cache.annotation.CacheMethodDetails)
+   */
+  @Override
+  public CacheResolver getCacheResolver(CacheMethodDetails<? extends Annotation> cacheMethodDetails) {
+    final String cacheName = cacheMethodDetails.getCacheName();
+    Cache<?, ?> cache = this.cacheManager.getCache(cacheName);
+
+    if (cache == null) {
+      this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
+      cache = this.cacheManager.configureCache(cacheName, new javax.cache.MutableConfiguration<Object, Object>());
     }
 
-    /**
-     * Constructs the resolver
-     */
-    public DefaultCacheResolverFactory() {
-        CachingProvider provider = Caching.getCachingProvider();
-        this.cacheManager = provider.getCacheManager(provider.getDefaultURI(), provider.getDefaultClassLoader());
+    return new DefaultCacheResolver(cache);
+  }
+
+  @Override
+  public CacheResolver getExceptionCacheResolver(CacheMethodDetails<CacheResult> cacheMethodDetails) {
+    final CacheResult cacheResultAnnotation = cacheMethodDetails.getCacheAnnotation();
+    final String exceptionCacheName = cacheResultAnnotation.exceptionCacheName();
+    if (exceptionCacheName == null || exceptionCacheName.trim().length() == 0) {
+      throw new IllegalArgumentException("Can only be called when CacheResult.exceptionCacheName() is specified");
     }
 
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheResolverFactory#getCacheResolver(javax.cache.annotation.CacheMethodDetails)
-     */
-    @Override
-    public CacheResolver getCacheResolver(CacheMethodDetails<? extends Annotation> cacheMethodDetails) {
-        final String cacheName = cacheMethodDetails.getCacheName();
-        Cache<?, ?> cache = this.cacheManager.getCache(cacheName);
-        
-        if (cache == null) {
-            this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
-            cache = this.cacheManager.configureCache(cacheName, new javax.cache.MutableConfiguration<Object, Object>());
-        }
-        
-        return new DefaultCacheResolver(cache);
+    Cache<?, ?> cache = this.cacheManager.getCache(exceptionCacheName);
+
+    if (cache == null) {
+      this.logger.warning("No Cache named '" + exceptionCacheName +
+          "' was found in the CacheManager, a default cache will be created.");
+      cache = this.cacheManager.configureCache(exceptionCacheName, new javax.cache.MutableConfiguration<Object, Object>());
     }
-    
-    @Override
-    public CacheResolver getExceptionCacheResolver(CacheMethodDetails<CacheResult> cacheMethodDetails) {
-        final CacheResult cacheResultAnnotation = cacheMethodDetails.getCacheAnnotation();
-        final String exceptionCacheName = cacheResultAnnotation.exceptionCacheName();
-        if (exceptionCacheName == null || exceptionCacheName.trim().length() == 0) {
-            throw new IllegalArgumentException("Can only be called when CacheResult.exceptionCacheName() is specified");
-        }
-        
-        Cache<?, ?> cache = this.cacheManager.getCache(exceptionCacheName);
-        
-        if (cache == null) {
-            this.logger.warning("No Cache named '" + exceptionCacheName + 
-                    "' was found in the CacheManager, a default cache will be created.");
-            cache = this.cacheManager.configureCache(exceptionCacheName, new javax.cache.MutableConfiguration<Object, Object>());
-        }
-        
-        return new DefaultCacheResolver(cache);
-    }
+
+    return new DefaultCacheResolver(cache);
+  }
 }

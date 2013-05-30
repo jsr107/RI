@@ -27,81 +27,81 @@ import java.lang.annotation.Annotation;
 
 /**
  * Interceptor for {@link CacheRemoveEntry}
- * 
+ *
+ * @param <I> The intercepted method invocation
  * @author Rick Hightower
  * @author Eric Dalquist
- * @param <I> The intercepted method invocation
  * @since 1.0
  */
 public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CacheRemoveEntryMethodDetails> {
 
-    /**
-     * Handles the {@link Cache#remove(Object)} as specified for the {@link CacheRemoveEntry} annotation
-     * 
-     * @param cacheContextSource The intercepted invocation
-     * @param invocation The intercepted invocation
-     * @return The result from {@link #proceed(Object)}
-     * @throws Throwable if {@link #proceed(Object)} threw
-     */
-    public final Object cacheRemoveEntry(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
-        final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext = 
-                cacheContextSource.getCacheKeyInvocationContext(invocation);
-        final CacheRemoveEntryMethodDetails methodDetails = 
-                this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_REMOVE_ENTRY);
-        
-        final CacheRemoveEntry cacheRemoveEntryAnnotation = methodDetails.getCacheAnnotation();
-        final boolean afterInvocation = cacheRemoveEntryAnnotation.afterInvocation();
-        
-        //If pre-invocation - remove entry
-        if (!afterInvocation) {
-            cacheRemove(cacheKeyInvocationContext, methodDetails);
-        }
-        
-        final Object result;
-        try {
-            //Call the annotated method
-            result = this.proceed(invocation);
-        } catch (Throwable t) {
-            if (afterInvocation) {
-                //If after invocation is true and if the throwable passes the include/exclude filters and then call remove
-                final Class<? extends Throwable>[] evictFor = cacheRemoveEntryAnnotation.evictFor();
-                final Class<? extends Throwable>[] noEvictFor = cacheRemoveEntryAnnotation.noEvictFor();
-                
-                //Check for empty/null here since isIncluded returns true for those cases
-                final boolean cache = ClassFilter.isIncluded(t, evictFor, noEvictFor, false);
-                
-                //Exception is included
-                if (cache) {
-                    cacheRemove(cacheKeyInvocationContext, methodDetails);
-                }
-            }
+  /**
+   * Handles the {@link Cache#remove(Object)} as specified for the {@link CacheRemoveEntry} annotation
+   *
+   * @param cacheContextSource The intercepted invocation
+   * @param invocation         The intercepted invocation
+   * @return The result from {@link #proceed(Object)}
+   * @throws Throwable if {@link #proceed(Object)} threw
+   */
+  public final Object cacheRemoveEntry(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
+    final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext =
+        cacheContextSource.getCacheKeyInvocationContext(invocation);
+    final CacheRemoveEntryMethodDetails methodDetails =
+        this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_REMOVE_ENTRY);
 
-            throw t;
-        }
-        
-        //If post-invocation - remove entry
-        if (afterInvocation) {
-            cacheRemove(cacheKeyInvocationContext, methodDetails);
-        }
-        
-        return result;
+    final CacheRemoveEntry cacheRemoveEntryAnnotation = methodDetails.getCacheAnnotation();
+    final boolean afterInvocation = cacheRemoveEntryAnnotation.afterInvocation();
+
+    //If pre-invocation - remove entry
+    if (!afterInvocation) {
+      cacheRemove(cacheKeyInvocationContext, methodDetails);
     }
 
-    /**
-     * Remove entry from cache
-     * 
-     * @param cacheKeyInvocationContext The invocation context 
-     * @param methodDetails The details about the cached method
-     */
-    private void cacheRemove(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
-            final CacheRemoveEntryMethodDetails methodDetails) {
-        
-        final CacheResolver cacheResolver = methodDetails.getCacheResolver();
-        final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
+    final Object result;
+    try {
+      //Call the annotated method
+      result = this.proceed(invocation);
+    } catch (Throwable t) {
+      if (afterInvocation) {
+        //If after invocation is true and if the throwable passes the include/exclude filters and then call remove
+        final Class<? extends Throwable>[] evictFor = cacheRemoveEntryAnnotation.evictFor();
+        final Class<? extends Throwable>[] noEvictFor = cacheRemoveEntryAnnotation.noEvictFor();
 
-        final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
-        final GeneratedCacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
-        
-        cache.remove(cacheKey);
+        //Check for empty/null here since isIncluded returns true for those cases
+        final boolean cache = ClassFilter.isIncluded(t, evictFor, noEvictFor, false);
+
+        //Exception is included
+        if (cache) {
+          cacheRemove(cacheKeyInvocationContext, methodDetails);
+        }
+      }
+
+      throw t;
     }
+
+    //If post-invocation - remove entry
+    if (afterInvocation) {
+      cacheRemove(cacheKeyInvocationContext, methodDetails);
+    }
+
+    return result;
+  }
+
+  /**
+   * Remove entry from cache
+   *
+   * @param cacheKeyInvocationContext The invocation context
+   * @param methodDetails             The details about the cached method
+   */
+  private void cacheRemove(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
+                           final CacheRemoveEntryMethodDetails methodDetails) {
+
+    final CacheResolver cacheResolver = methodDetails.getCacheResolver();
+    final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);
+
+    final CacheKeyGenerator cacheKeyGenerator = methodDetails.getCacheKeyGenerator();
+    final GeneratedCacheKey cacheKey = cacheKeyGenerator.generateCacheKey(cacheKeyInvocationContext);
+
+    cache.remove(cacheKey);
+  }
 }

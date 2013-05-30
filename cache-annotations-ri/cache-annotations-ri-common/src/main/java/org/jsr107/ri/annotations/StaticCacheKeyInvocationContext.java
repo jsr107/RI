@@ -25,52 +25,52 @@ import java.util.List;
 
 /**
  * Details common to all annotated methods that generate a cache key
- * 
- * @author Eric Dalquist
+ *
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
+ * @author Eric Dalquist
  * @since 1.0
  */
 public abstract class StaticCacheKeyInvocationContext<A extends Annotation> extends AbstractStaticCacheInvocationContext<A> {
-    private final CacheKeyGenerator cacheKeyGenerator;
-    private final List<CacheParameterDetails> keyParameters;
-    
-    /**
-     * @param cacheMethodDetails
-     * @param cacheResolver
-     * @param cacheKeyGenerator The key generator to use
-     * @param keyParameters Parameter details to use for key generation
-     */
-    public StaticCacheKeyInvocationContext(CacheMethodDetails<A> cacheMethodDetails, CacheResolver cacheResolver,
-            CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
-            List<CacheParameterDetails> keyParameters) {
-        
-        super(cacheMethodDetails, cacheResolver, allParameters);
-        
-        if (cacheKeyGenerator == null) {
-            throw new IllegalArgumentException("cacheKeyGenerator cannot be null");
-        }
-        if (keyParameters == null) {
-            throw new IllegalArgumentException("keyParameters cannot be null");
-        }
-        
-        this.cacheKeyGenerator = cacheKeyGenerator;
-        this.keyParameters = keyParameters;
+  private final CacheKeyGenerator cacheKeyGenerator;
+  private final List<CacheParameterDetails> keyParameters;
+
+  /**
+   * @param cacheMethodDetails
+   * @param cacheResolver
+   * @param cacheKeyGenerator  The key generator to use
+   * @param keyParameters      Parameter details to use for key generation
+   */
+  public StaticCacheKeyInvocationContext(CacheMethodDetails<A> cacheMethodDetails, CacheResolver cacheResolver,
+                                         CacheKeyGenerator cacheKeyGenerator, List<CacheParameterDetails> allParameters,
+                                         List<CacheParameterDetails> keyParameters) {
+
+    super(cacheMethodDetails, cacheResolver, allParameters);
+
+    if (cacheKeyGenerator == null) {
+      throw new IllegalArgumentException("cacheKeyGenerator cannot be null");
+    }
+    if (keyParameters == null) {
+      throw new IllegalArgumentException("keyParameters cannot be null");
     }
 
-    
-    /**
-     * @return the cacheKeyGenerator
-     */
-    public CacheKeyGenerator getCacheKeyGenerator() {
-        return this.cacheKeyGenerator;
-    }
+    this.cacheKeyGenerator = cacheKeyGenerator;
+    this.keyParameters = keyParameters;
+  }
 
-    /**
-     * @return the keyParameters
-     */
-    public List<CacheParameterDetails> getKeyParameters() {
-        return this.keyParameters;
-    }
+
+  /**
+   * @return the cacheKeyGenerator
+   */
+  public CacheKeyGenerator getCacheKeyGenerator() {
+    return this.cacheKeyGenerator;
+  }
+
+  /**
+   * @return the keyParameters
+   */
+  public List<CacheParameterDetails> getKeyParameters() {
+    return this.keyParameters;
+  }
 }

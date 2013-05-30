@@ -23,30 +23,30 @@ import java.util.List;
 
 /**
  * Details for a method annotated with {@link CacheRemoveAll}
- * 
+ *
  * @author Eric Dalquist
  * @since 1.0
  */
 public class CacheRemoveAllMethodDetails extends AbstractStaticCacheInvocationContext<CacheRemoveAll> {
-    
-    /**
-     * Create a new details object for {@link CacheRemoveAll}
-     * 
-     * @param cacheMethodDetails The base details of the annotated method
-     * @param cacheResolver The cache resolver to use
-     * @param allParameters An immutable list of all parameter details
-     */
-    public CacheRemoveAllMethodDetails(
-            CacheMethodDetails<CacheRemoveAll> cacheMethodDetails,
-            CacheResolver cacheResolver, List<CacheParameterDetails> allParameters) {
-        super(cacheMethodDetails, cacheResolver, allParameters);
-    }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
-     */
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_REMOVE_ALL;
-    }
+  /**
+   * Create a new details object for {@link CacheRemoveAll}
+   *
+   * @param cacheMethodDetails The base details of the annotated method
+   * @param cacheResolver      The cache resolver to use
+   * @param allParameters      An immutable list of all parameter details
+   */
+  public CacheRemoveAllMethodDetails(
+      CacheMethodDetails<CacheRemoveAll> cacheMethodDetails,
+      CacheResolver cacheResolver, List<CacheParameterDetails> allParameters) {
+    super(cacheMethodDetails, cacheResolver, allParameters);
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.interceptor.MethodDetails#getInterceptorType()
+   */
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_REMOVE_ALL;
+  }
 }

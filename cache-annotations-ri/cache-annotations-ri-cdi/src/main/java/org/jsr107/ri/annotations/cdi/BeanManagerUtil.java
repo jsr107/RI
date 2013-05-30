@@ -24,43 +24,41 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
- * 
  * @author Rick Hightower
  * @since 1.0
  */
 public class BeanManagerUtil {
-    
-    
-    /**
-     * 
-     */
-    @Inject 
-    private BeanManager beanManager;
-    
-    /**
-     * 
-     * @param <T>
-     * @param type
-     * @param qualifiers
-     * @return the bean
-     */
-    public <T> T getBeanByType(Class<T> type, Annotation... qualifiers) {
-        if (type == null) {
-            throw new IllegalArgumentException("CDI Bean type cannot be null");
-        }
 
-        Set<Bean<?>> beans = beanManager.getBeans(type, qualifiers);
-        if (beans.isEmpty()) {
-            return null;
-        }
-        Bean<?> bean = beanManager.resolve(beans);
-        CreationalContext<?> context = beanManager
-                .createCreationalContext(bean);
-        @SuppressWarnings("unchecked")
-        T result = (T) beanManager.getReference(bean, bean.getBeanClass(),
-                context);
-        return result;
+
+  /**
+   *
+   */
+  @Inject
+  private BeanManager beanManager;
+
+  /**
+   * @param <T>
+   * @param type
+   * @param qualifiers
+   * @return the bean
+   */
+  public <T> T getBeanByType(Class<T> type, Annotation... qualifiers) {
+    if (type == null) {
+      throw new IllegalArgumentException("CDI Bean type cannot be null");
     }
+
+    Set<Bean<?>> beans = beanManager.getBeans(type, qualifiers);
+    if (beans.isEmpty()) {
+      return null;
+    }
+    Bean<?> bean = beanManager.resolve(beans);
+    CreationalContext<?> context = beanManager
+        .createCreationalContext(bean);
+    @SuppressWarnings("unchecked")
+    T result = (T) beanManager.getReference(bean, bean.getBeanClass(),
+        context);
+    return result;
+  }
 
 
 }

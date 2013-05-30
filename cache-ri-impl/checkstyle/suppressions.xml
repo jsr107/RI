@@ -18,17 +18,19 @@
 
     <suppress checks="CyclomaticComplexity" files="RIConfiguration.java"/>
     <suppress checks="NPathComplexity" files="RIConfiguration.java"/>
-    
+
     <suppress checks="NPathComplexity" files="AbstractCacheLookupUtil.java"/>
     <suppress checks="CyclomaticComplexity" files="AbstractCacheLookupUtil.java"/>
-    
+
     <suppress checks="CyclomaticComplexity" files="RICacheManager.java"/>
     <suppress checks="NPathComplexity" files="RICacheManager.java"/>
 
     <suppress checks="NPathComplexity" files="RICacheEventEventDispatcher.java"/>
-    <suppress checks="CyclomaticComplexity" files="RICacheEventEventDispatcher.java"/>
-    
-    <suppress checks="NPathComplexity" files="RICacheEntryListenerRegistration.java"/>
+    <suppress checks="CyclomaticComplexity"
+              files="RICacheEventEventDispatcher.java"/>
+
+    <suppress checks="NPathComplexity"
+              files="RICacheEntryListenerRegistration.java"/>
 
     <suppress checks="NPathComplexity" files="RICachingProvider.java"/>
 </suppressions>

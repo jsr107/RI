@@ -21,33 +21,33 @@ import java.lang.annotation.Annotation;
 /**
  * Base class for all interceptor implementations, contains utility methods
  *
- * @author Eric Dalquist
  * @param <I> The intercepted method invocation
  * @param <T> The type of static invocation context data expected
+ * @author Eric Dalquist
  * @since 1.0
  */
 public abstract class AbstractKeyedCacheInterceptor<I, T extends StaticCacheKeyInvocationContext<?>> extends AbstractCacheInterceptor<I> {
 
-    /**
-     * Get, check the {@link InterceptorType} and cast the {@link CacheMethodDetailsImpl} for the invocation.
-     * 
-     * @param cacheInvocationContext The invocation context to get the {@link CacheMethodDetailsImpl} from.
-     * @param interceptorType The current interceptor type, used for validation.
-     * @return The casted {@link CacheMethodDetailsImpl} object.
-     */
-    @SuppressWarnings("unchecked")
-    protected T getStaticCacheKeyInvocationContext(
-            final InternalCacheKeyInvocationContext<?> cacheInvocationContext, final InterceptorType interceptorType) {
-        
-        final StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext = 
-                cacheInvocationContext.getStaticCacheKeyInvocationContext();
-        
-        if (staticCacheKeyInvocationContext.getInterceptorType() != interceptorType) {
-            throw new IllegalStateException("AroundInvoke method for " + interceptorType + " called but MethodDetails.InterceptorType is " + 
-                    staticCacheKeyInvocationContext.getInterceptorType());
-        }
-        
-        return (T)staticCacheKeyInvocationContext;
+  /**
+   * Get, check the {@link InterceptorType} and cast the {@link CacheMethodDetailsImpl} for the invocation.
+   *
+   * @param cacheInvocationContext The invocation context to get the {@link CacheMethodDetailsImpl} from.
+   * @param interceptorType        The current interceptor type, used for validation.
+   * @return The casted {@link CacheMethodDetailsImpl} object.
+   */
+  @SuppressWarnings("unchecked")
+  protected T getStaticCacheKeyInvocationContext(
+      final InternalCacheKeyInvocationContext<?> cacheInvocationContext, final InterceptorType interceptorType) {
+
+    final StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext =
+        cacheInvocationContext.getStaticCacheKeyInvocationContext();
+
+    if (staticCacheKeyInvocationContext.getInterceptorType() != interceptorType) {
+      throw new IllegalStateException("AroundInvoke method for " + interceptorType + " called but MethodDetails.InterceptorType is " +
+          staticCacheKeyInvocationContext.getInterceptorType());
     }
+
+    return (T) staticCacheKeyInvocationContext;
+  }
 
 }

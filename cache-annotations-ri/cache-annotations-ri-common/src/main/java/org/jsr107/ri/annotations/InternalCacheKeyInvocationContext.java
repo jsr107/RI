@@ -20,15 +20,15 @@ import javax.cache.annotation.CacheKeyInvocationContext;
 import java.lang.annotation.Annotation;
 
 /**
- * @author Eric Dalquist
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
+ * @author Eric Dalquist
  * @since 1.0
  */
 public interface InternalCacheKeyInvocationContext<A extends Annotation> extends CacheKeyInvocationContext<A> {
-    /**
-     * @return The static cache invocation details for the invoked method
-     */
-    StaticCacheKeyInvocationContext<A> getStaticCacheKeyInvocationContext();
+  /**
+   * @return The static cache invocation details for the invoked method
+   */
+  StaticCacheKeyInvocationContext<A> getStaticCacheKeyInvocationContext();
 }

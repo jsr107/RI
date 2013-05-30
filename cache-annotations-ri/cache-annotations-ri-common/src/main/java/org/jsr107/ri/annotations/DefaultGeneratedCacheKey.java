@@ -34,37 +34,37 @@ import java.util.Arrays;
  */
 public class DefaultGeneratedCacheKey implements GeneratedCacheKey {
 
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private final Object[] parameters;
-    private final int hashCode;
+  private final Object[] parameters;
+  private final int hashCode;
 
-    /**
-     * Constructs a default cache key
-     *
-     * @param parameters the paramters to use
-     */
-    public DefaultGeneratedCacheKey(Object[] parameters) {
-        this.parameters = parameters;
-        this.hashCode = Arrays.deepHashCode(parameters);
-    }
+  /**
+   * Constructs a default cache key
+   *
+   * @param parameters the paramters to use
+   */
+  public DefaultGeneratedCacheKey(Object[] parameters) {
+    this.parameters = parameters;
+    this.hashCode = Arrays.deepHashCode(parameters);
+  }
 
-    @Override
-    public int hashCode() {
-        return this.hashCode;
-    }
+  @Override
+  public int hashCode() {
+    return this.hashCode;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        if (this.hashCode != obj.hashCode()) 
-            return false;
-        DefaultGeneratedCacheKey other = (DefaultGeneratedCacheKey) obj;
-        return Arrays.deepEquals(this.parameters, other.parameters);
-    }
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    if (this.hashCode != obj.hashCode())
+      return false;
+    DefaultGeneratedCacheKey other = (DefaultGeneratedCacheKey) obj;
+    return Arrays.deepEquals(this.parameters, other.parameters);
+  }
 }

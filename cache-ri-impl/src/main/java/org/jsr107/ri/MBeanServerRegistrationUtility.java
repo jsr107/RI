@@ -35,122 +35,122 @@ import java.util.Set;
  */
 public final class MBeanServerRegistrationUtility {
 
-    /**
-     * The type of registered Object
-     */
-    enum ObjectNameType {
-
-        /**
-         * Cache Statistics
-         */
-        Statistics,
-
-        /**
-         * Cache Configuration
-         */
-        Configuration
-
-    }
-
-
-    private MBeanServerRegistrationUtility() {
-        //prevent construction
-    }
-
+  /**
+   * The type of registered Object
+   */
+  enum ObjectNameType {
 
     /**
-     * Utility method for registering CacheStatistics with the platform MBeanServer
-     *
-     * @param cache the cache to register
+     * Cache Statistics
      */
-    static void registerCacheObject(RICache cache, ObjectNameType objectNameType) {
-        //these can change during runtime, so always look it up
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-        ObjectName registeredObjectName = calculateObjectName(cache, objectNameType);
-        try {
-            if (objectNameType.equals(ObjectNameType.Configuration)) {
-                if (!isRegistered(cache, objectNameType)) {
-                    mBeanServer.registerMBean(cache.getCacheMXBean(), registeredObjectName);
-                }
-            } else if (objectNameType.equals(ObjectNameType.Statistics)) {
-                if (!isRegistered(cache, objectNameType)) {
-                    mBeanServer.registerMBean(cache.getCacheStatisticsMXBean(), registeredObjectName);
-                }
-            }
-        } catch (Exception e) {
-            throw new CacheException("Error registering cache MXBeans for CacheManager "
-                    + registeredObjectName + " . Error was " + e.getMessage(), e);
+    Statistics,
+
+    /**
+     * Cache Configuration
+     */
+    Configuration
+
+  }
+
+
+  private MBeanServerRegistrationUtility() {
+    //prevent construction
+  }
+
+
+  /**
+   * Utility method for registering CacheStatistics with the platform MBeanServer
+   *
+   * @param cache the cache to register
+   */
+  static void registerCacheObject(RICache cache, ObjectNameType objectNameType) {
+    //these can change during runtime, so always look it up
+    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+    ObjectName registeredObjectName = calculateObjectName(cache, objectNameType);
+    try {
+      if (objectNameType.equals(ObjectNameType.Configuration)) {
+        if (!isRegistered(cache, objectNameType)) {
+          mBeanServer.registerMBean(cache.getCacheMXBean(), registeredObjectName);
         }
-    }
-
-    /**
-     * Checks whether an ObjectName is already registered.
-     *
-     * @throws CacheException - all exceptions are wrapped in CacheException
-     */
-    static boolean isRegistered(RICache cache, ObjectNameType objectNameType) {
-
-        Set<ObjectName> registeredObjectNames = null;
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-
-        ObjectName objectName = calculateObjectName(cache, objectNameType);
-        registeredObjectNames = mBeanServer.queryNames(objectName, null);
-
-        return !registeredObjectNames.isEmpty();
-    }
-
-
-    /**
-     * Removes registered CacheStatistics for a Cache
-     *
-     * @throws CacheException - all exceptions are wrapped in CacheException
-     */
-    static void unregisterCacheObject(RICache cache, ObjectNameType objectNameType) {
-
-        Set<ObjectName> registeredObjectNames = null;
-        MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-
-        ObjectName objectName = calculateObjectName(cache, objectNameType);
-        registeredObjectNames = mBeanServer.queryNames(objectName, null);
-
-        //should just be one
-        for (ObjectName registeredObjectName : registeredObjectNames) {
-            try {
-                mBeanServer.unregisterMBean(registeredObjectName);
-            } catch (Exception e) {
-                throw new CacheException("Error unregistering object instance "
-                        + registeredObjectName + " . Error was " + e.getMessage(), e);
-            }
+      } else if (objectNameType.equals(ObjectNameType.Statistics)) {
+        if (!isRegistered(cache, objectNameType)) {
+          mBeanServer.registerMBean(cache.getCacheStatisticsMXBean(), registeredObjectName);
         }
+      }
+    } catch (Exception e) {
+      throw new CacheException("Error registering cache MXBeans for CacheManager "
+          + registeredObjectName + " . Error was " + e.getMessage(), e);
     }
+  }
 
-    /**
-     * Creates an object name using the scheme
-     * "javax.cache:type=Cache&lt;Statistics|Configuration&gt;,CacheManager=&lt;cacheManagerName&gt;,name=&lt;cacheName&gt;"
-     */
-    private static ObjectName calculateObjectName(Cache cache, ObjectNameType objectNameType) {
-        String cacheManagerName = mbeanSafe(cache.getCacheManager().getURI().toString());
-        String cacheName = mbeanSafe(cache.getName());
+  /**
+   * Checks whether an ObjectName is already registered.
+   *
+   * @throws CacheException - all exceptions are wrapped in CacheException
+   */
+  static boolean isRegistered(RICache cache, ObjectNameType objectNameType) {
 
-        try {
-            return new ObjectName("javax.cache:type=Cache" + objectNameType + ",CacheManager="
-                    + cacheManagerName + ",Cache=" + cacheName);
-        } catch (MalformedObjectNameException e) {
-            throw new CacheException("Illegal ObjectName for Management Bean. " +
-                    "CacheManager=[" + cacheManagerName + "], Cache=[" + cacheName + "]", e);
-        }
+    Set<ObjectName> registeredObjectNames = null;
+    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+
+    ObjectName objectName = calculateObjectName(cache, objectNameType);
+    registeredObjectNames = mBeanServer.queryNames(objectName, null);
+
+    return !registeredObjectNames.isEmpty();
+  }
+
+
+  /**
+   * Removes registered CacheStatistics for a Cache
+   *
+   * @throws CacheException - all exceptions are wrapped in CacheException
+   */
+  static void unregisterCacheObject(RICache cache, ObjectNameType objectNameType) {
+
+    Set<ObjectName> registeredObjectNames = null;
+    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
+
+    ObjectName objectName = calculateObjectName(cache, objectNameType);
+    registeredObjectNames = mBeanServer.queryNames(objectName, null);
+
+    //should just be one
+    for (ObjectName registeredObjectName : registeredObjectNames) {
+      try {
+        mBeanServer.unregisterMBean(registeredObjectName);
+      } catch (Exception e) {
+        throw new CacheException("Error unregistering object instance "
+            + registeredObjectName + " . Error was " + e.getMessage(), e);
+      }
     }
+  }
 
+  /**
+   * Creates an object name using the scheme
+   * "javax.cache:type=Cache&lt;Statistics|Configuration&gt;,CacheManager=&lt;cacheManagerName&gt;,name=&lt;cacheName&gt;"
+   */
+  private static ObjectName calculateObjectName(Cache cache, ObjectNameType objectNameType) {
+    String cacheManagerName = mbeanSafe(cache.getCacheManager().getURI().toString());
+    String cacheName = mbeanSafe(cache.getName());
 
-    /**
-     * Filter out invalid ObjectName characters from string.
-     *
-     * @param string input string
-     * @return A valid JMX ObjectName attribute value.
-     */
-    private static String mbeanSafe(String string) {
-        return string == null ? "" : string.replaceAll(",|:|=|\n", ".");
+    try {
+      return new ObjectName("javax.cache:type=Cache" + objectNameType + ",CacheManager="
+          + cacheManagerName + ",Cache=" + cacheName);
+    } catch (MalformedObjectNameException e) {
+      throw new CacheException("Illegal ObjectName for Management Bean. " +
+          "CacheManager=[" + cacheManagerName + "], Cache=[" + cacheName + "]", e);
     }
+  }
+
+
+  /**
+   * Filter out invalid ObjectName characters from string.
+   *
+   * @param string input string
+   * @return A valid JMX ObjectName attribute value.
+   */
+  private static String mbeanSafe(String string) {
+    return string == null ? "" : string.replaceAll(",|:|=|\n", ".");
+  }
 
 }
 

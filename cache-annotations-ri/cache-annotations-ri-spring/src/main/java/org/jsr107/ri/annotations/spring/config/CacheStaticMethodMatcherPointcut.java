@@ -30,38 +30,38 @@ import java.lang.reflect.Method;
 
 /**
  * Pointcut that delegates matching checks to a {@link CacheContextSource}.
- * 
+ *
  * @author Eric Dalquist
  * @version $Revision: 656 $
  */
 public class CacheStaticMethodMatcherPointcut extends StaticMethodMatcherPointcut {
-    private final CacheContextSource<MethodInvocation> cacheContextSource;
-    private final InterceptorType interceptorType;
-    
-    /**
-     * Create pointcut that uses the specific cache context source and operations on the specified interceptor type
-     * 
-     * @param cacheContextSource Source to retrieve invocation context information from
-     * @param cacheInterceptor The type of interceptor this pointcut is for
-     */
-    public CacheStaticMethodMatcherPointcut(CacheContextSource<MethodInvocation> cacheContextSource, CacheMethodInterceptor cacheInterceptor) {
-        Assert.notNull(cacheContextSource);
-        Assert.notNull(cacheInterceptor);
-        
-        this.cacheContextSource = cacheContextSource;
-        this.interceptorType = cacheInterceptor.getInterceptorType();
-    }
+  private final CacheContextSource<MethodInvocation> cacheContextSource;
+  private final InterceptorType interceptorType;
 
-    /**
-     * Returns true if the configured {@link CacheContextSource#getMethodDetails(Method, Class)}
-     * method returns an {@link StaticCacheInvocationContext} with an {@link InterceptorType} that matches
-     * the type passed into the constructor
-     * 
-     * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
-     */
-    @Override
-    public boolean matches(Method method, Class<?> targetClass) {
-        final StaticCacheInvocationContext<? extends Annotation> methodDetails = this.cacheContextSource.getMethodDetails(method, targetClass);
-        return methodDetails != null && methodDetails.getInterceptorType() == interceptorType;
-    }
+  /**
+   * Create pointcut that uses the specific cache context source and operations on the specified interceptor type
+   *
+   * @param cacheContextSource Source to retrieve invocation context information from
+   * @param cacheInterceptor   The type of interceptor this pointcut is for
+   */
+  public CacheStaticMethodMatcherPointcut(CacheContextSource<MethodInvocation> cacheContextSource, CacheMethodInterceptor cacheInterceptor) {
+    Assert.notNull(cacheContextSource);
+    Assert.notNull(cacheInterceptor);
+
+    this.cacheContextSource = cacheContextSource;
+    this.interceptorType = cacheInterceptor.getInterceptorType();
+  }
+
+  /**
+   * Returns true if the configured {@link CacheContextSource#getMethodDetails(Method, Class)}
+   * method returns an {@link StaticCacheInvocationContext} with an {@link InterceptorType} that matches
+   * the type passed into the constructor
+   *
+   * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
+   */
+  @Override
+  public boolean matches(Method method, Class<?> targetClass) {
+    final StaticCacheInvocationContext<? extends Annotation> methodDetails = this.cacheContextSource.getMethodDetails(method, targetClass);
+    return methodDetails != null && methodDetails.getInterceptorType() == interceptorType;
+  }
 }

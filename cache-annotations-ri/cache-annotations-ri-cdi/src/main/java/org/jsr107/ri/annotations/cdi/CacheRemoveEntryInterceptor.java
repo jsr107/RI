@@ -28,33 +28,34 @@ import javax.interceptor.InvocationContext;
 
 /**
  * Interceptor for {@link CacheRemoveEntry}
- * 
+ *
  * @author Rick Hightower
  * @author Eric Dalquist
  * @since 1.0
  */
-@CacheRemoveEntry @Interceptor
+@CacheRemoveEntry
+@Interceptor
 public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterceptor<InvocationContext> {
-    
-    @Inject
-    private CacheLookupUtil lookup;
+
+  @Inject
+  private CacheLookupUtil lookup;
 
 
-    /**
-     * @param invocationContext The intercepted invocation
-     * @return The result from {@link InvocationContext#proceed()}
-     * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
-     */
-    @AroundInvoke
-    public Object cacheRemoveEntry(InvocationContext invocationContext) throws Throwable {
-        return this.cacheRemoveEntry(this.lookup, invocationContext);
-    }
+  /**
+   * @param invocationContext The intercepted invocation
+   * @return The result from {@link InvocationContext#proceed()}
+   * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
+   */
+  @AroundInvoke
+  public Object cacheRemoveEntry(InvocationContext invocationContext) throws Throwable {
+    return this.cacheRemoveEntry(this.lookup, invocationContext);
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
-     */
-    @Override
-    protected Object proceed(InvocationContext invocation) throws Exception {
-        return invocation.proceed();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
+   */
+  @Override
+  protected Object proceed(InvocationContext invocation) throws Exception {
+    return invocation.proceed();
+  }
 }

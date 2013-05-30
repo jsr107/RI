@@ -21,58 +21,57 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 
-
 /**
  * Defines API for looking up information about an invocation.
- * 
- * @author Eric Dalquist
+ *
  * @param <I> The intercepted method invocation
+ * @author Eric Dalquist
  * @since 1.0
  */
 public interface CacheContextSource<I> {
-    /**
-     * Placeholder used for caching a null value
-     */
-    NullPlaceholder NULL_PLACEHOLDER = NullPlaceholder.INSTANCE;
-    
-    /**
-     * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult}, 
-     * {@link javax.cache.annotation.CachePut}, or {@link javax.cache.annotation.CacheRemoveEntry}
-     * 
-     * @param invocation The intercepted invocation
-     * @return Information about the invocation
-     */
-    InternalCacheKeyInvocationContext<? extends Annotation> getCacheKeyInvocationContext(I invocation);
-    
-    /**
-     * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult}, 
-     * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry},
-     * or {@link javax.cache.annotation.CacheRemoveAll}
-     * 
-     * @param invocation The intercepted invocation
-     * @return Information about the invocation
-     */
-    InternalCacheInvocationContext<? extends Annotation> getCacheInvocationContext(I invocation);
-    
-    /**
-     * Get static information about a method annotated with {@link javax.cache.annotation.CacheResult}, 
-     * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry},
-     * or {@link javax.cache.annotation.CacheRemoveAll}
-     * 
-     * @param method The annotated method
-     * @param targetClass The Class that will be targeted with invocations
-     * @return Static information about the annotated method
-     */
-    StaticCacheInvocationContext<? extends Annotation> getMethodDetails(Method method, Class<? extends Object> targetClass);
+  /**
+   * Placeholder used for caching a null value
+   */
+  NullPlaceholder NULL_PLACEHOLDER = NullPlaceholder.INSTANCE;
 
-    
+  /**
+   * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult},
+   * {@link javax.cache.annotation.CachePut}, or {@link javax.cache.annotation.CacheRemoveEntry}
+   *
+   * @param invocation The intercepted invocation
+   * @return Information about the invocation
+   */
+  InternalCacheKeyInvocationContext<? extends Annotation> getCacheKeyInvocationContext(I invocation);
+
+  /**
+   * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult},
+   * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry},
+   * or {@link javax.cache.annotation.CacheRemoveAll}
+   *
+   * @param invocation The intercepted invocation
+   * @return Information about the invocation
+   */
+  InternalCacheInvocationContext<? extends Annotation> getCacheInvocationContext(I invocation);
+
+  /**
+   * Get static information about a method annotated with {@link javax.cache.annotation.CacheResult},
+   * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry},
+   * or {@link javax.cache.annotation.CacheRemoveAll}
+   *
+   * @param method      The annotated method
+   * @param targetClass The Class that will be targeted with invocations
+   * @return Static information about the annotated method
+   */
+  StaticCacheInvocationContext<? extends Annotation> getMethodDetails(Method method, Class<? extends Object> targetClass);
+
+
+  /**
+   * Used to cache null values, there should never be more than the single INSTANCE
+   */
+  public enum NullPlaceholder {
     /**
-     * Used to cache null values, there should never be more than the single INSTANCE
+     * Null Placeholder for use with {@link javax.cache.CachePut} and {@link javax.cache.CacheResult}
      */
-    public enum NullPlaceholder {
-        /**
-         * Null Placeholder for use with {@link javax.cache.CachePut} and {@link javax.cache.CacheResult}
-         */
-        INSTANCE;
-    }
+    INSTANCE;
+  }
 }

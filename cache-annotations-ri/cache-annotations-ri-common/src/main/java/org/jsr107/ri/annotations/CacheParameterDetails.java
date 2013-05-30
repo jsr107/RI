@@ -24,39 +24,41 @@ import java.util.Set;
  * @since 1.0
  */
 public class CacheParameterDetails {
-    private final Class<?> rawType;
-    private final Set<Annotation> annotations;
-    private final int parameterPosition;
-    
-    /**
-     * Create new cache parameter details
-     * 
-     * @param rawType The declared class of the parameter
-     * @param annotations All annotations on the parameter
-     * @param parameterPosition The position of the parameter in the original parameter array
-     */
-    public CacheParameterDetails(Class<?> rawType, Set<Annotation> annotations, int parameterPosition) {
-        this.rawType = rawType;
-        this.annotations = annotations;
-        this.parameterPosition = parameterPosition;
-    }
-    
-    /**
-     * @see javax.cache.annotation.CacheInvocationParameter#getRawType()
-     */
-    public Class<?> getRawType() {
-        return this.rawType;
-    }
-    /**
-     * @see javax.cache.annotation.CacheInvocationParameter#getAnnotations()
-     */
-    public Set<Annotation> getAnnotations() {
-        return this.annotations;
-    }
-    /**
-     * @see javax.cache.annotation.CacheInvocationParameter#getParameterPosition()
-     */
-    public int getParameterPosition() {
-        return this.parameterPosition;
-    }
+  private final Class<?> rawType;
+  private final Set<Annotation> annotations;
+  private final int parameterPosition;
+
+  /**
+   * Create new cache parameter details
+   *
+   * @param rawType           The declared class of the parameter
+   * @param annotations       All annotations on the parameter
+   * @param parameterPosition The position of the parameter in the original parameter array
+   */
+  public CacheParameterDetails(Class<?> rawType, Set<Annotation> annotations, int parameterPosition) {
+    this.rawType = rawType;
+    this.annotations = annotations;
+    this.parameterPosition = parameterPosition;
+  }
+
+  /**
+   * @see javax.cache.annotation.CacheInvocationParameter#getRawType()
+   */
+  public Class<?> getRawType() {
+    return this.rawType;
+  }
+
+  /**
+   * @see javax.cache.annotation.CacheInvocationParameter#getAnnotations()
+   */
+  public Set<Annotation> getAnnotations() {
+    return this.annotations;
+  }
+
+  /**
+   * @see javax.cache.annotation.CacheInvocationParameter#getParameterPosition()
+   */
+  public int getParameterPosition() {
+    return this.parameterPosition;
+  }
 }

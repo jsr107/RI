@@ -30,80 +30,80 @@ import javax.cache.transaction.Mode;
  * @since 1.0
  */
 public class RICacheMXBean<K, V> implements CacheMXBean {
-    private final Cache<K, V> cache;
+  private final Cache<K, V> cache;
 
-    /**
-     * Constructor
-     *
-     * @param cache the cache
-     */
-    public RICacheMXBean(Cache<K, V> cache) {
-        this.cache = cache;
-    }
+  /**
+   * Constructor
+   *
+   * @param cache the cache
+   */
+  public RICacheMXBean(Cache<K, V> cache) {
+    this.cache = cache;
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isReadThrough() {
-        return cache.getConfiguration().isReadThrough();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isReadThrough() {
+    return cache.getConfiguration().isReadThrough();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isWriteThrough() {
-        return cache.getConfiguration().isWriteThrough();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isWriteThrough() {
+    return cache.getConfiguration().isWriteThrough();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isStoreByValue() {
-        return cache.getConfiguration().isStoreByValue();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isStoreByValue() {
+    return cache.getConfiguration().isStoreByValue();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isStatisticsEnabled() {
-        return cache.getConfiguration().isStatisticsEnabled();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isStatisticsEnabled() {
+    return cache.getConfiguration().isStatisticsEnabled();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isManagementEnabled() {
-        return cache.getConfiguration().isManagementEnabled();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isManagementEnabled() {
+    return cache.getConfiguration().isManagementEnabled();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isTransactionsEnabled() {
-        return cache.getConfiguration().isTransactionsEnabled();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isTransactionsEnabled() {
+    return cache.getConfiguration().isTransactionsEnabled();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IsolationLevel getTransactionIsolationLevel() {
-        return cache.getConfiguration().getTransactionIsolationLevel();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public IsolationLevel getTransactionIsolationLevel() {
+    return cache.getConfiguration().getTransactionIsolationLevel();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Mode getTransactionMode() {
-        return cache.getConfiguration().getTransactionMode();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Mode getTransactionMode() {
+    return cache.getConfiguration().getTransactionMode();
+  }
 
 //    @Override
 //    public ExpiryPolicy getExpiryPolicyFactory() {

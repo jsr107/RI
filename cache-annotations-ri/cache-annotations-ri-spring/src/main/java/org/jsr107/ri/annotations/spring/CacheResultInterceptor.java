@@ -27,39 +27,38 @@ import org.jsr107.ri.annotations.InterceptorType;
  * @version $Revision$
  */
 public class CacheResultInterceptor extends AbstractCacheResultInterceptor<MethodInvocation> implements CacheMethodInterceptor {
-    private final CacheContextSource<MethodInvocation> cacheContextSource;
-    
-    /**
-     * @param cacheContextSource
-     */
-    public CacheResultInterceptor(CacheContextSource<MethodInvocation> cacheContextSource) {
-        this.cacheContextSource = cacheContextSource;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.spring.CacheMethodInterceptor#getInterceptorType()
-     */
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_RESULT;
-    }
+  private final CacheContextSource<MethodInvocation> cacheContextSource;
+
+  /**
+   * @param cacheContextSource
+   */
+  public CacheResultInterceptor(CacheContextSource<MethodInvocation> cacheContextSource) {
+    this.cacheContextSource = cacheContextSource;
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.spring.CacheMethodInterceptor#getInterceptorType()
+   */
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_RESULT;
+  }
 
 
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.spring.AbstractCacheInterceptor#invoke(org.aopalliance.intercept.MethodInvocation, java.lang.Class, javax.cache.annotation.impl.spring.CacheOperation)
+   */
+  @Override
+  public Object invoke(MethodInvocation invocation) throws Throwable {
+    return this.cacheResult(cacheContextSource, invocation);
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.spring.AbstractCacheInterceptor#invoke(org.aopalliance.intercept.MethodInvocation, java.lang.Class, javax.cache.annotation.impl.spring.CacheOperation)
-     */
-    @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
-        return this.cacheResult(cacheContextSource, invocation);
-    }
 
-
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
-     */
-    @Override
-    protected Object proceed(MethodInvocation invocation) throws Throwable {
-        return invocation.proceed();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
+   */
+  @Override
+  protected Object proceed(MethodInvocation invocation) throws Throwable {
+    return invocation.proceed();
+  }
 }

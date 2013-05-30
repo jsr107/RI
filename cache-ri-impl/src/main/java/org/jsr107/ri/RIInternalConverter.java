@@ -21,33 +21,31 @@ package org.jsr107.ri;
  * Converts values of a specified type to and from an internal representation.
  * <p/>
  * {@link RIInternalConverter}s are typically used convert cache keys and values
- * to and from an appropriate internal representation, that of which is managed 
+ * to and from an appropriate internal representation, that of which is managed
  * by a cache.
  * <p/>
  * The internal representation is declared as an Object as the type is typically
- * unknown until runtime. 
+ * unknown until runtime.
  *
  * @param <T> the type of value to convert from and to
- * 
+ * @author Brian Oliver
  * @see RIReferenceInternalConverter
  * @see RISerializingInternalConverter
- * 
- * @author Brian Oliver
  */
 public interface RIInternalConverter<T> {
-    /**
-     * Converts the value to an internal representation.
-     * 
-     * @param value the value to convert 
-     * @return an internal representation of the value
-     */
-    Object toInternal(T value);
-    
-    /**
-     * Converts an internal representation of a value to a value.
-     * 
-     * @param internal the internal representation of the value
-     * @return the value
-     */
-    T fromInternal(Object internal);
+  /**
+   * Converts the value to an internal representation.
+   *
+   * @param value the value to convert
+   * @return an internal representation of the value
+   */
+  Object toInternal(T value);
+
+  /**
+   * Converts an internal representation of a value to a value.
+   *
+   * @param internal the internal representation of the value
+   * @return the value
+   */
+  T fromInternal(Object internal);
 }

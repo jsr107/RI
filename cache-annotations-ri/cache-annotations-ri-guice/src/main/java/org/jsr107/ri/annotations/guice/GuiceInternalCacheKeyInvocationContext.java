@@ -27,39 +27,40 @@ import java.lang.reflect.Method;
 /**
  * Guice specific cache key invocation context using {@link MethodInvocation}
  *
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
  * @author Michael Stachel
  * @version $Revision$
- * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
  */
 public class GuiceInternalCacheKeyInvocationContext<A extends Annotation> extends
-        AbstractInternalCacheKeyInvocationContext<MethodInvocation, A> {
+    AbstractInternalCacheKeyInvocationContext<MethodInvocation, A> {
 
-    /**
-     * Create new cache key invocation context for the static context and invocation
-     *
-     * @param staticCacheKeyInvocationContext Static information about the invoked method
-     * @param invocation The AOP Alliance invocation context
-     */
-    public GuiceInternalCacheKeyInvocationContext(StaticCacheKeyInvocationContext<A> staticCacheKeyInvocationContext,
-            MethodInvocation invocation) {
-        super(staticCacheKeyInvocationContext, invocation);
-    }
+  /**
+   * Create new cache key invocation context for the static context and invocation
+   *
+   * @param staticCacheKeyInvocationContext
+   *                   Static information about the invoked method
+   * @param invocation The AOP Alliance invocation context
+   */
+  public GuiceInternalCacheKeyInvocationContext(StaticCacheKeyInvocationContext<A> staticCacheKeyInvocationContext,
+                                                MethodInvocation invocation) {
+    super(staticCacheKeyInvocationContext, invocation);
+  }
 
-    @Override
-    protected Object[] getParameters(MethodInvocation invocation) {
-        return invocation.getArguments();
-    }
+  @Override
+  protected Object[] getParameters(MethodInvocation invocation) {
+    return invocation.getArguments();
+  }
 
-    @Override
-    protected Method getMethod(MethodInvocation invocation) {
-        return invocation.getMethod();
-    }
+  @Override
+  protected Method getMethod(MethodInvocation invocation) {
+    return invocation.getMethod();
+  }
 
-    @Override
-    protected Object getTarget(MethodInvocation invocation) {
-        return invocation.getThis();
-    }
+  @Override
+  protected Object getTarget(MethodInvocation invocation) {
+    return invocation.getThis();
+  }
 
 }

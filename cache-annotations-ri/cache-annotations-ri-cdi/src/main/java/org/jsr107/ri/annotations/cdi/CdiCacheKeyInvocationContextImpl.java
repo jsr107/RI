@@ -26,50 +26,51 @@ import java.lang.reflect.Method;
 
 /**
  * CDI specific cache key invocation context using {@link InvocationContext}
- * 
- * @author Eric Dalquist
+ *
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
+ * @author Eric Dalquist
  * @since 1.0
  */
 public class CdiCacheKeyInvocationContextImpl<A extends Annotation> extends AbstractInternalCacheKeyInvocationContext<InvocationContext, A> {
-    
-    /**
-     * Create new cache key invocation context for the static context and invocation
-     * 
-     * @param staticCacheKeyInvocationContext Static information about the invoked method
-     * @param invocation The CDI invocation context
-     */
-    public CdiCacheKeyInvocationContextImpl(
-            StaticCacheKeyInvocationContext<A> staticCacheKeyInvocationContext,
-            InvocationContext invocation) {
 
-        super(staticCacheKeyInvocationContext, invocation);
-    }
+  /**
+   * Create new cache key invocation context for the static context and invocation
+   *
+   * @param staticCacheKeyInvocationContext
+   *                   Static information about the invoked method
+   * @param invocation The CDI invocation context
+   */
+  public CdiCacheKeyInvocationContextImpl(
+      StaticCacheKeyInvocationContext<A> staticCacheKeyInvocationContext,
+      InvocationContext invocation) {
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getParameters(java.lang.Object)
-     */
-    @Override
-    protected Object[] getParameters(InvocationContext invocation) {
-        return invocation.getParameters();
-    }
+    super(staticCacheKeyInvocationContext, invocation);
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getMethod(java.lang.Object)
-     */
-    @Override
-    protected Method getMethod(InvocationContext invocation) {
-        return invocation.getMethod();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getParameters(java.lang.Object)
+   */
+  @Override
+  protected Object[] getParameters(InvocationContext invocation) {
+    return invocation.getParameters();
+  }
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getTarget(java.lang.Object)
-     */
-    @Override
-    protected Object getTarget(InvocationContext invocation) {
-        return invocation.getTarget();
-    }
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getMethod(java.lang.Object)
+   */
+  @Override
+  protected Method getMethod(InvocationContext invocation) {
+    return invocation.getMethod();
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext#getTarget(java.lang.Object)
+   */
+  @Override
+  protected Object getTarget(InvocationContext invocation) {
+    return invocation.getTarget();
+  }
 
 }

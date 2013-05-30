@@ -27,37 +27,37 @@ import org.jsr107.ri.annotations.InterceptorType;
  * @version $Revision$
  */
 public class CachePutInterceptor extends AbstractCachePutInterceptor<MethodInvocation> implements CacheMethodInterceptor {
-    private final CacheContextSource<MethodInvocation> cacheContextSource;
-    
-    /**
-     * @param cacheContextSource
-     */
-    public CachePutInterceptor(CacheContextSource<MethodInvocation> cacheContextSource) {
-        this.cacheContextSource = cacheContextSource;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.spring.CacheMethodInterceptor#getInterceptorType()
-     */
-    @Override
-    public InterceptorType getInterceptorType() {
-        return InterceptorType.CACHE_PUT;
-    }
+  private final CacheContextSource<MethodInvocation> cacheContextSource;
 
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.spring.AbstractCacheInterceptor#invoke(org.aopalliance.intercept.MethodInvocation, java.lang.Class, javax.cache.annotation.impl.spring.CacheOperation)
-     */
-    @Override
-    public Object invoke(MethodInvocation invocation) throws Throwable {
-        return this.cachePut(cacheContextSource, invocation);
-    }
-    
-    
-    /* (non-Javadoc)
-     * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
-     */
-    @Override
-    protected Object proceed(MethodInvocation invocation) throws Throwable {
-        return invocation.proceed();
-    }
+  /**
+   * @param cacheContextSource
+   */
+  public CachePutInterceptor(CacheContextSource<MethodInvocation> cacheContextSource) {
+    this.cacheContextSource = cacheContextSource;
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.spring.CacheMethodInterceptor#getInterceptorType()
+   */
+  @Override
+  public InterceptorType getInterceptorType() {
+    return InterceptorType.CACHE_PUT;
+  }
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.spring.AbstractCacheInterceptor#invoke(org.aopalliance.intercept.MethodInvocation, java.lang.Class, javax.cache.annotation.impl.spring.CacheOperation)
+   */
+  @Override
+  public Object invoke(MethodInvocation invocation) throws Throwable {
+    return this.cachePut(cacheContextSource, invocation);
+  }
+
+
+  /* (non-Javadoc)
+   * @see org.jsr107.ri.annotations.AbstractCacheInterceptor#proceed(java.lang.Object)
+   */
+  @Override
+  protected Object proceed(MethodInvocation invocation) throws Throwable {
+    return invocation.proceed();
+  }
 }

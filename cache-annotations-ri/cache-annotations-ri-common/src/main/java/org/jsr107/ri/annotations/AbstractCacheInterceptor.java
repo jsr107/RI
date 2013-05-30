@@ -19,19 +19,19 @@ package org.jsr107.ri.annotations;
 
 /**
  * Base class for cache related interceptors
- * 
- * @author Eric Dalquist
+ *
  * @param <I> The intercepted method invocation
+ * @author Eric Dalquist
  * @since 1.0
  */
 public abstract class AbstractCacheInterceptor<I> {
-    /**
-     * Proceed with the invocation
-     * 
-     * @param invocation The intercepted invocation
-     * @return The value returned by the invocation
-     * @throws Throwable The exception thrown by the invocation, if any
-     */
-    protected abstract Object proceed(I invocation) throws Throwable;
+  /**
+   * Proceed with the invocation
+   *
+   * @param invocation The intercepted invocation
+   * @return The value returned by the invocation
+   * @throws Throwable The exception thrown by the invocation, if any
+   */
+  protected abstract Object proceed(I invocation) throws Throwable;
 
 }

@@ -24,25 +24,25 @@ import java.lang.annotation.Annotation;
 
 /**
  * Creates a {@link DefaultGeneratedCacheKey} for the {@link CacheKeyInvocationContext}
- * 
+ *
  * @author Eric Dalquist
  * @author Rick Hightower
  * @since 1.0
  */
 public class DefaultCacheKeyGenerator implements CacheKeyGenerator {
 
-    /* (non-Javadoc)
-     * @see javax.cache.annotation.CacheKeyGenerator#generateCacheKey(javax.cache.annotation.CacheInvocationContext)
-     */
-    @Override
-    public GeneratedCacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext) {
-        final CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
-        
-        final Object[] parameters = new Object[keyParameters.length];
-        for (int index = 0; index < keyParameters.length; index++) {
-            parameters[index] = keyParameters[index].getValue();
-        }
-        
-        return new DefaultGeneratedCacheKey(parameters);
+  /* (non-Javadoc)
+   * @see javax.cache.annotation.CacheKeyGenerator#generateCacheKey(javax.cache.annotation.CacheInvocationContext)
+   */
+  @Override
+  public GeneratedCacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext) {
+    final CacheInvocationParameter[] keyParameters = cacheKeyInvocationContext.getKeyParameters();
+
+    final Object[] parameters = new Object[keyParameters.length];
+    for (int index = 0; index < keyParameters.length; index++) {
+      parameters[index] = keyParameters[index].getValue();
     }
+
+    return new DefaultGeneratedCacheKey(parameters);
+  }
 }

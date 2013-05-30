@@ -23,27 +23,27 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
+ * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CacheRemoveAll}.
  * @author Eric Dalquist
  * @version $Revision$
- * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
- * {@link javax.cache.annotation.CacheRemoveAll}.
  * @since 1.0
  */
 public interface StaticCacheInvocationContext<A extends Annotation> extends CacheMethodDetails<A> {
 
-    /**
-     * @return The type of intercepter this {@link CacheMethodDetailsImpl} is for
-     */
-    InterceptorType getInterceptorType();
+  /**
+   * @return The type of intercepter this {@link CacheMethodDetailsImpl} is for
+   */
+  InterceptorType getInterceptorType();
 
-    /**
-     * @return the allParameters in an unmodifiable List
-     */
-    List<CacheParameterDetails> getAllParameters();
+  /**
+   * @return the allParameters in an unmodifiable List
+   */
+  List<CacheParameterDetails> getAllParameters();
 
-    /**
-     * @return The {@link CacheResolver} to use to get the cache for this method
-     */
-    CacheResolver getCacheResolver();
+  /**
+   * @return The {@link CacheResolver} to use to get the cache for this method
+   */
+  CacheResolver getCacheResolver();
 }

@@ -23,7 +23,7 @@ import javax.cache.event.EventType;
 
 /**
  * The reference implementation of the {@link CacheEntryEvent}.
- * 
+ *
  * @param <K> the type of keys maintained by this cache
  * @param <V> the type of cached values
  * @author Greg Luck
@@ -31,89 +31,89 @@ import javax.cache.event.EventType;
  */
 public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
 
-    private K key;
-    private V value;
-    private V oldValue;
-    private boolean oldValueAvailable;
+  private K key;
+  private V value;
+  private V oldValue;
+  private boolean oldValueAvailable;
 
-    /**
-     * Constructs a cache entry event from a given cache as source
-     * (without an old value)
-     *
-     * @param source the cache that originated the event
-     * @param key    the key
-     * @param value  the value
-     */
-    public RICacheEntryEvent(Cache<K, V> source, K key, V value, EventType eventType) {
-        super(source, eventType);
-        this.key = key;
-        this.value = value;
-        this.oldValue = null;
-        this.oldValueAvailable = false;
-    }
-    
-    /**
-     * Constructs a cache entry event from a given cache as source
-     * (with an old value)
-     *
-     * @param source   the cache that originated the event
-     * @param key      the key
-     * @param value    the value
-     * @param oldValue the oldValue
-     */
-    public RICacheEntryEvent(Cache<K, V> source, K key, V value, V oldValue, EventType eventType) {
-        super(source, eventType);
-        this.key = key;
-        this.value = value;
-        this.oldValue = oldValue;
-        this.oldValueAvailable = true;
-    }
+  /**
+   * Constructs a cache entry event from a given cache as source
+   * (without an old value)
+   *
+   * @param source the cache that originated the event
+   * @param key    the key
+   * @param value  the value
+   */
+  public RICacheEntryEvent(Cache<K, V> source, K key, V value, EventType eventType) {
+    super(source, eventType);
+    this.key = key;
+    this.value = value;
+    this.oldValue = null;
+    this.oldValueAvailable = false;
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public K getKey() {
-        return key;
-    }
+  /**
+   * Constructs a cache entry event from a given cache as source
+   * (with an old value)
+   *
+   * @param source   the cache that originated the event
+   * @param key      the key
+   * @param value    the value
+   * @param oldValue the oldValue
+   */
+  public RICacheEntryEvent(Cache<K, V> source, K key, V value, V oldValue, EventType eventType) {
+    super(source, eventType);
+    this.key = key;
+    this.value = value;
+    this.oldValue = oldValue;
+    this.oldValueAvailable = true;
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public V getValue() {
-        return value;
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public K getKey() {
+    return key;
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public V getOldValue() throws UnsupportedOperationException {
-        if (isOldValueAvailable()) {
-            return oldValue;
-        } else {
-            throw new UnsupportedOperationException("Old value is not available for key");
-        }
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public V getValue() {
+    return value;
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T unwrap(Class<T> clazz) {
-        if (clazz != null && clazz.isInstance(this)) {
-            return (T) this;
-        } else {
-            throw new IllegalArgumentException("The class " + clazz + " is unknown to this implementation");
-        }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public V getOldValue() throws UnsupportedOperationException {
+    if (isOldValueAvailable()) {
+      return oldValue;
+    } else {
+      throw new UnsupportedOperationException("Old value is not available for key");
     }
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isOldValueAvailable() {
-        return oldValueAvailable;
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <T> T unwrap(Class<T> clazz) {
+    if (clazz != null && clazz.isInstance(this)) {
+      return (T) this;
+    } else {
+      throw new IllegalArgumentException("The class " + clazz + " is unknown to this implementation");
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isOldValueAvailable() {
+    return oldValueAvailable;
+  }
 }

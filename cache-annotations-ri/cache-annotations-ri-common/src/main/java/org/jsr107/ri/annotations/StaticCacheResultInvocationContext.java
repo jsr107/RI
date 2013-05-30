@@ -26,8 +26,8 @@ import javax.cache.annotation.CacheResult;
  */
 public interface StaticCacheResultInvocationContext extends StaticCacheInvocationContext<CacheResult> {
 
-    /**
-     * @return The {@link CacheExceptionResolver} to use to get the cache for this method
-     */
-    CacheResolver getExceptionCacheResolver();
+  /**
+   * @return The {@link CacheExceptionResolver} to use to get the cache for this method
+   */
+  CacheResolver getExceptionCacheResolver();
 }

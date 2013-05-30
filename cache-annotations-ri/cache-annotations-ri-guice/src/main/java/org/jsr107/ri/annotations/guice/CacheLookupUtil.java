@@ -39,59 +39,59 @@ import java.lang.reflect.Method;
 @Singleton
 public class CacheLookupUtil extends AbstractCacheLookupUtil<MethodInvocation> {
 
-    private final Injector injector;
-    private final CacheKeyGenerator defaultCacheKeyGenerator;
-    private final CacheResolverFactory defaultCacheResolverFactory;
+  private final Injector injector;
+  private final CacheKeyGenerator defaultCacheKeyGenerator;
+  private final CacheResolverFactory defaultCacheResolverFactory;
 
-    /**
-     * @param injector Guice injector
-     * @param defaultCacheKeyGenerator the default CacheKeyGenerator
-     * @param defaultCacheResolverFactory the default CacheResolverFactory
-     */
-    @Inject
-    public CacheLookupUtil(Injector injector, CacheKeyGenerator defaultCacheKeyGenerator,
-                           CacheResolverFactory defaultCacheResolverFactory) {
-        this.injector = injector;
-        this.defaultCacheKeyGenerator = defaultCacheKeyGenerator;
-        this.defaultCacheResolverFactory = defaultCacheResolverFactory;
-    }
+  /**
+   * @param injector                    Guice injector
+   * @param defaultCacheKeyGenerator    the default CacheKeyGenerator
+   * @param defaultCacheResolverFactory the default CacheResolverFactory
+   */
+  @Inject
+  public CacheLookupUtil(Injector injector, CacheKeyGenerator defaultCacheKeyGenerator,
+                         CacheResolverFactory defaultCacheResolverFactory) {
+    this.injector = injector;
+    this.defaultCacheKeyGenerator = defaultCacheKeyGenerator;
+    this.defaultCacheResolverFactory = defaultCacheResolverFactory;
+  }
 
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
-            StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext, MethodInvocation invocation) {
-        return new GuiceInternalCacheKeyInvocationContext(staticCacheKeyInvocationContext, invocation);
-    }
+  @SuppressWarnings({"unchecked" })
+  @Override
+  protected InternalCacheKeyInvocationContext<? extends Annotation> createCacheKeyInvocationContextImpl(
+      StaticCacheKeyInvocationContext<? extends Annotation> staticCacheKeyInvocationContext, MethodInvocation invocation) {
+    return new GuiceInternalCacheKeyInvocationContext(staticCacheKeyInvocationContext, invocation);
+  }
 
-    @SuppressWarnings({ "unchecked" })
-    @Override
-    protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
-            StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, MethodInvocation invocation) {
-        return new GuiceInternalCacheInvocationContext(staticCacheInvocationContext, invocation);
-    }
+  @SuppressWarnings({"unchecked" })
+  @Override
+  protected InternalCacheInvocationContext<? extends Annotation> createCacheInvocationContextImpl(
+      StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, MethodInvocation invocation) {
+    return new GuiceInternalCacheInvocationContext(staticCacheInvocationContext, invocation);
+  }
 
-    @Override
-    protected Class<?> getTargetClass(MethodInvocation invocation) {
-        return invocation.getThis().getClass();
-    }
+  @Override
+  protected Class<?> getTargetClass(MethodInvocation invocation) {
+    return invocation.getThis().getClass();
+  }
 
-    @Override
-    protected Method getMethod(MethodInvocation invocation) {
-        return invocation.getMethod();
-    }
+  @Override
+  protected Method getMethod(MethodInvocation invocation) {
+    return invocation.getMethod();
+  }
 
-    @Override
-    protected <T> T getObjectByType(Class<T> type) {
-        return this.injector.getInstance(type);
-    }
+  @Override
+  protected <T> T getObjectByType(Class<T> type) {
+    return this.injector.getInstance(type);
+  }
 
-    @Override
-    protected CacheKeyGenerator getDefaultCacheKeyGenerator() {
-        return this.defaultCacheKeyGenerator;
-    }
+  @Override
+  protected CacheKeyGenerator getDefaultCacheKeyGenerator() {
+    return this.defaultCacheKeyGenerator;
+  }
 
-    @Override
-    protected CacheResolverFactory getDefaultCacheResolverFactory() {
-        return this.defaultCacheResolverFactory;
-    }
+  @Override
+  protected CacheResolverFactory getDefaultCacheResolverFactory() {
+    return this.defaultCacheResolverFactory;
+  }
 }
