@@ -20,7 +20,8 @@ package org.jsr107.ri;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.Configuration;
-import javax.cache.ExpiryPolicy;
+import javax.cache.expiry.Eternal;
+import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.Factory;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
@@ -64,7 +65,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     protected Factory<CacheWriter<? super K, ? super V>> cacheWriterFactory;
     
     /**
-     * The {@link javax.cache.ExpiryPolicy} for the {@link javax.cache.Configuration}.
+     * The {@link javax.cache.expiry.ExpiryPolicy} for the {@link javax.cache.Configuration}.
      */
     protected Factory<ExpiryPolicy<? super K, ? super V>> expiryPolicyFactory;
     
@@ -117,7 +118,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
         this.cacheLoaderFactory = null;
         this.cacheWriterFactory = null;
-        this.expiryPolicyFactory = ExpiryPolicy.Eternal.<K, V>getFactory();
+        this.expiryPolicyFactory = Eternal.<K, V>getFactory();
         this.isReadThrough = false;
         this.isWriteThrough = false;
         this.setStatisticsEnabled(false);
@@ -152,7 +153,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         this.cacheWriterFactory = configuration.getCacheWriterFactory();
 
         if (configuration.getExpiryPolicyFactory() == null) {
-            this.expiryPolicyFactory = ExpiryPolicy.Eternal.<K, V>getFactory();
+            this.expiryPolicyFactory = Eternal.<K, V>getFactory();
         } else {
             this.expiryPolicyFactory = configuration.getExpiryPolicyFactory();
         }

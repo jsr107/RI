@@ -25,8 +25,8 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMXBean;
 import javax.cache.CacheWriter;
 import javax.cache.Configuration;
-import javax.cache.Configuration.Duration;
-import javax.cache.ExpiryPolicy;
+import javax.cache.expiry.Duration;
+import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
@@ -122,7 +122,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     private final RIInternalMap<Object, RICachedValue> entries;
 
     /**
-     * The {@link javax.cache.ExpiryPolicy} for the {@link Cache}.
+     * The {@link javax.cache.expiry.ExpiryPolicy} for the {@link Cache}.
      */
     private final ExpiryPolicy<? super K, ? super V> expiryPolicy;
     

@@ -20,8 +20,8 @@ package org.jsr107.ri;
 import org.junit.Test;
 
 import javax.cache.Configuration;
-import javax.cache.Configuration.Duration;
-import javax.cache.ExpiryPolicy;
+import javax.cache.expiry.Duration;
+import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.MutableConfiguration;
 import java.util.concurrent.TimeUnit;
 
@@ -86,24 +86,24 @@ public class RIConfigurationTest {
 
     @Test
     public void DurationEquals() {
-        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
-        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.DAYS, 2);
+        Duration duration1 = new Duration(TimeUnit.DAYS, 2);
+        Duration duration2 = new Duration(TimeUnit.DAYS, 2);
         assertEquals(duration1, duration2);
     }
 
 
     @Test
     public void durationNotEqualsAmount() {
-        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
-        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.DAYS, 3);
+        Duration duration1 = new Duration(TimeUnit.DAYS, 2);
+        Duration duration2 = new Duration(TimeUnit.DAYS, 3);
         assertFalse(duration1.equals(duration2));
         assertFalse(duration1.hashCode() == duration2.hashCode());
     }
 
     @Test
     public void durationNotEqualsUnit() {
-        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.DAYS, 2);
-        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 2);
+        Duration duration1 = new Duration(TimeUnit.DAYS, 2);
+        Duration duration2 = new Duration(TimeUnit.MINUTES, 2);
         assertFalse(duration1.equals(duration2));
         assertFalse(duration1.hashCode() == duration2.hashCode());
 
@@ -119,16 +119,16 @@ public class RIConfigurationTest {
      */
     @Test
     public void durationEqualsWhenSemanticallyEqualsButExpressedDifferentUnits() {
-        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.SECONDS, 120);
-        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 2);
+        Duration duration1 = new Duration(TimeUnit.SECONDS, 120);
+        Duration duration2 = new Duration(TimeUnit.MINUTES, 2);
         assertEquals(duration1, duration2);
         assertEquals(duration1.hashCode(), duration2.hashCode());
     }
 
     @Test
     public void durationEqualsWhenSemanticallyEqualsButExpressedDifferentUnitsHashCode() {
-        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.SECONDS, 120);
-        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 2);
+        Duration duration1 = new Duration(TimeUnit.SECONDS, 120);
+        Duration duration2 = new Duration(TimeUnit.MINUTES, 2);
         assertEquals(duration1, duration2);
         assertEquals(duration1.hashCode(), duration2.hashCode());
     }
@@ -137,15 +137,15 @@ public class RIConfigurationTest {
     @Test
     public void durationNotEqualsUnitEquals() {
         long time = 2;
-        Configuration.Duration duration1 = new Configuration.Duration(TimeUnit.HOURS, 2);
+        Duration duration1 = new Duration(TimeUnit.HOURS, 2);
         time *= 60;
-        Configuration.Duration duration2 = new Configuration.Duration(TimeUnit.MINUTES, 120);
+        Duration duration2 = new Duration(TimeUnit.MINUTES, 120);
         assertEquals(duration1, duration2);
         time *= 60;
-        duration2 = new Configuration.Duration(TimeUnit.SECONDS, time);
+        duration2 = new Duration(TimeUnit.SECONDS, time);
         assertEquals(duration1, duration2);
         time *= 1000;
-        duration2 = new Configuration.Duration(TimeUnit.MILLISECONDS, time);
+        duration2 = new Duration(TimeUnit.MILLISECONDS, time);
         assertEquals(duration1, duration2);
     }
 
@@ -153,26 +153,26 @@ public class RIConfigurationTest {
     @Test
     public void DurationExceptions() {
         try {
-            new Configuration.Duration(null, 2);
+            new Duration(null, 2);
         } catch (NullPointerException e) {
             //expected
         }
 
         try {
-            new Configuration.Duration(TimeUnit.MINUTES, 0);
+            new Duration(TimeUnit.MINUTES, 0);
         } catch (NullPointerException e) {
             //expected
         }
 
 
         try {
-            new Configuration.Duration(TimeUnit.MICROSECONDS, 10);
+            new Duration(TimeUnit.MICROSECONDS, 10);
         } catch (IllegalArgumentException e) {
             //expected
         }
 
         try {
-            new Configuration.Duration(TimeUnit.MILLISECONDS, -10);
+            new Duration(TimeUnit.MILLISECONDS, -10);
         } catch (IllegalArgumentException e) {
             //expected
         }
