@@ -19,11 +19,11 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
-import javax.cache.CacheLoader;
+import javax.cache.configuration.CacheLoader;
 import javax.cache.management.CacheMXBean;
 import javax.cache.CacheManager;
 import javax.cache.management.CacheStatisticsMXBean;
-import javax.cache.CacheWriter;
+import javax.cache.configuration.CacheWriter;
 import javax.cache.configuration.Configuration;
 import javax.cache.expiry.Duration;
 import javax.cache.expiry.ExpiryPolicy;
