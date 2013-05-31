@@ -17,8 +17,8 @@
 
 package org.jsr107.ri;
 
-import javax.cache.configuration.CacheLoader;
-import javax.cache.configuration.CacheWriter;
+import javax.cache.integration.CacheLoader;
+import javax.cache.integration.CacheWriter;
 import javax.cache.configuration.Configuration;
 import javax.cache.expiry.EternalExpiryPolicy;
 import javax.cache.expiry.ExpiryPolicy;
