@@ -264,11 +264,11 @@ public class RICacheManager implements CacheManager {
    * {@inheritDoc}
    */
   @Override
-  public Iterable<Cache<?, ?>> getCaches() {
+  public Iterable<String> getCacheNames() {
     synchronized (caches) {
-      HashSet<Cache<?, ?>> set = new HashSet<Cache<?, ?>>();
+      HashSet<String> set = new HashSet<String>();
       for (Cache<?, ?> cache : caches.values()) {
-        set.add(cache);
+        set.add(cache.getName());
       }
       return Collections.unmodifiableSet(set);
     }
