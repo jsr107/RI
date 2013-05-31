@@ -18,7 +18,7 @@ package org.jsr107.ri;
 
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
-import javax.cache.OptionalFeature;
+import javax.cache.configuration.OptionalFeature;
 import javax.cache.spi.CachingProvider;
 import java.net.URI;
 import java.net.URISyntaxException;

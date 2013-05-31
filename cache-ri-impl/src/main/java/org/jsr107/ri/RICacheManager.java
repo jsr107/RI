@@ -19,8 +19,8 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
-import javax.cache.Configuration;
-import javax.cache.OptionalFeature;
+import javax.cache.configuration.Configuration;
+import javax.cache.configuration.OptionalFeature;
 import javax.cache.spi.CachingProvider;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;

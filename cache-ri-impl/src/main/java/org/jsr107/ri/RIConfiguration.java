@@ -19,17 +19,17 @@ package org.jsr107.ri;
 
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
-import javax.cache.Configuration;
+import javax.cache.configuration.Configuration;
 import javax.cache.expiry.Eternal;
 import javax.cache.expiry.ExpiryPolicy;
-import javax.cache.Factory;
+import javax.cache.configuration.Factory;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 import java.util.ArrayList;
 
 /**
- * The reference implementation of a {@link javax.cache.Configuration}.
+ * The reference implementation of a {@link javax.cache.configuration.Configuration}.
  *
  * @param <K> the type of keys maintained the cache
  * @param <V> the type of cached values
@@ -49,22 +49,22 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
   protected Class<V> valueType;
 
   /**
-   * The {@link CacheEntryListenerRegistration}s for the {@link javax.cache.Configuration}.
+   * The {@link CacheEntryListenerRegistration}s for the {@link javax.cache.configuration.Configuration}.
    */
   protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
 
   /**
-   * The {@link CacheLoader} {@link Factory} for the {@link javax.cache.Configuration}.
+   * The {@link CacheLoader} {@link Factory} for the {@link javax.cache.configuration.Configuration}.
    */
   protected Factory<CacheLoader<K, V>> cacheLoaderFactory;
 
   /**
-   * The {@link CacheWriter} {@link Factory} for the {@link javax.cache.Configuration}.
+   * The {@link CacheWriter} {@link Factory} for the {@link javax.cache.configuration.Configuration}.
    */
   protected Factory<CacheWriter<? super K, ? super V>> cacheWriterFactory;
 
   /**
-   * The {@link javax.cache.expiry.ExpiryPolicy} for the {@link javax.cache.Configuration}.
+   * The {@link javax.cache.expiry.ExpiryPolicy} for the {@link javax.cache.configuration.Configuration}.
    */
   protected Factory<ExpiryPolicy<? super K, ? super V>> expiryPolicyFactory;
 
@@ -131,7 +131,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
   /**
    * A copy-constructor for a {@link RIConfiguration}.
    *
-   * @param configuration the {@link javax.cache.Configuration} from which to copy
+   * @param configuration the {@link javax.cache.configuration.Configuration} from which to copy
    */
   public RIConfiguration(Configuration<K, V> configuration) {
 

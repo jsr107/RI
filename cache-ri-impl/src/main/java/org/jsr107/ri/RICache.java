@@ -24,7 +24,7 @@ import javax.cache.CacheMXBean;
 import javax.cache.CacheManager;
 import javax.cache.CacheStatisticsMXBean;
 import javax.cache.CacheWriter;
-import javax.cache.Configuration;
+import javax.cache.configuration.Configuration;
 import javax.cache.expiry.Duration;
 import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.event.CacheEntryCreatedListener;
