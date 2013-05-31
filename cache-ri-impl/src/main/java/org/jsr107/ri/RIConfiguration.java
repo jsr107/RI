@@ -20,7 +20,7 @@ package org.jsr107.ri;
 import javax.cache.CacheLoader;
 import javax.cache.CacheWriter;
 import javax.cache.configuration.Configuration;
-import javax.cache.expiry.Eternal;
+import javax.cache.expiry.EternalExpiryPolicy;
 import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.configuration.Factory;
 import javax.cache.event.CacheEntryListenerRegistration;
@@ -117,7 +117,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
     this.cacheLoaderFactory = null;
     this.cacheWriterFactory = null;
-    this.expiryPolicyFactory = Eternal.<K, V>getFactory();
+    this.expiryPolicyFactory = EternalExpiryPolicy.<K, V>getFactory();
     this.isReadThrough = false;
     this.isWriteThrough = false;
     this.setStatisticsEnabled(false);
@@ -152,7 +152,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     this.cacheWriterFactory = configuration.getCacheWriterFactory();
 
     if (configuration.getExpiryPolicyFactory() == null) {
-      this.expiryPolicyFactory = Eternal.<K, V>getFactory();
+      this.expiryPolicyFactory = EternalExpiryPolicy.<K, V>getFactory();
     } else {
       this.expiryPolicyFactory = configuration.getExpiryPolicyFactory();
     }
