@@ -251,7 +251,8 @@ public class RICacheManager implements CacheManager {
             configuration.getValueType() == null) {
           return (Cache<K, V>) cache;
         } else {
-          throw new ClassCastException("Cache " + cacheName + " was defined with specific types Cache<" +
+          throw new IllegalArgumentException("Cache " + cacheName + " was " +
+              "defined with specific types Cache<" +
               configuration.getKeyType() + ", " + configuration.getValueType() + "> " +
               "in which case CacheManager.getCache(String, Class, Class) must be used");
         }
