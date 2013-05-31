@@ -18,13 +18,13 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
-import javax.cache.CacheStatisticsMXBean;
+import javax.cache.management.CacheStatisticsMXBean;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * The reference implementation of {@link javax.cache.CacheStatisticsMXBean}.
+ * The reference implementation of {@link javax.cache.management.CacheStatisticsMXBean}.
  */
 public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializable {
 
