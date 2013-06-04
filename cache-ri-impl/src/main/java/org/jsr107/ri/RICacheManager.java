@@ -204,6 +204,15 @@ public class RICacheManager implements CacheManager {
     if (isClosed()) {
       throw new IllegalStateException();
     }
+
+    if (keyType == null) {
+      throw new NullPointerException("keyType can not be null");
+    }
+
+    if (valueType == null) {
+      throw new NullPointerException("valueType can not be null");
+    }
+
     synchronized (caches) {
       RICache<?, ?> cache = caches.get(cacheName);
 
