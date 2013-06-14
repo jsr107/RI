@@ -402,6 +402,13 @@ public final class RICache<K, V> implements Cache<K, V> {
 
             Map<? extends K, ? extends V> loaded = cacheLoader.loadAll(keysToLoad);
 
+            //remove all of the null values (they can't be in the cache)
+            for(K key : keysToLoad) {
+              if (loaded.get(key) == null) {
+                loaded.remove(key);
+              }
+            }
+
             putAll(loaded, replaceExistingValues, false);
 
             if (listener != null) {
