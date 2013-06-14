@@ -383,13 +383,19 @@ public final class RICache<K, V> implements Cache<K, V> {
         listener.onCompletion();
       }
     } else {
+      for (K key : keys) {
+        if (key == null) {
+          throw new NullPointerException("keys contains a null");
+        }
+      }
+
       executorService.submit(new Runnable() {
         @Override
         public void run() {
           try {
             ArrayList<K> keysToLoad = new ArrayList<K>();
             for (K key : keys) {
-              if (!containsKey(key)) {
+              if (replaceExistingValues || !containsKey(key)) {
                 keysToLoad.add(key);
               }
             }
