@@ -9,28 +9,27 @@
     <!-- Suppress duplicate checking of copyright notice -->
     <suppress checks="StrictDuplicateCode" files=".java" lines="1-53"/>
 
-    <suppress checks="NPathComplexity" files="RICache.java"/>
+    <suppress checks="AnonInnerLength" files="RICache.java"/>
     <suppress checks="ClassDataAbstractionCoupling" files="RICache.java"/>
-    <suppress checks="FanOutComplexity" files="RICache.java"/>
-    <suppress checks="FileLength" files="RICache.java"/>
     <suppress checks="CyclomaticComplexity" files="RICache.java"/>
     <suppress checks="ExecutableStatementCount" files="RICache.java"/>
+    <suppress checks="FanOutComplexity" files="RICache.java"/>
+    <suppress checks="FileLength" files="RICache.java"/>
+    <suppress checks="NPathComplexity" files="RICache.java"/>
 
     <suppress checks="CyclomaticComplexity" files="RIConfiguration.java"/>
     <suppress checks="NPathComplexity" files="RIConfiguration.java"/>
 
-    <suppress checks="NPathComplexity" files="AbstractCacheLookupUtil.java"/>
     <suppress checks="CyclomaticComplexity" files="AbstractCacheLookupUtil.java"/>
+    <suppress checks="NPathComplexity" files="AbstractCacheLookupUtil.java"/>
 
     <suppress checks="CyclomaticComplexity" files="RICacheManager.java"/>
     <suppress checks="NPathComplexity" files="RICacheManager.java"/>
 
+    <suppress checks="CyclomaticComplexity" files="RICacheEventEventDispatcher.java"/>
     <suppress checks="NPathComplexity" files="RICacheEventEventDispatcher.java"/>
-    <suppress checks="CyclomaticComplexity"
-              files="RICacheEventEventDispatcher.java"/>
 
-    <suppress checks="NPathComplexity"
-              files="RICacheEntryListenerRegistration.java"/>
+    <suppress checks="NPathComplexity" files="RICacheEntryListenerRegistration.java"/>
 
     <suppress checks="NPathComplexity" files="RICachingProvider.java"/>
 </suppressions>
