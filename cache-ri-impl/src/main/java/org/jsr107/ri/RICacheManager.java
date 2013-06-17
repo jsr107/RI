@@ -287,8 +287,7 @@ public class RICacheManager implements CacheManager {
   /**
    * {@inheritDoc}
    */
-  @Override
-  public boolean removeCache(String cacheName) {
+  public void destroyCache(String cacheName) {
     if (isClosed()) {
       throw new IllegalStateException();
     }
@@ -301,11 +300,8 @@ public class RICacheManager implements CacheManager {
       cache = caches.get(cacheName);
     }
 
-    if (cache == null) {
-      return false;
-    } else {
+    if (cache != null) {
       cache.close();
-      return true;
     }
   }
 
