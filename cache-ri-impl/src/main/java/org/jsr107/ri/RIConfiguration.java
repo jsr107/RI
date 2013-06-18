@@ -23,7 +23,7 @@ import javax.cache.configuration.Configuration;
 import javax.cache.expiry.EternalExpiryPolicy;
 import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.configuration.Factory;
-import javax.cache.event.CacheEntryListenerRegistration;
+import javax.cache.event.CacheEntryListenerDefinition;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 import java.util.ArrayList;
@@ -49,9 +49,9 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
   protected Class<V> valueType;
 
   /**
-   * The {@link CacheEntryListenerRegistration}s for the {@link javax.cache.configuration.Configuration}.
+   * The {@link javax.cache.event.CacheEntryListenerDefinition}s for the {@link javax.cache.configuration.Configuration}.
    */
-  protected ArrayList<CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations;
+  protected ArrayList<CacheEntryListenerDefinition<K, V>> cacheEntryListenerDefinitions;
 
   /**
    * The {@link CacheLoader} {@link Factory} for the {@link javax.cache.configuration.Configuration}.
@@ -114,7 +114,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
   public RIConfiguration() {
     this.keyType = null;
     this.valueType = null;
-    this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
+    this.cacheEntryListenerDefinitions = new ArrayList<CacheEntryListenerDefinition<K, V>>();
     this.cacheLoaderFactory = null;
     this.cacheWriterFactory = null;
     this.expiryPolicyFactory = EternalExpiryPolicy.<K, V>getFactory();
@@ -138,14 +138,14 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     this.keyType = configuration.getKeyType();
     this.valueType = configuration.getValueType();
 
-    this.cacheEntryListenerRegistrations = new ArrayList<CacheEntryListenerRegistration<? super K, ? super V>>();
-    for (CacheEntryListenerRegistration<? super K, ? super V> r : configuration.getCacheEntryListenerRegistrations()) {
-      RICacheEntryListenerRegistration<? super K, ? super V> registration =
-          new RICacheEntryListenerRegistration<K, V>(r.getCacheEntryListener(),
-              r.getCacheEntryFilter(),
+    this.cacheEntryListenerDefinitions = new ArrayList<CacheEntryListenerDefinition<K, V>>();
+    for (CacheEntryListenerDefinition<K, V> r : configuration.getCacheEntryListenerDefinitions()) {
+      RICacheEntryListenerDefinition<K, V> registration =
+          new RICacheEntryListenerDefinition<K, V>(r.getCacheEntryListenerFactory(),
+              r.getCacheEntryFilterFactory(),
               r.isOldValueRequired(),
               r.isSynchronous());
-      this.cacheEntryListenerRegistrations.add(registration);
+      this.cacheEntryListenerDefinitions.add(registration);
     }
 
     this.cacheLoaderFactory = configuration.getCacheLoaderFactory();
@@ -190,8 +190,8 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public Iterable<CacheEntryListenerRegistration<? super K, ? super V>> getCacheEntryListenerRegistrations() {
-    return cacheEntryListenerRegistrations;
+  public Iterable<CacheEntryListenerDefinition<K, V>> getCacheEntryListenerDefinitions() {
+    return cacheEntryListenerDefinitions;
   }
 
   /**
@@ -297,7 +297,7 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
         ((valueType == null) ? 0 : valueType.hashCode());
     result = prime
         * result
-        + ((cacheEntryListenerRegistrations == null) ? 0 : cacheEntryListenerRegistrations
+        + ((cacheEntryListenerDefinitions == null) ? 0 : cacheEntryListenerDefinitions
         .hashCode());
     result = prime * result
         + ((cacheLoaderFactory == null) ? 0 : cacheLoaderFactory.hashCode());
@@ -346,11 +346,11 @@ public class RIConfiguration<K, V> implements Configuration<K, V> {
     } else if (!valueType.equals(other.valueType)) {
       return false;
     }
-    if (cacheEntryListenerRegistrations == null) {
-      if (other.cacheEntryListenerRegistrations != null) {
+    if (cacheEntryListenerDefinitions == null) {
+      if (other.cacheEntryListenerDefinitions != null) {
         return false;
       }
-    } else if (!cacheEntryListenerRegistrations.equals(other.cacheEntryListenerRegistrations)) {
+    } else if (!cacheEntryListenerDefinitions.equals(other.cacheEntryListenerDefinitions)) {
       return false;
     }
     if (cacheLoaderFactory == null) {

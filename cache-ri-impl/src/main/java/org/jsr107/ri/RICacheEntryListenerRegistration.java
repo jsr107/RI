@@ -19,16 +19,16 @@ package org.jsr107.ri;
 
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerRegistration;
+import javax.cache.event.CacheEntryListenerDefinition;
 
 /**
- * The reference implementation of the {@link CacheEntryListenerRegistration}.
+ * An internal structure to represent the registration of a {@link CacheEntryListener}.
  *
  * @param <K> the type of keys
  * @param <V> the type of values
  * @author Brian Oliver
  */
-public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListenerRegistration<K, V> {
+class RICacheEntryListenerRegistration<K, V> {
 
   private CacheEntryListener<? super K, ? super V> listener;
   private CacheEntryEventFilter<? super K, ? super V> filter;
@@ -38,49 +38,50 @@ public class RICacheEntryListenerRegistration<K, V> implements CacheEntryListene
   /**
    * Constructs an {@link RICacheEntryListenerRegistration}.
    *
-   * @param listener           the {@link CacheEntryListener}
-   * @param filter             the optional {@link CacheEntryEventFilter}
-   * @param isOldValueRequired if the old value is required for events with this listener
-   * @param isSynchronous      if the listener should block the thread causing the event
+   * @param definition  the {@link CacheEntryListenerDefinition} to be registered
    */
-  public RICacheEntryListenerRegistration(CacheEntryListener<? super K, ? super V> listener,
-                                          CacheEntryEventFilter<? super K, ? super V> filter,
-                                          boolean isOldValueRequired,
-                                          boolean isSynchronous) {
-    this.listener = listener;
-    this.filter = filter;
-    this.isOldValueRequired = isOldValueRequired;
-    this.isSynchronous = isSynchronous;
+  public RICacheEntryListenerRegistration(CacheEntryListenerDefinition<K, V> definition) {
+    this.listener = definition.getCacheEntryListenerFactory().create();
+    this.filter = definition.getCacheEntryFilterFactory() == null
+                  ? null
+                  : definition.getCacheEntryFilterFactory().create();
+    this.isOldValueRequired = definition.isOldValueRequired();
+    this.isSynchronous = definition.isSynchronous();
   }
 
   /**
-   * {@inheritDoc}
+   * Obtains the {@link CacheEntryListener} that was registered.
+   *
+   * @return the {@link CacheEntryListener}
    */
-  @Override
-  public CacheEntryEventFilter<? super K, ? super V> getCacheEntryFilter() {
-    return filter;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public CacheEntryListener<? super K, ? super V> getCacheEntryListener() {
     return listener;
   }
 
   /**
-   * {@inheritDoc}
+   * Obtains the {@link CacheEntryEventFilter} that was registered.
+   *
+   * @return the {@link CacheEntryEventFilter}
    */
-  @Override
+  public CacheEntryEventFilter<? super K, ? super V> getCacheEntryFilter() {
+    return filter;
+  }
+
+  /**
+   * Determines if the old/previous value should to be supplied with the
+   * {@link javax.cache.event.CacheEntryEvent}s dispatched to the
+   * {@link CacheEntryListener}.
+   */
   public boolean isOldValueRequired() {
     return isOldValueRequired;
   }
 
   /**
-   * {@inheritDoc}
+   * Determines if {@link javax.cache.event.CacheEntryEvent}s should be raised
+   * synchronously.
+   *
+   * @return <code>true</code> if events should be raised synchronously
    */
-  @Override
   public boolean isSynchronous() {
     return isSynchronous;
   }

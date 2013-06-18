@@ -22,10 +22,9 @@ import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
 import javax.cache.event.CacheEntryCreatedListener;
-import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerRegistration;
+import javax.cache.event.CacheEntryListenerDefinition;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
@@ -122,11 +121,11 @@ public final class RICache<K, V> implements Cache<K, V> {
   private final ExpiryPolicy<? super K, ? super V> expiryPolicy;
 
   /**
-   * The {@link CacheEntryListenerRegistration}s for the {@link Cache}.
+   * The {@link RICacheEntryListenerRegistration}s for the {@link Cache}.
    */
   private final ConcurrentHashMap<CacheEntryListener<? super K, ? super V>,
-      CacheEntryListenerRegistration<? super K, ? super V>> cacheEntryListenerRegistrations =
-      new ConcurrentHashMap<CacheEntryListener<? super K, ? super V>, CacheEntryListenerRegistration<? super K, ? super V>>();
+      RICacheEntryListenerRegistration<K, V>> cacheEntryListenerRegistrations =
+      new ConcurrentHashMap<CacheEntryListener<? super K, ? super V>, RICacheEntryListenerRegistration<K, V>>();
 
   /**
    * The open/closed state of the Cache.
@@ -203,17 +202,12 @@ public final class RICache<K, V> implements Cache<K, V> {
       setStatisticsEnabled(true);
     }
 
-    for (CacheEntryListenerRegistration<? super K, ? super V> r : configuration.getCacheEntryListenerRegistrations()) {
-
-      CacheEntryListener<? super K, ? super V> listener = r.getCacheEntryListener();
-      CacheEntryEventFilter<? super K, ? super V> filter = r.getCacheEntryFilter();
-      boolean oldValueRequired = r.isOldValueRequired();
-      boolean synchronous = r.isSynchronous();
+    for (CacheEntryListenerDefinition<K, V> definition : configuration.getCacheEntryListenerDefinitions()) {
 
       RICacheEntryListenerRegistration<K, V> registration =
-          new RICacheEntryListenerRegistration<K, V>(listener, filter, oldValueRequired, synchronous);
+          new RICacheEntryListenerRegistration<K, V>(definition);
 
-      cacheEntryListenerRegistrations.put(listener, registration);
+      cacheEntryListenerRegistrations.put(registration.getCacheEntryListener(), registration);
     }
   }
 

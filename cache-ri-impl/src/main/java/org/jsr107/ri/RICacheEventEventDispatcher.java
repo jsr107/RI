@@ -21,7 +21,6 @@ import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import java.util.ArrayList;
@@ -89,13 +88,13 @@ public class RICacheEventEventDispatcher<K, V> {
 
   /**
    * Dispatches the added events to the listeners defined by the specified
-   * {@link CacheEntryListenerRegistration}s.
+   * {@link javax.cache.event.CacheEntryListenerDefinition}s.
    *
-   * @param registrations the {@link CacheEntryListenerRegistration} defining
+   * @param registrations the {@link RICacheEntryListenerRegistration}s defining
    *                      {@link CacheEntryListener}s to which to dispatch events
    * @see #addEvent(Class, CacheEntryEvent)
    */
-  public void dispatch(Iterable<CacheEntryListenerRegistration<? super K, ? super V>> registrations) {
+  public void dispatch(Iterable<RICacheEntryListenerRegistration<K, V>> registrations) {
 
     //TODO: we could really optimize this implementation
 
@@ -110,7 +109,7 @@ public class RICacheEventEventDispatcher<K, V> {
     //notify expiry listeners
     events = eventMap.get(CacheEntryExpiredListener.class);
     if (events != null) {
-      for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+      for (RICacheEntryListenerRegistration<K, V> registration : registrations) {
         CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
         Iterable<CacheEntryEvent<K, V>> iterable =
             filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
@@ -125,7 +124,7 @@ public class RICacheEventEventDispatcher<K, V> {
     //notify create listeners
     events = eventMap.get(CacheEntryCreatedListener.class);
     if (events != null) {
-      for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+      for (RICacheEntryListenerRegistration<K, V> registration : registrations) {
         CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
         Iterable<CacheEntryEvent<K, V>> iterable =
             filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
@@ -140,7 +139,7 @@ public class RICacheEventEventDispatcher<K, V> {
     //notify update listeners
     events = eventMap.get(CacheEntryUpdatedListener.class);
     if (events != null) {
-      for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+      for (RICacheEntryListenerRegistration<K, V> registration : registrations) {
         CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
         Iterable<CacheEntryEvent<K, V>> iterable =
             filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
@@ -155,7 +154,7 @@ public class RICacheEventEventDispatcher<K, V> {
     //notify remove listeners
     events = eventMap.get(CacheEntryRemovedListener.class);
     if (events != null) {
-      for (CacheEntryListenerRegistration<? super K, ? super V> registration : registrations) {
+      for (RICacheEntryListenerRegistration<K, V> registration : registrations) {
         CacheEntryEventFilter<? super K, ? super V> filter = registration.getCacheEntryFilter();
         Iterable<CacheEntryEvent<K, V>> iterable =
             filter == null ? events : new RICacheEntryEventFilteringIterable<K, V>(events, filter);
