@@ -968,6 +968,17 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           result = true;
         } else {
+          try {
+            RIEntry<K, V> entry = new RIEntry<K, V>(key, oldValue);
+            Duration duration = expiryPolicy.getExpiryForAccessedEntry(entry);
+            if (duration != null) {
+              long expiryTime = duration.getAdjustedTime(now);
+              cachedValue.setExpiryTime(expiryTime);
+            }
+          } catch (Throwable t) {
+            //leave the expiry time untouched when we can't determine a duration
+          }
+
           result = false;
         }
       }
