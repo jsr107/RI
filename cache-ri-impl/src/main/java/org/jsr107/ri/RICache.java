@@ -19,24 +19,23 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
-import javax.cache.integration.CacheLoader;
-import javax.cache.management.CacheMXBean;
 import javax.cache.CacheManager;
-import javax.cache.management.CacheStatisticsMXBean;
-import javax.cache.integration.CacheWriter;
 import javax.cache.configuration.Configuration;
-import javax.cache.expiry.Duration;
-import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryListenerRegistration;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
 import javax.cache.event.EventType;
+import javax.cache.expiry.Duration;
+import javax.cache.expiry.ExpiryPolicy;
+import javax.cache.integration.CacheLoader;
+import javax.cache.integration.CacheWriter;
+import javax.cache.management.CacheMXBean;
+import javax.cache.management.CacheStatisticsMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,10 +52,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static javax.cache.event.EventType.CREATED;
-import static javax.cache.event.EventType.EXPIRED;
-import static javax.cache.event.EventType.REMOVED;
-import static javax.cache.event.EventType.UPDATED;
+import static javax.cache.event.EventType.*;
 import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
 import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
 
@@ -1277,34 +1273,6 @@ public final class RICache<K, V> implements Cache<K, V> {
       } finally {
         lockManager.unLock(key);
       }
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean registerCacheEntryListener(CacheEntryListener<? super K, ? super V> listener,
-                                            boolean requireOldValue,
-                                            CacheEntryEventFilter<? super K, ? super V> filter,
-                                            boolean synchronous) {
-    if (listener == null) {
-      throw new CacheEntryListenerException("A listener may not be null");
-    }
-    RICacheEntryListenerRegistration<K, V> registration =
-        new RICacheEntryListenerRegistration<K, V>(listener, filter, requireOldValue, synchronous);
-    return cacheEntryListenerRegistrations.putIfAbsent(listener, registration) != null;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean unregisterCacheEntryListener(CacheEntryListener<?, ?> listener) {
-    if (listener == null) {
-      return false;
-    } else {
-      return cacheEntryListenerRegistrations.remove(listener) != null;
     }
   }
 
