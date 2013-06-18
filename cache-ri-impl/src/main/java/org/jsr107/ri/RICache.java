@@ -36,6 +36,8 @@ import javax.cache.integration.CacheLoader;
 import javax.cache.integration.CacheWriter;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -261,6 +263,44 @@ public final class RICache<K, V> implements Cache<K, V> {
       //disable statistics and management
       setStatisticsEnabled(false);
       setManagementEnabled(false);
+
+      //close the configured CacheLoader
+      if (cacheLoader instanceof Closeable) {
+        try {
+        ((Closeable)cacheLoader).close();
+        } catch (IOException e) {
+          //TODO: log the exception
+        }
+      }
+
+      //close the configured CacheWriter
+      if (cacheWriter instanceof Closeable) {
+        try {
+          ((Closeable)cacheWriter).close();
+        } catch (IOException e) {
+          //TODO: log the exception
+        }
+      }
+
+      //close the configured ExpiryPolicy
+      if (expiryPolicy instanceof Closeable) {
+        try {
+          ((Closeable)expiryPolicy).close();
+        } catch (IOException e) {
+          //TODO: log the exception
+        }
+      }
+
+      //close the configured CacheEntryListeners
+      for (RICacheEntryListenerRegistration registration : cacheEntryListenerRegistrations.values()) {
+        if (registration.getCacheEntryListener() instanceof Closeable) {
+          try {
+            ((Closeable)registration).close();
+          } catch (IOException e) {
+            //TODO: log the exception
+          }
+        }
+      }
 
       //attempt to shutdown (and wait for the cache to shutdown)
       executorService.shutdown();
