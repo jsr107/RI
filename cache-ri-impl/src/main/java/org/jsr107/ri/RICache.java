@@ -21,6 +21,7 @@ import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
+import javax.cache.configuration.MutableConfiguration;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.event.CacheEntryListener;
@@ -87,7 +88,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   /**
    * The {@link Configuration} for the {@link Cache}.
    */
-  private final RIConfiguration<K, V> configuration;
+  private final MutableConfiguration<K, V> configuration;
 
   /**
    * The {@link CacheLoader} for the {@link Cache}.
@@ -165,7 +166,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     //we make a copy of the configuration here so that the provided one
     //may be changed and or used independently for other caches.  we do this
     //as we don't know if the provided configuration is mutable
-    this.configuration = new RIConfiguration<K, V>(configuration);
+    this.configuration = new MutableConfiguration<K, V>(configuration);
 
     if (this.configuration.getCacheLoaderFactory() != null) {
       this.cacheLoader = (CacheLoader<K, V>) this.configuration.getCacheLoaderFactory().create();
