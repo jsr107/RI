@@ -88,7 +88,7 @@ public class RICacheEventEventDispatcher<K, V> {
 
   /**
    * Dispatches the added events to the listeners defined by the specified
-   * {@link javax.cache.event.CacheEntryListenerDefinition}s.
+   * {@link javax.cache.event.CacheEntryListenerFactoryDefinition}s.
    *
    * @param registrations the {@link RICacheEntryListenerRegistration}s defining
    *                      {@link CacheEntryListener}s to which to dispatch events

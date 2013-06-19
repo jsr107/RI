@@ -20,16 +20,16 @@ package org.jsr107.ri;
 import javax.cache.configuration.Factory;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerDefinition;
+import javax.cache.event.CacheEntryListenerFactoryDefinition;
 
 /**
- * The reference implementation of the {@link javax.cache.event.CacheEntryListenerDefinition}.
+ * The reference implementation of the {@link javax.cache.event.CacheEntryListenerFactoryDefinition}.
  *
  * @param <K> the type of keys
  * @param <V> the type of values
  * @author Brian Oliver
  */
-public class RICacheEntryListenerDefinition<K, V> implements CacheEntryListenerDefinition<K, V> {
+public class RICacheEntryListenerFactoryDefinition<K, V> implements CacheEntryListenerFactoryDefinition<K, V> {
 
   private Factory<CacheEntryListener<? super K, ? super V>> listenerFactory;
   private Factory<CacheEntryEventFilter<? super K, ? super V>> filterFactory;
@@ -37,17 +37,17 @@ public class RICacheEntryListenerDefinition<K, V> implements CacheEntryListenerD
   private boolean isSynchronous;
 
   /**
-   * Constructs an {@link RICacheEntryListenerDefinition}.
+   * Constructs an {@link RICacheEntryListenerFactoryDefinition}.
    *
    * @param listenerFactory    the {@link CacheEntryListener} {@link Factory}
    * @param filterFactory      the optional {@link CacheEntryEventFilter} {@link Factory}
    * @param isOldValueRequired if the old value is required for events with this listenerFactory
    * @param isSynchronous      if the listenerFactory should block the thread causing the event
    */
-  public RICacheEntryListenerDefinition(Factory<CacheEntryListener<? super K, ? super V>> listenerFactory,
-                                        Factory<CacheEntryEventFilter<? super K, ? super V>> filterFactory,
-                                        boolean isOldValueRequired,
-                                        boolean isSynchronous) {
+  public RICacheEntryListenerFactoryDefinition(Factory<CacheEntryListener<? super K, ? super V>> listenerFactory,
+                                               Factory<CacheEntryEventFilter<? super K, ? super V>> filterFactory,
+                                               boolean isOldValueRequired,
+                                               boolean isSynchronous) {
     this.listenerFactory = listenerFactory;
     this.filterFactory = filterFactory;
     this.isOldValueRequired = isOldValueRequired;
@@ -112,10 +112,10 @@ public class RICacheEntryListenerDefinition<K, V> implements CacheEntryListenerD
     if (object == null) {
       return false;
     }
-    if (!(object instanceof RICacheEntryListenerDefinition)) {
+    if (!(object instanceof RICacheEntryListenerFactoryDefinition)) {
       return false;
     }
-    RICacheEntryListenerDefinition<?, ?> other = (RICacheEntryListenerDefinition<?, ?>) object;
+    RICacheEntryListenerFactoryDefinition<?, ?> other = (RICacheEntryListenerFactoryDefinition<?, ?>) object;
     if (filterFactory == null) {
       if (other.filterFactory != null) {
         return false;

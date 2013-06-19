@@ -19,7 +19,7 @@ package org.jsr107.ri;
 
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerDefinition;
+import javax.cache.event.CacheEntryListenerFactoryDefinition;
 
 /**
  * An internal structure to represent the registration of a {@link CacheEntryListener}.
@@ -38,9 +38,9 @@ class RICacheEntryListenerRegistration<K, V> {
   /**
    * Constructs an {@link RICacheEntryListenerRegistration}.
    *
-   * @param definition  the {@link CacheEntryListenerDefinition} to be registered
+   * @param definition  the {@link javax.cache.event.CacheEntryListenerFactoryDefinition} to be registered
    */
-  public RICacheEntryListenerRegistration(CacheEntryListenerDefinition<K, V> definition) {
+  public RICacheEntryListenerRegistration(CacheEntryListenerFactoryDefinition<K, V> definition) {
     this.listener = definition.getCacheEntryListenerFactory().create();
     this.filter = definition.getCacheEntryFilterFactory() == null
                   ? null

@@ -24,7 +24,7 @@ import javax.cache.configuration.Configuration;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryExpiredListener;
-import javax.cache.event.CacheEntryListenerDefinition;
+import javax.cache.event.CacheEntryListenerFactoryDefinition;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CompletionListener;
@@ -191,7 +191,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     //establish all of the listeners
     LinkedList<RICacheEntryListenerRegistration<K, V>> registrations = new LinkedList<RICacheEntryListenerRegistration<K, V>>();
-    for (CacheEntryListenerDefinition<K, V> definition : configuration.getCacheEntryListenerDefinitions()) {
+    for (CacheEntryListenerFactoryDefinition<K, V> definition : configuration
+        .getCacheEntryListenerFactoryDefinitions()) {
 
       RICacheEntryListenerRegistration<K, V> registration =
           new RICacheEntryListenerRegistration<K, V>(definition);
