@@ -20,16 +20,16 @@ package org.jsr107.ri;
 import javax.cache.configuration.Factory;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerFactoryDefinition;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 
 /**
- * The reference implementation of the {@link javax.cache.event.CacheEntryListenerFactoryDefinition}.
+ * The reference implementation of the {@link javax.cache.configuration.CacheEntryListenerConfiguration}.
  *
  * @param <K> the type of keys
  * @param <V> the type of values
  * @author Brian Oliver
  */
-public class RICacheEntryListenerFactoryDefinition<K, V> implements CacheEntryListenerFactoryDefinition<K, V> {
+public class RICacheEntryListenerFactoryDefinition<K, V> implements CacheEntryListenerConfiguration<K, V> {
 
   private Factory<CacheEntryListener<? super K, ? super V>> listenerFactory;
   private Factory<CacheEntryEventFilter<? super K, ? super V>> filterFactory;
@@ -58,7 +58,7 @@ public class RICacheEntryListenerFactoryDefinition<K, V> implements CacheEntryLi
    * {@inheritDoc}
    */
   @Override
-  public Factory<CacheEntryEventFilter<? super K, ? super V>> getCacheEntryFilterFactory() {
+  public Factory<CacheEntryEventFilter<? super K, ? super V>> getCacheEntryEventFilterFactory() {
     return filterFactory;
   }
 

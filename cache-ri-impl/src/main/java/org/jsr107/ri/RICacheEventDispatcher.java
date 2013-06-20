@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <V> the type of values
  * @author Brian Oliver
  */
-public class RICacheEventEventDispatcher<K, V> {
+public class RICacheEventDispatcher<K, V> {
 
   /**
    * The map of {@link CacheEntryEvent}s to deliver, keyed by the class of
@@ -44,9 +44,9 @@ public class RICacheEventEventDispatcher<K, V> {
       ArrayList<CacheEntryEvent<K, V>>> eventMap;
 
   /**
-   * Constructs an {@link RICacheEventEventDispatcher}.
+   * Constructs an {@link RICacheEventDispatcher}.
    */
-  public RICacheEventEventDispatcher() {
+  public RICacheEventDispatcher() {
     this.eventMap = new ConcurrentHashMap<Class<? extends CacheEntryListener>,
         ArrayList<CacheEntryEvent<K, V>>>();
   }
@@ -88,7 +88,7 @@ public class RICacheEventEventDispatcher<K, V> {
 
   /**
    * Dispatches the added events to the listeners defined by the specified
-   * {@link javax.cache.event.CacheEntryListenerFactoryDefinition}s.
+   * {@link javax.cache.configuration.CacheEntryListenerConfiguration}s.
    *
    * @param registrations the {@link RICacheEntryListenerRegistration}s defining
    *                      {@link CacheEntryListener}s to which to dispatch events

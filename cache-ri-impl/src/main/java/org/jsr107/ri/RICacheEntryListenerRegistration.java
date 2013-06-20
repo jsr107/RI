@@ -19,7 +19,7 @@ package org.jsr107.ri;
 
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.CacheEntryListenerFactoryDefinition;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 
 /**
  * An internal structure to represent the registration of a {@link CacheEntryListener}.
@@ -38,15 +38,15 @@ class RICacheEntryListenerRegistration<K, V> {
   /**
    * Constructs an {@link RICacheEntryListenerRegistration}.
    *
-   * @param definition  the {@link javax.cache.event.CacheEntryListenerFactoryDefinition} to be registered
+   * @param configuration  the {@link javax.cache.configuration.CacheEntryListenerConfiguration} to be registered
    */
-  public RICacheEntryListenerRegistration(CacheEntryListenerFactoryDefinition<K, V> definition) {
-    this.listener = definition.getCacheEntryListenerFactory().create();
-    this.filter = definition.getCacheEntryFilterFactory() == null
+  public RICacheEntryListenerRegistration(CacheEntryListenerConfiguration<K, V> configuration) {
+    this.listener = configuration.getCacheEntryListenerFactory().create();
+    this.filter = configuration.getCacheEntryEventFilterFactory() == null
                   ? null
-                  : definition.getCacheEntryFilterFactory().create();
-    this.isOldValueRequired = definition.isOldValueRequired();
-    this.isSynchronous = definition.isSynchronous();
+                  : configuration.getCacheEntryEventFilterFactory().create();
+    this.isOldValueRequired = configuration.isOldValueRequired();
+    this.isSynchronous = configuration.isSynchronous();
   }
 
   /**
