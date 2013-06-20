@@ -406,15 +406,15 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public void loadAll(final Iterable<? extends K> keys, final boolean replaceExistingValues, final CompletionListener listener) {
+  public void loadAll(final Iterable<? extends K> keys, final boolean replaceExistingValues, final CompletionListener completionListener) {
     ensureOpen();
     if (keys == null) {
       throw new NullPointerException("keys");
     }
 
     if (cacheLoader == null) {
-      if (listener != null) {
-        listener.onCompletion();
+      if (completionListener != null) {
+        completionListener.onCompletion();
       }
     } else {
       for (K key : keys) {
@@ -444,12 +444,12 @@ public final class RICache<K, V> implements Cache<K, V> {
 
             putAll(loaded, replaceExistingValues, false);
 
-            if (listener != null) {
-              listener.onCompletion();
+            if (completionListener != null) {
+              completionListener.onCompletion();
             }
           } catch (Exception e) {
-            if (listener != null) {
-              listener.onException(e);
+            if (completionListener != null) {
+              completionListener.onException(e);
             }
           }
         }
