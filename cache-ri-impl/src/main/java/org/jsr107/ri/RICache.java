@@ -27,7 +27,7 @@ import javax.cache.event.CacheEntryExpiredListener;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
-import javax.cache.event.CompletionListener;
+import javax.cache.integration.CompletionListener;
 import javax.cache.event.EventType;
 import javax.cache.expiry.Duration;
 import javax.cache.expiry.ExpiryPolicy;
