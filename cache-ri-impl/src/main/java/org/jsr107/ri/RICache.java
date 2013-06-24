@@ -1459,6 +1459,34 @@ public final class RICache<K, V> implements Cache<K, V> {
     return result;
   }
 
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <T> Map<K, T> invokeEntryProcessor(Set<? extends K> keys,
+                                            EntryProcessor<K, V, T> entryProcessor,
+                                            Object... arguments) {
+
+    ensureOpen();
+    if (keys == null) {
+      throw new NullPointerException();
+    }
+    if (entryProcessor == null) {
+      throw new NullPointerException();
+    }
+
+    HashMap<K, T> map = new HashMap<K, T>();
+    for (K key : keys) {
+      T t = invokeEntryProcessor(key, entryProcessor, arguments);
+      if (t != null) {
+        map.put(key, t);
+      }
+    }
+
+    return map;
+  }
+
   /**
    * {@inheritDoc}
    */
