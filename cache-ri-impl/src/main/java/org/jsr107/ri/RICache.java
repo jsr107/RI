@@ -1329,7 +1329,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public <T> T invokeEntryProcessor(K key, EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
+  public <T> T invoke(K key, EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
     ensureOpen();
     if (key == null) {
       throw new NullPointerException();
@@ -1464,9 +1464,9 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public <T> Map<K, T> invokeEntryProcessor(Set<? extends K> keys,
-                                            EntryProcessor<K, V, T> entryProcessor,
-                                            Object... arguments) {
+  public <T> Map<K, T> invokeAll(Set<? extends K> keys,
+                                 EntryProcessor<K, V, T> entryProcessor,
+                                 Object... arguments) {
 
     ensureOpen();
     if (keys == null) {
@@ -1478,7 +1478,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     HashMap<K, T> map = new HashMap<K, T>();
     for (K key : keys) {
-      T t = invokeEntryProcessor(key, entryProcessor, arguments);
+      T t = invoke(key, entryProcessor, arguments);
       if (t != null) {
         map.put(key, t);
       }
