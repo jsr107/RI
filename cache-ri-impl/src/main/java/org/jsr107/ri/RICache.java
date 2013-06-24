@@ -406,7 +406,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public void loadAll(final Iterable<? extends K> keys, final boolean replaceExistingValues, final CompletionListener completionListener) {
+  public void loadAll(final Set<? extends K> keys, final boolean replaceExistingValues, final CompletionListener completionListener) {
     ensureOpen();
     if (keys == null) {
       throw new NullPointerException("keys");
