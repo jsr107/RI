@@ -18,6 +18,7 @@
 package org.jsr107.ri;
 
 import javax.cache.Cache;
+import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
 import javax.cache.configuration.OptionalFeature;
@@ -158,6 +159,14 @@ public class RICacheManager implements CacheManager {
    */
   @Override
   public <K, V> Cache<K, V> getOrCreateCache(String cacheName, Configuration<K, V> configuration) {
+    return getOrCreateInternal(cacheName, configuration, true);
+  }
+
+  /**
+   * Method used to perform a create or getOrCreate
+   */
+  protected <K, V> Cache<K, V> getOrCreateInternal(String cacheName, Configuration<K,
+      V> configuration, boolean allowExisting) {
     if (isClosed()) {
       throw new IllegalStateException();
     }
@@ -187,6 +196,10 @@ public class RICacheManager implements CacheManager {
     synchronized (caches) {
       RICache<?, ?> cache = caches.get(cacheName);
 
+      if (cache != null && !allowExisting) {
+        throw new CacheException("A cache named " + cacheName + " already exists.");
+      }
+
       if (cache == null) {
         cache = new RICache(this, cacheName, getClassLoader(), configuration);
         caches.put(cache.getName(), cache);
@@ -194,6 +207,14 @@ public class RICacheManager implements CacheManager {
 
       return (Cache<K, V>) cache;
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <K, V> Cache<K, V> createCache(String cacheName, Configuration<K, V> configuration) throws IllegalArgumentException {
+    return getOrCreateInternal(cacheName, configuration, false);
   }
 
   /**
