@@ -70,7 +70,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
 
     if (cache == null) {
       this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
-      cache = this.cacheManager.configureCache(cacheName, new MutableConfiguration<Object, Object>());
+      cache = this.cacheManager.getOrCreateCache(cacheName, new MutableConfiguration<Object, Object>());
     }
 
     return new DefaultCacheResolver(cache);
@@ -89,7 +89,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
     if (cache == null) {
       this.logger.warning("No Cache named '" + exceptionCacheName +
           "' was found in the CacheManager, a default cache will be created.");
-      cache = this.cacheManager.configureCache(exceptionCacheName, new MutableConfiguration<Object, Object>());
+      cache = this.cacheManager.getOrCreateCache(exceptionCacheName, new MutableConfiguration<Object, Object>());
     }
 
     return new DefaultCacheResolver(cache);

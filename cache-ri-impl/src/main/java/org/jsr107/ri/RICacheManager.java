@@ -157,7 +157,7 @@ public class RICacheManager implements CacheManager {
    * {@inheritDoc}
    */
   @Override
-  public <K, V> Cache<K, V> configureCache(String cacheName, Configuration<K, V> configuration) {
+  public <K, V> Cache<K, V> getOrCreateCache(String cacheName, Configuration<K, V> configuration) {
     if (isClosed()) {
       throw new IllegalStateException();
     }
