@@ -17,10 +17,10 @@
 
 package org.jsr107.ri;
 
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Factory;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
 
 /**
  * The reference implementation of the {@link javax.cache.configuration.CacheEntryListenerConfiguration}.

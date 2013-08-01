@@ -17,9 +17,9 @@
 
 package org.jsr107.ri;
 
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
 
 /**
  * An internal structure to represent the registration of a {@link CacheEntryListener}.

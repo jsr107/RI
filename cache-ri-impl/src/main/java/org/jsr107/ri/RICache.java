@@ -20,19 +20,19 @@ package org.jsr107.ri;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Configuration;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryExpiredListener;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
-import javax.cache.integration.CompletionListener;
 import javax.cache.event.EventType;
 import javax.cache.expiry.Duration;
 import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.integration.CacheLoader;
 import javax.cache.integration.CacheWriter;
+import javax.cache.integration.CompletionListener;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
 import java.io.Closeable;
@@ -42,7 +42,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -55,7 +54,10 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static javax.cache.event.EventType.*;
+import static javax.cache.event.EventType.CREATED;
+import static javax.cache.event.EventType.EXPIRED;
+import static javax.cache.event.EventType.REMOVED;
+import static javax.cache.event.EventType.UPDATED;
 import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
 import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
 
@@ -148,6 +150,15 @@ public final class RICache<K, V> implements Cache<K, V> {
    */
   private final ExecutorService executorService = Executors.newFixedThreadPool(1);
 
+
+  /**
+   * The dynamic {@link CacheEntryListenerConfiguration}s for the {@link
+   * Configuration}.
+   */
+  private ArrayList<CacheEntryListenerConfiguration<K,
+      V>> dynamicListenerConfigurations;
+
+
   /**
    * Constructs a cache.
    *
@@ -189,17 +200,13 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     entries = new RISimpleInternalMap<Object, RICachedValue>();
 
+    listenerRegistrations = new CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>>();
     //establish all of the listeners
-    LinkedList<RICacheEntryListenerRegistration<K, V>> registrations = new LinkedList<RICacheEntryListenerRegistration<K, V>>();
     for (CacheEntryListenerConfiguration<K, V> listenerConfiguration : configuration
         .getCacheEntryListenerConfigurations()) {
 
-      RICacheEntryListenerRegistration<K, V> registration =
-          new RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
-
-      registrations.add(registration);
+      createAndAddListener(listenerConfiguration);
     }
-    listenerRegistrations = new CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>>(registrations);
 
     cacheMXBean = new RICacheMXBean<K, V>(this);
     statistics = new RICacheStatisticsMXBean(this);
@@ -215,6 +222,17 @@ public final class RICache<K, V> implements Cache<K, V> {
     if (configuration.isStatisticsEnabled()) {
       setStatisticsEnabled(true);
     }
+  }
+
+  private void createAndAddListener(CacheEntryListenerConfiguration<K, V> listenerConfiguration) {
+    RICacheEntryListenerRegistration<K, V> registration = new RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
+    listenerRegistrations.add(registration);
+  }
+
+  //todo
+  private void removeListener(CacheEntryListenerConfiguration<K, V> listenerConfiguration) {
+//    RICacheEntryListenerRegistration<K, V> registration = new RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
+//    listenerRegistrations.add(registration);
   }
 
   /**
@@ -1556,6 +1574,24 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     throw new IllegalArgumentException("Unwrapping to " + cls + " is not a supported by this implementation");
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void registerCacheEntryListener(CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
+    configuration.addCacheEntryListenerConfiguration(cacheEntryListenerConfiguration);
+    createAndAddListener(cacheEntryListenerConfiguration);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
+    //To change body of implemented methods use File | Settings | File Templates.
+  }
+
 
   private boolean statisticsEnabled() {
     return getConfiguration().isStatisticsEnabled();
