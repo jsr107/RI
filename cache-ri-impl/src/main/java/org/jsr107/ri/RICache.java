@@ -224,15 +224,25 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
   }
 
+  //todo concurrency
   private void createAndAddListener(CacheEntryListenerConfiguration<K, V> listenerConfiguration) {
     RICacheEntryListenerRegistration<K, V> registration = new RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
     listenerRegistrations.add(registration);
   }
 
-  //todo
-  private void removeListener(CacheEntryListenerConfiguration<K, V> listenerConfiguration) {
-//    RICacheEntryListenerRegistration<K, V> registration = new RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
-//    listenerRegistrations.add(registration);
+  //todo concurrency
+  private void removeListener(CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
+
+    if (cacheEntryListenerConfiguration == null) {
+      throw new NullPointerException("CacheEntryListenerConfiguration can't be null");
+    }
+
+    for (RICacheEntryListenerRegistration<K, V> listenerRegistration : listenerRegistrations) {
+      if (cacheEntryListenerConfiguration.equals(listenerRegistration.getConfiguration())) {
+        listenerRegistrations.remove(listenerRegistration);
+        configuration.getCacheEntryListenerConfigurations().remove(cacheEntryListenerConfiguration);
+      }
+    }
   }
 
   /**
@@ -1589,7 +1599,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    */
   @Override
   public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
-    //To change body of implemented methods use File | Settings | File Templates.
+    removeListener(cacheEntryListenerConfiguration);
   }
 
 

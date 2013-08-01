@@ -30,6 +30,7 @@ import javax.cache.event.CacheEntryListener;
  */
 class RICacheEntryListenerRegistration<K, V> {
 
+  private final CacheEntryListenerConfiguration<K, V> configuration;
   private CacheEntryListener<? super K, ? super V> listener;
   private CacheEntryEventFilter<? super K, ? super V> filter;
   private boolean isOldValueRequired;
@@ -41,6 +42,7 @@ class RICacheEntryListenerRegistration<K, V> {
    * @param configuration  the {@link javax.cache.configuration.CacheEntryListenerConfiguration} to be registered
    */
   public RICacheEntryListenerRegistration(CacheEntryListenerConfiguration<K, V> configuration) {
+    this.configuration = configuration;
     this.listener = configuration.getCacheEntryListenerFactory().create();
     this.filter = configuration.getCacheEntryEventFilterFactory() == null
                   ? null
@@ -137,5 +139,13 @@ class RICacheEntryListenerRegistration<K, V> {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Gets the underlying configuration used to create this registration
+   * @return the configuration
+   */
+  CacheEntryListenerConfiguration<K, V> getConfiguration() {
+    return configuration;
   }
 }
