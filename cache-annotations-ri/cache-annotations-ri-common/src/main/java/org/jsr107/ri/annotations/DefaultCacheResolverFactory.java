@@ -69,8 +69,9 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
     Cache<?, ?> cache = this.cacheManager.getCache(cacheName);
 
     if (cache == null) {
-      this.logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
-      cache = this.cacheManager.getOrCreateCache(cacheName, new MutableConfiguration<Object, Object>());
+      logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
+      cacheManager.createCache(cacheName, new MutableConfiguration<Object, Object>());
+      cache = cacheManager.getCache(cacheName);
     }
 
     return new DefaultCacheResolver(cache);
@@ -84,12 +85,13 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
       throw new IllegalArgumentException("Can only be called when CacheResult.exceptionCacheName() is specified");
     }
 
-    Cache<?, ?> cache = this.cacheManager.getCache(exceptionCacheName);
+    Cache<?, ?> cache = cacheManager.getCache(exceptionCacheName);
 
     if (cache == null) {
-      this.logger.warning("No Cache named '" + exceptionCacheName +
+      logger.warning("No Cache named '" + exceptionCacheName +
           "' was found in the CacheManager, a default cache will be created.");
-      cache = this.cacheManager.getOrCreateCache(exceptionCacheName, new MutableConfiguration<Object, Object>());
+      cacheManager.createCache(exceptionCacheName, new MutableConfiguration<Object, Object>());
+      cache = cacheManager.getCache(exceptionCacheName);
     }
 
     return new DefaultCacheResolver(cache);
