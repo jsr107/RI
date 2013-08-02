@@ -154,14 +154,6 @@ public class RICacheManager implements CacheManager {
   }
 
   /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <K, V> Cache<K, V> getOrCreateCache(String cacheName, Configuration<K, V> configuration) {
-    return getOrCreateInternal(cacheName, configuration, true);
-  }
-
-  /**
    * Method used to perform a create or getOrCreate
    */
   protected <K, V> Cache<K, V> getOrCreateInternal(String cacheName, Configuration<K,
