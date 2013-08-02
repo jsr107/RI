@@ -21,7 +21,6 @@ import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
-import javax.cache.configuration.OptionalFeature;
 import javax.cache.spi.CachingProvider;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
@@ -347,14 +346,6 @@ public class RICacheManager implements CacheManager {
   @Override
   public UserTransaction getUserTransaction() {
     throw new UnsupportedOperationException("Transactions are not supported.");
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean isSupported(OptionalFeature optionalFeature) {
-    return getCachingProvider().isSupported(optionalFeature);
   }
 
   /**
