@@ -204,8 +204,8 @@ public class RICacheManager implements CacheManager {
    * {@inheritDoc}
    */
   @Override
-  public <K, V> Cache<K, V> createCache(String cacheName, Configuration<K, V> configuration) throws IllegalArgumentException {
-    return getOrCreateInternal(cacheName, configuration, false);
+  public void createCache(String cacheName, Configuration configuration) throws IllegalArgumentException {
+    getOrCreateInternal(cacheName, configuration, false);
   }
 
   /**
