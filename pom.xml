@@ -66,7 +66,7 @@
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-checkstyle-plugin
                                         </artifactId>
-                                        <versionRange>[2.6,)</versionRange>
+                                        <versionRange>[2.10,)</versionRange>
                                         <goals>
                                             <goal>checkstyle</goal>
                                         </goals>
