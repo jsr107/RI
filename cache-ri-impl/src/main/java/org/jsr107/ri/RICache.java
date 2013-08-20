@@ -1463,7 +1463,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         case REMOVE:
           deleteCacheEntry(key);
 
-          oldValue = valueConverter.fromInternal(cachedValue.get());
+          oldValue = cachedValue == null ? null : valueConverter.fromInternal(cachedValue.get());
           entries.remove(internalKey);
 
           dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
@@ -2183,7 +2183,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void remove() {
-      operation = cachedValue == null || cachedValue.isExpiredAt(now) ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
+      operation = (operation == MutableEntryOperation.CREATE) ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
       value = null;
     }
 
