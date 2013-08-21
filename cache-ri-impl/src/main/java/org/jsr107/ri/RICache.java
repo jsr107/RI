@@ -32,6 +32,7 @@ import javax.cache.expiry.Duration;
 import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.integration.CacheLoader;
 import javax.cache.integration.CacheWriter;
+import javax.cache.integration.CacheWriterException;
 import javax.cache.integration.CompletionListener;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
@@ -681,7 +682,7 @@ public final class RICache<K, V> implements Cache<K, V> {
       throw new NullPointerException("key");
     }
 
-    CacheException exception = null;
+    CacheWriterException exception = null;
 
     RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
 
@@ -712,8 +713,10 @@ public final class RICache<K, V> implements Cache<K, V> {
       if (isWriteThrough) {
         try {
           cacheWriter.writeAll(entriesToWrite);
-        } catch (CacheException e) {
-          exception = e;
+        } catch (Exception e) {
+          if (!(e instanceof CacheWriterException)) {
+            exception = new CacheWriterException("Exception during write", e);
+          }
         }
 
         for (Entry entry : entriesToWrite) {
@@ -1205,8 +1208,10 @@ public final class RICache<K, V> implements Cache<K, V> {
       if (isWriteThrough) {
         try {
           cacheWriter.deleteAll(keysToDelete);
-        } catch (CacheException e) {
-          exception = e;
+        } catch (Exception e) {
+          if (!(e instanceof CacheWriterException)) {
+            exception = new CacheWriterException("Exception during write", e);
+          }
         }
       }
 
@@ -1289,8 +1294,10 @@ public final class RICache<K, V> implements Cache<K, V> {
       if (isWriteThrough) {
         try {
           cacheWriter.deleteAll(keysToDelete);
-        } catch (CacheException e) {
-          exception = e;
+        } catch (Exception e) {
+          if (!(e instanceof CacheWriterException)) {
+            exception = new CacheWriterException("Exception during write", e);
+          }
         }
       }
 
@@ -1614,7 +1621,15 @@ public final class RICache<K, V> implements Cache<K, V> {
    */
   private void writeCacheEntry(RIEntry<K, V> entry) {
     if (configuration.isWriteThrough()) {
-      cacheWriter.write(entry);
+      try {
+        cacheWriter.write(entry);
+      } catch (Exception e) {
+        if (!(e instanceof CacheWriterException)) {
+          throw new CacheWriterException("Exception in CacheWriter", e);
+        } else {
+          throw e;
+        }
+      }
     }
   }
 
@@ -1626,7 +1641,15 @@ public final class RICache<K, V> implements Cache<K, V> {
    */
   private void deleteCacheEntry(K key) {
     if (configuration.isWriteThrough()) {
-      cacheWriter.delete(key);
+      try {
+        cacheWriter.delete(key);
+      } catch (Exception e) {
+        if (!(e instanceof CacheWriterException)) {
+          throw new CacheWriterException("Exception in CacheWriter", e);
+        } else {
+          throw e;
+        }
+      }
     }
   }
 
