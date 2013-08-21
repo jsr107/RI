@@ -658,7 +658,6 @@ public final class RICache<K, V> implements Cache<K, V> {
   }
 
   /**
-   * {@inheritDoc}
    */
   public void putAll(Map<? extends K, ? extends V> map, boolean replaceExistingValues) {
     putAll(map, replaceExistingValues, true);
