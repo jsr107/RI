@@ -168,11 +168,11 @@ public class RICacheEventDispatcher<K, V> {
           }
         }
       }
-    } catch (Throwable t) {
-      if (!(t instanceof CacheEntryListenerException)) {
-        throw new CacheEntryListenerException("Failure on listener execution", t);
+    } catch (Exception e) {
+      if (!(e instanceof CacheEntryListenerException)) {
+        throw new CacheEntryListenerException("Exception on listener execution", e);
       } else {
-        throw t;
+        throw e;
       }
     }
   }
