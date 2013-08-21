@@ -31,6 +31,7 @@ import javax.cache.event.EventType;
 import javax.cache.expiry.Duration;
 import javax.cache.expiry.ExpiryPolicy;
 import javax.cache.integration.CacheLoader;
+import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriter;
 import javax.cache.integration.CacheWriterException;
 import javax.cache.integration.CompletionListener;
@@ -65,7 +66,8 @@ import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statis
 /**
  * The reference implementation for JSR107.
  * <p/>
- * This is meant to act as a proof of concept for the API. It is not threadsafe or high performance and does limit
+ * This is meant to act as a proof of concept for the API. It is not threadsafe or
+ * high performance and does limit
  * the size of caches or provide eviction. It therefore is not suitable for use in production. Please use a
  * production implementation of the API.
  * <p/>
@@ -463,7 +465,16 @@ public final class RICache<K, V> implements Cache<K, V> {
               }
             }
 
-            Map<? extends K, ? extends V> loaded = cacheLoader.loadAll(keysToLoad);
+            Map<? extends K, ? extends V> loaded;
+            try {
+              loaded = cacheLoader.loadAll(keysToLoad);
+            } catch (Exception e) {
+              if (!(e instanceof CacheLoaderException)) {
+                throw new CacheLoaderException("Exception in CacheLoader", e);
+              } else {
+                throw e;
+              }
+            }
 
             for (K key : keysToLoad) {
               if (loaded.get(key) == null) {
@@ -1693,7 +1704,16 @@ public final class RICache<K, V> implements Cache<K, V> {
           return null;
         }
 
-        Entry<K, ? extends V> entry = cacheLoader.load(key);
+        Entry<K, ? extends V> entry = null;
+        try {
+          entry = cacheLoader.load(key);
+        } catch (Exception e) {
+          if (!(e instanceof CacheLoaderException)) {
+            throw new CacheLoaderException("Exception in CacheLoader", e);
+          } else {
+            throw e;
+          }
+        }
 
         if (entry == null) {
           return null;
@@ -2006,7 +2026,17 @@ public final class RICache<K, V> implements Cache<K, V> {
           keysNotInStore.add(key);
         }
       }
-      Map<K, ? extends V> value = cacheLoader.loadAll(keysNotInStore);
+      Map<K, ? extends V> value;
+      try {
+        value = cacheLoader.loadAll(keysNotInStore);
+      } catch (Exception e) {
+        if (!(e instanceof CacheLoaderException)) {
+          throw new CacheLoaderException("Exception in CacheLoader", e);
+        } else {
+          throw e;
+        }
+      }
+
       cache.putAll(value);
       return value;
     }
