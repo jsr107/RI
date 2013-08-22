@@ -247,21 +247,21 @@ public class RICacheManager implements CacheManager {
    * {@inheritDoc}
    */
   @Override
-  public <K, V> Cache<K, V> getCache(String cacheName) {
+  public Cache getCache(String cacheName) {
     if (isClosed()) {
       throw new IllegalStateException();
     }
     synchronized (caches) {
-      RICache<?, ?> cache = caches.get(cacheName);
+      RICache cache = caches.get(cacheName);
 
       if (cache == null) {
         return null;
       } else {
-        Configuration<?, ?> configuration = cache.getConfiguration();
+        Configuration configuration = cache.getConfiguration();
 
-        if (configuration.getKeyType() == null &&
-            configuration.getValueType() == null) {
-          return (Cache<K, V>) cache;
+        if (configuration.getKeyType().equals(Object.class) &&
+            configuration.getValueType().equals(Object.class)) {
+          return cache;
         } else {
           throw new IllegalArgumentException("Cache " + cacheName + " was " +
               "defined with specific types Cache<" +
