@@ -154,10 +154,11 @@ public class RICacheManager implements CacheManager {
   }
 
   /**
-   * Method used to perform a create or getOrCreate
+   * {@inheritDoc}
    */
-  protected <K, V> Cache<K, V> getOrCreateInternal(String cacheName, Configuration<K,
-      V> configuration, boolean allowExisting) {
+  @Override
+  public <K, V> Cache<K, V> createCache(String cacheName,
+                                        Configuration<K, V> configuration) throws IllegalArgumentException {
     if (isClosed()) {
       throw new IllegalStateException();
     }
@@ -187,25 +188,15 @@ public class RICacheManager implements CacheManager {
     synchronized (caches) {
       RICache<?, ?> cache = caches.get(cacheName);
 
-      if (cache != null && !allowExisting) {
-        throw new CacheException("A cache named " + cacheName + " already exists.");
-      }
-
       if (cache == null) {
         cache = new RICache(this, cacheName, getClassLoader(), configuration);
         caches.put(cache.getName(), cache);
+
+        return (Cache<K, V>) cache;
+      } else {
+        throw new CacheException("A cache named " + cacheName + " already exists.");
       }
-
-      return (Cache<K, V>) cache;
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void createCache(String cacheName, Configuration configuration) throws IllegalArgumentException {
-    getOrCreateInternal(cacheName, configuration, false);
   }
 
   /**
