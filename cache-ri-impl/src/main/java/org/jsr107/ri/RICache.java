@@ -37,6 +37,7 @@ import javax.cache.integration.CacheWriterException;
 import javax.cache.integration.CompletionListener;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
+import javax.cache.processor.MutableEntry;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1374,7 +1375,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public <T> T invoke(K key, EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
+  public <T> T invoke(K key, javax.cache.processor.EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
     ensureOpen();
     if (key == null) {
       throw new NullPointerException();
@@ -1510,7 +1511,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    */
   @Override
   public <T> Map<K, T> invokeAll(Set<? extends K> keys,
-                                 EntryProcessor<K, V, T> entryProcessor,
+                                 javax.cache.processor.EntryProcessor<K, V, T> entryProcessor,
                                  Object... arguments) {
 
     ensureOpen();
@@ -2146,7 +2147,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   }
 
   /**
-   * A {@link MutableEntry} that is used by {@link EntryProcessor}s.
+   * A {@link MutableEntry} that is used by {@link javax.cache.processor.EntryProcessor}s.
    */
   private class EntryProcessorEntry implements MutableEntry<K, V> {
     /**
