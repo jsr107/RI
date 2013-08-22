@@ -39,6 +39,7 @@ import javax.cache.integration.CacheWriterException;
 import javax.cache.integration.CompletionListener;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
+import javax.cache.processor.EntryProcessorException;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1414,9 +1415,14 @@ public final class RICache<K, V> implements Cache<K, V> {
           cachedValue, now, dispatcher);
       try {
         result = entryProcessor.process(entry, arguments);
-      } catch (Throwable t) {
-        throw new CacheException(t);
+      } catch (Exception e) {
+        if (!(e instanceof EntryProcessorException)) {
+          throw new EntryProcessorException(e);
+        } else {
+          throw e;
+        }
       }
+
       Duration duration;
       long expiryTime;
       switch (entry.getOperation()) {
@@ -1553,6 +1559,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   /**
    * @return the managemtn bean
    */
+
   public CacheMXBean getCacheMXBean() {
     return cacheMXBean;
   }
@@ -2124,8 +2131,6 @@ public final class RICache<K, V> implements Cache<K, V> {
       }
     }
   }
-
-
 
 
 }
