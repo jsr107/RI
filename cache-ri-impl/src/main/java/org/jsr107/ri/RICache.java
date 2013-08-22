@@ -17,6 +17,8 @@
 
 package org.jsr107.ri;
 
+import org.jsr107.ri.processor.EntryProcessorEntry;
+
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
@@ -37,7 +39,6 @@ import javax.cache.integration.CacheWriterException;
 import javax.cache.integration.CompletionListener;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
-import javax.cache.processor.MutableEntry;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1409,21 +1410,21 @@ public final class RICache<K, V> implements Cache<K, V> {
       //restart start as fetch finished
       start = statisticsEnabled() ? System.nanoTime() : 0;
 
-      EntryProcessorEntry entry = new EntryProcessorEntry(key, cachedValue, now, dispatcher);
+      EntryProcessorEntry<K, V> entry = new EntryProcessorEntry<>(valueConverter, key,
+          cachedValue, now, dispatcher);
       try {
         result = entryProcessor.process(entry, arguments);
       } catch (Throwable t) {
         throw new CacheException(t);
       }
-
       Duration duration;
       long expiryTime;
-      switch (entry.operation) {
+      switch (entry.getOperation()) {
         case NONE:
           break;
 
         case CREATE:
-          RIEntry<K, V> e = new RIEntry<K, V>(key, entry.value);
+          RIEntry<K, V> e = new RIEntry<K, V>(key, entry.getValue());
           writeCacheEntry(e);
 
           try {
@@ -1433,7 +1434,8 @@ public final class RICache<K, V> implements Cache<K, V> {
           }
           expiryTime = duration.getAdjustedTime(now);
 
-          cachedValue = new RICachedValue(valueConverter.toInternal(entry.value), now, expiryTime);
+          cachedValue = new RICachedValue(valueConverter.toInternal(entry.getValue()),
+              now, expiryTime);
 
           if (cachedValue.isExpiredAt(now)) {
             V previousValue = valueConverter.fromInternal(cachedValue.get());
@@ -1442,7 +1444,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           entries.put(internalKey, cachedValue);
 
-          dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, CREATED));
+          dispatcher.addEvent(CacheEntryCreatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, entry.getValue(), CREATED));
 
           if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
@@ -1454,7 +1457,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         case UPDATE:
           V oldValue = valueConverter.fromInternal(cachedValue.get());
 
-          e = new RIEntry<K, V>(key, entry.value, oldValue);
+          e = new RIEntry<K, V>(key, entry.getValue(), oldValue);
           writeCacheEntry(e);
 
           try {
@@ -1467,9 +1470,11 @@ public final class RICache<K, V> implements Cache<K, V> {
             //leave the expiry time untouched when we can't determine a duration
           }
 
-          cachedValue.setInternalValue(valueConverter.toInternal(entry.value), now);
+          cachedValue.setInternalValue(valueConverter.toInternal(entry.getValue()), now);
 
-          dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, entry.value, oldValue, UPDATED));
+          dispatcher.addEvent(CacheEntryUpdatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, entry.getValue(), oldValue,
+                  UPDATED));
 
           if (statisticsEnabled()) {
             statistics.increaseCachePuts(1);
@@ -2120,144 +2125,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
   }
 
-  /**
-   * The operation to perform on a {@link RICachedValue} as a result of
-   * actions performed on a {@link MutableEntry}.
-   */
-  private enum MutableEntryOperation {
-    /**
-     * Don't perform any operations on the {@link RICachedValue}.
-     */
-    NONE,
 
-    /**
-     * Create a new {@link RICachedValue}.
-     */
-    CREATE,
 
-    /**
-     * Remove the {@link RICachedValue} (and thus the Cache Entry).
-     */
-    REMOVE,
 
-    /**
-     * Update the {@link RICachedValue}.
-     */
-    UPDATE;
-  }
-
-  /**
-   * A {@link MutableEntry} that is used by {@link javax.cache.processor.EntryProcessor}s.
-   */
-  private class EntryProcessorEntry implements MutableEntry<K, V> {
-    /**
-     * The key of the {@link MutableEntry}.
-     */
-    private final K key;
-
-    /**
-     * The {@link RICachedValue} for the {@link MutableEntry}.
-     */
-    private final RICachedValue cachedValue;
-
-    /**
-     * The new value for the {@link MutableEntry}.
-     */
-    private V value;
-
-    /**
-     * The {@link MutableEntryOperation} to be performed on the {@link MutableEntry}.
-     */
-    private MutableEntryOperation operation;
-
-    /**
-     * The time (since the Epoc) when the MutableEntry was created.
-     */
-    private long now;
-
-    /**
-     * The dispatcher to use for capturing events to eventually dispatch.
-     */
-    private RICacheEventDispatcher<K, V> dispatcher;
-
-    /**
-     * Construct a {@link MutableEntry}
-     *
-     * @param key         the key for the {@link MutableEntry}
-     * @param cachedValue the {@link RICachedValue} of the {@link MutableEntry}
-     *                    (may be <code>null</code>)
-     * @param now         the current time
-     * @param dispatcher  the dispatch to capture events to dispatch
-     */
-    EntryProcessorEntry(K key, RICachedValue cachedValue, long now, RICacheEventDispatcher<K, V> dispatcher) {
-      this.key = key;
-      this.cachedValue = cachedValue;
-      this.operation = MutableEntryOperation.NONE;
-      this.value = null;
-      this.now = now;
-      this.dispatcher = dispatcher;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public K getKey() {
-      return key;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public V getValue() {
-      if (operation == MutableEntryOperation.NONE) {
-        if (cachedValue == null || cachedValue.isExpiredAt(now)) {
-          value = null;
-        } else if (value == null) {
-          Object internalValue = cachedValue.getInternalValue(now);
-          value = internalValue == null ? null : (V) RICache.this.valueConverter.fromInternal(internalValue);
-        }
-      }
-
-      return value;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean exists() {
-      return (operation == MutableEntryOperation.NONE && cachedValue != null && !cachedValue.isExpiredAt(now)) || value != null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void remove() {
-      operation = (operation == MutableEntryOperation.CREATE) ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
-      value = null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(V value) {
-      if (value == null) {
-        throw new NullPointerException();
-      }
-      operation = cachedValue == null || cachedValue.isExpiredAt(now) ? MutableEntryOperation.CREATE : MutableEntryOperation.UPDATE;
-      this.value = value;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T unwrap(Class<T> clazz) {
-      throw new IllegalArgumentException("Can't unwrap an EntryProcessor Entry");
-    }
-  }
 }
