@@ -130,7 +130,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   /**
    * The {@link javax.cache.expiry.ExpiryPolicy} for the {@link Cache}.
    */
-  private final ExpiryPolicy<? super K, ? super V> expiryPolicy;
+  private final ExpiryPolicy<? super K> expiryPolicy;
 
   /**
    * The {@link RICacheEntryListenerRegistration}s for the {@link Cache}.
@@ -535,7 +535,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         Duration duration;
         try {
-          duration = expiryPolicy.getExpiryForCreatedEntry(entry);
+          duration = expiryPolicy.getExpiryForCreatedEntry(key);
         } catch (Throwable t) {
           duration = getDefaultDuration();
         }
@@ -555,7 +555,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         writeCacheEntry(entry);
 
         try {
-          Duration duration = expiryPolicy.getExpiryForModifiedEntry(entry);
+          Duration duration = expiryPolicy.getExpiryForModifiedEntry(key);
           if (duration != null) {
             long expiryTime = duration.getAdjustedTime(now);
             cachedValue.setExpiryTime(expiryTime);
@@ -613,7 +613,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         Duration duration;
         try {
-          duration = expiryPolicy.getExpiryForCreatedEntry(entry);
+          duration = expiryPolicy.getExpiryForCreatedEntry(key);
         } catch (Throwable t) {
           duration = getDefaultDuration();
         }
@@ -633,7 +633,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         writeCacheEntry(entry);
 
         try {
-          Duration duration = expiryPolicy.getExpiryForModifiedEntry(entry);
+          Duration duration = expiryPolicy.getExpiryForModifiedEntry(key);
           if (duration != null) {
             long expiryTime = duration.getAdjustedTime(now);
             cachedValue.setExpiryTime(expiryTime);
@@ -757,7 +757,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           Duration duration;
           try {
-            duration = expiryPolicy.getExpiryForCreatedEntry(new RIEntry<K, V>(key, value));
+            duration = expiryPolicy.getExpiryForCreatedEntry(key);
           } catch (Throwable t) {
             duration = getDefaultDuration();
           }
@@ -772,7 +772,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           V oldValue = valueConverter.fromInternal(cachedValue.get());
 
           try {
-            Duration duration = expiryPolicy.getExpiryForModifiedEntry(new RIEntry<K, V>(key, value, oldValue));
+            Duration duration = expiryPolicy.getExpiryForModifiedEntry(key);
             if (duration != null) {
               long expiryTime = duration.getAdjustedTime(now);
               cachedValue.setExpiryTime(expiryTime);
@@ -846,7 +846,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         Duration duration;
         try {
-          duration = expiryPolicy.getExpiryForCreatedEntry(entry);
+          duration = expiryPolicy.getExpiryForCreatedEntry(key);
         } catch (Throwable t) {
           duration = getDefaultDuration();
         }
@@ -1037,7 +1037,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           writeCacheEntry(entry);
 
           try {
-            Duration duration = expiryPolicy.getExpiryForModifiedEntry(entry);
+            Duration duration = expiryPolicy.getExpiryForModifiedEntry(key);
             if (duration != null) {
               long expiryTime = duration.getAdjustedTime(now);
               cachedValue.setExpiryTime(expiryTime);
@@ -1057,7 +1057,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         } else {
           try {
             RIEntry<K, V> entry = new RIEntry<K, V>(key, oldValue);
-            Duration duration = expiryPolicy.getExpiryForAccessedEntry(entry);
+            Duration duration = expiryPolicy.getExpiryForAccessedEntry(key);
             if (duration != null) {
               long expiryTime = duration.getAdjustedTime(now);
               cachedValue.setExpiryTime(expiryTime);
@@ -1104,7 +1104,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         writeCacheEntry(entry);
 
         try {
-          Duration duration = expiryPolicy.getExpiryForModifiedEntry(entry);
+          Duration duration = expiryPolicy.getExpiryForModifiedEntry(key);
           if (duration != null) {
             long expiryTime = duration.getAdjustedTime(now);
             cachedValue.setExpiryTime(expiryTime);
@@ -1156,7 +1156,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         writeCacheEntry(entry);
 
         try {
-          Duration duration = expiryPolicy.getExpiryForModifiedEntry(entry);
+          Duration duration = expiryPolicy.getExpiryForModifiedEntry(key);
           if (duration != null) {
             long expiryTime = duration.getAdjustedTime(now);
             cachedValue.setExpiryTime(expiryTime);
@@ -1434,7 +1434,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           writeCacheEntry(e);
 
           try {
-            duration = expiryPolicy.getExpiryForCreatedEntry(e);
+            duration = expiryPolicy.getExpiryForCreatedEntry(key);
           } catch (Throwable t) {
             duration = getDefaultDuration();
           }
@@ -1467,7 +1467,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           writeCacheEntry(e);
 
           try {
-            duration = expiryPolicy.getExpiryForModifiedEntry(e);
+            duration = expiryPolicy.getExpiryForModifiedEntry(key);
             if (duration != null) {
               expiryTime = duration.getAdjustedTime(now);
               cachedValue.setExpiryTime(expiryTime);
@@ -1736,7 +1736,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         Duration duration;
         try {
-          duration = expiryPolicy.getExpiryForCreatedEntry(new RIEntry<K, V>(key, value));
+          duration = expiryPolicy.getExpiryForCreatedEntry(key);
         } catch (Throwable t) {
           duration = getDefaultDuration();
         }
@@ -1757,7 +1757,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
 
         try {
-          Duration duration = expiryPolicy.getExpiryForAccessedEntry(entry);
+          Duration duration = expiryPolicy.getExpiryForAccessedEntry(key);
           if (duration != null) {
             long expiryTime = duration.getAdjustedTime(now);
             cachedValue.setExpiryTime(expiryTime);
@@ -1934,7 +1934,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             nextEntry = new RIEntry<K, V>(key, value);
 
             try {
-              Duration duration = expiryPolicy.getExpiryForAccessedEntry(nextEntry);
+              Duration duration = expiryPolicy.getExpiryForAccessedEntry(key);
               if (duration != null) {
                 long expiryTime = duration.getAdjustedTime(now);
                 cachedValue.setExpiryTime(expiryTime);
