@@ -63,7 +63,7 @@ public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> 
    * Annoation type cannot be known at compile time so ignore the warning
    *
    * (non-Javadoc)
-   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheInvocationContextImpl(javax.cache.annotation.impl.AbstractStaticCacheInvocationContext, java.lang.Object)
+   * @see org.jsr107.ri.annotations.AbstractCacheLookupUtil#createCacheInvocationContextImpl
    */
   @SuppressWarnings({"rawtypes", "unchecked" })
   @Override

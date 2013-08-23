@@ -18,6 +18,7 @@
 package org.jsr107.ri;
 
 import javax.cache.configuration.CacheEntryListenerConfiguration;
+import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 
@@ -39,7 +40,7 @@ class RICacheEntryListenerRegistration<K, V> {
   /**
    * Constructs an {@link RICacheEntryListenerRegistration}.
    *
-   * @param configuration  the {@link javax.cache.configuration.CacheEntryListenerConfiguration} to be registered
+   * @param configuration  the {@link CacheEntryListenerConfiguration} to be registered
    */
   public RICacheEntryListenerRegistration(CacheEntryListenerConfiguration<K, V> configuration) {
     this.configuration = configuration;
@@ -71,7 +72,7 @@ class RICacheEntryListenerRegistration<K, V> {
 
   /**
    * Determines if the old/previous value should to be supplied with the
-   * {@link javax.cache.event.CacheEntryEvent}s dispatched to the
+   * {@link CacheEntryEvent}s dispatched to the
    * {@link CacheEntryListener}.
    */
   public boolean isOldValueRequired() {
@@ -79,7 +80,7 @@ class RICacheEntryListenerRegistration<K, V> {
   }
 
   /**
-   * Determines if {@link javax.cache.event.CacheEntryEvent}s should be raised
+   * Determines if {@link CacheEntryEvent}s should be raised
    * synchronously.
    *
    * @return <code>true</code> if events should be raised synchronously

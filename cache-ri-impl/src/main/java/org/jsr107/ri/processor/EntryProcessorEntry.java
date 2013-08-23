@@ -21,10 +21,11 @@ import org.jsr107.ri.RICacheEventDispatcher;
 import org.jsr107.ri.RICachedValue;
 import org.jsr107.ri.RIInternalConverter;
 
+import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.MutableEntry;
 
 /**
- * A {@link javax.cache.processor.MutableEntry} that is used by {@link javax.cache.processor.EntryProcessor}s.
+ * A {@link javax.cache.processor.MutableEntry} that is used by {@link EntryProcessor}s.
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*

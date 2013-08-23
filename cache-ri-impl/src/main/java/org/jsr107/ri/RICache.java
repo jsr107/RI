@@ -128,7 +128,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   private final RIInternalMap<Object, RICachedValue> entries;
 
   /**
-   * The {@link javax.cache.expiry.ExpiryPolicy} for the {@link Cache}.
+   * The {@link ExpiryPolicy} for the {@link Cache}.
    */
   private final ExpiryPolicy<? super K> expiryPolicy;
 

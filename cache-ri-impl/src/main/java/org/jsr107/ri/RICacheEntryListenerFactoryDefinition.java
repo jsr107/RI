@@ -23,7 +23,7 @@ import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryListener;
 
 /**
- * The reference implementation of the {@link javax.cache.configuration.CacheEntryListenerConfiguration}.
+ * The reference implementation of the {@link CacheEntryListenerConfiguration}.
  *
  * @param <K> the type of keys
  * @param <V> the type of values

@@ -17,9 +17,11 @@
 
 package org.jsr107.ri.processor;
 
+import javax.cache.processor.MutableEntry;
+
 /**
  * The operation to perform on a {@link org.jsr107.ri.RICachedValue} as a result of
- * actions performed on a {@link javax.cache.processor.MutableEntry}.
+ * actions performed on a {@link MutableEntry}.
  */
 public enum MutableEntryOperation {
   /**

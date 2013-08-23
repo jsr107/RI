@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * The reference implementation of {@link javax.cache.management.CacheStatisticsMXBean}.
+ * The reference implementation of {@link CacheStatisticsMXBean}.
  */
 public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializable {
 

@@ -16,6 +16,7 @@
  */
 package org.jsr107.ri;
 
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.event.CacheEntryCreatedListener;
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
@@ -89,7 +90,7 @@ public class RICacheEventDispatcher<K, V> {
 
   /**
    * Dispatches the added events to the listeners defined by the specified
-   * {@link javax.cache.configuration.CacheEntryListenerConfiguration}s.
+   * {@link CacheEntryListenerConfiguration}s.
    *
    * @param registrations the {@link RICacheEntryListenerRegistration}s defining
    *                      {@link CacheEntryListener}s to which to dispatch events
