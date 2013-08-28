@@ -18,17 +18,17 @@ package org.jsr107.ri.annotations;
 
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheMethodDetails;
-import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResolver;
 import java.util.List;
 
 /**
- * Details for a method annotated with {@link CacheRemoveEntry}
+ * Details for a method annotated with {@link javax.cache.annotation.CacheRemove}
  *
  * @author Eric Dalquist
  * @since 1.0
  */
-public class CacheRemoveEntryMethodDetails extends StaticCacheKeyInvocationContext<CacheRemoveEntry> {
+public class CacheRemoveEntryMethodDetails extends StaticCacheKeyInvocationContext<CacheRemove> {
 
   /**
    * @param cacheMethodDetails
@@ -37,7 +37,7 @@ public class CacheRemoveEntryMethodDetails extends StaticCacheKeyInvocationConte
    * @param allParameters      All parameter details
    * @param keyParameters      Parameter details to use for key generation
    */
-  public CacheRemoveEntryMethodDetails(CacheMethodDetails<CacheRemoveEntry> cacheMethodDetails,
+  public CacheRemoveEntryMethodDetails(CacheMethodDetails<CacheRemove> cacheMethodDetails,
                                        CacheResolver cacheResolver, CacheKeyGenerator cacheKeyGenerator,
                                        List<CacheParameterDetails> allParameters, List<CacheParameterDetails> keyParameters) {
 

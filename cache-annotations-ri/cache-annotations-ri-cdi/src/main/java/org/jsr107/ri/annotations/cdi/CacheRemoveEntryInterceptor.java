@@ -19,7 +19,7 @@ package org.jsr107.ri.annotations.cdi;
 
 import org.jsr107.ri.annotations.AbstractCacheRemoveEntryInterceptor;
 
-import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheRemove;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -27,13 +27,13 @@ import javax.interceptor.InvocationContext;
 
 
 /**
- * Interceptor for {@link CacheRemoveEntry}
+ * Interceptor for {@link javax.cache.annotation.CacheRemove}
  *
  * @author Rick Hightower
  * @author Eric Dalquist
  * @since 1.0
  */
-@CacheRemoveEntry
+@CacheRemove
 @Interceptor
 public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterceptor<InvocationContext> {
 

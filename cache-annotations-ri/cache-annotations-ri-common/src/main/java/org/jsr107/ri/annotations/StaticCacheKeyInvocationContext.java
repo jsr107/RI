@@ -27,7 +27,7 @@ import java.util.List;
  * Details common to all annotated methods that generate a cache key
  *
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
- *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry}, or
+ *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemove}, or
  *            {@link javax.cache.annotation.CacheRemoveAll}.
  * @author Eric Dalquist
  * @since 1.0

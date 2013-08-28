@@ -17,8 +17,8 @@
 package org.jsr107.ri.annotations.cdi;
 
 import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheRemoveEntry;
 import javax.cache.annotation.CacheResult;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -40,7 +40,7 @@ public class InterceptorExtension implements Extension {
   void discoverInterceptorBindings(@Observes BeforeBeanDiscovery beforeBeanDiscoveryEvent) {
     beforeBeanDiscoveryEvent.addInterceptorBinding(CachePut.class);
     beforeBeanDiscoveryEvent.addInterceptorBinding(CacheResult.class);
-    beforeBeanDiscoveryEvent.addInterceptorBinding(CacheRemoveEntry.class);
+    beforeBeanDiscoveryEvent.addInterceptorBinding(CacheRemove.class);
     beforeBeanDiscoveryEvent.addInterceptorBinding(CacheRemoveAll.class);
   }
 

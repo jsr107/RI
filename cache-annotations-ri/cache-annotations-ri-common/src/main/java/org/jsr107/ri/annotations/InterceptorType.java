@@ -33,7 +33,7 @@ public enum InterceptorType {
    */
   CACHE_PUT,
   /**
-   * {@link javax.cache.annotation.CacheRemoveEntry} advice
+   * {@link javax.cache.annotation.CacheRemove} advice
    */
   CACHE_REMOVE_ENTRY,
   /**

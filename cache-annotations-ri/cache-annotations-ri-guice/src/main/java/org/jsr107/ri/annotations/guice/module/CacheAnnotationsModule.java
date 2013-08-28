@@ -32,8 +32,8 @@ import org.jsr107.ri.annotations.guice.CacheResultInterceptor;
 
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheRemoveEntry;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
 
@@ -67,8 +67,8 @@ public class CacheAnnotationsModule extends AbstractModule {
 
     CacheRemoveEntryInterceptor cacheRemoveEntryInterceptor = new CacheRemoveEntryInterceptor();
     requestInjection(cacheRemoveEntryInterceptor);
-    bindInterceptor(Matchers.annotatedWith(CacheRemoveEntry.class), Matchers.any(), cacheRemoveEntryInterceptor);
-    bindInterceptor(Matchers.any(), Matchers.annotatedWith(CacheRemoveEntry.class), cacheRemoveEntryInterceptor);
+    bindInterceptor(Matchers.annotatedWith(CacheRemove.class), Matchers.any(), cacheRemoveEntryInterceptor);
+    bindInterceptor(Matchers.any(), Matchers.annotatedWith(CacheRemove.class), cacheRemoveEntryInterceptor);
 
     CacheRemoveAllInterceptor cacheRemoveAllInterceptor = new CacheRemoveAllInterceptor();
     requestInjection(cacheRemoveAllInterceptor);

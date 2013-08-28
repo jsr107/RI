@@ -21,8 +21,8 @@ import javax.cache.annotation.CacheKey;
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheRemoveAll;
-import javax.cache.annotation.CacheRemoveEntry;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
@@ -175,14 +175,14 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     //Grab all possible annotations from the method, needed to enforce valid use of the annotations
     final CacheResult cacheResultAnnotation = getAnnotation(CacheResult.class, method, targetClass);
     final CachePut cachePutAnnotation = getAnnotation(CachePut.class, method, targetClass);
-    final CacheRemoveEntry cacheRemoveEntryAnnotation = getAnnotation(CacheRemoveEntry.class, method, targetClass);
+    final CacheRemove cacheRemoveAnnotation = getAnnotation(CacheRemove.class, method, targetClass);
     final CacheRemoveAll cacheRemoveAllAnnotation = getAnnotation(CacheRemoveAll.class, method, targetClass);
 
-    if (cacheResultAnnotation == null && cachePutAnnotation == null && cacheRemoveEntryAnnotation == null && cacheRemoveAllAnnotation == null) {
+    if (cacheResultAnnotation == null && cachePutAnnotation == null && cacheRemoveAnnotation == null && cacheRemoveAllAnnotation == null) {
       //Check for no annotations, just ignore the method
       return null;
     } else if (!(cacheResultAnnotation != null ^ cachePutAnnotation != null ^
-        cacheRemoveEntryAnnotation != null ^ cacheRemoveAllAnnotation != null)) {
+        cacheRemoveAnnotation != null ^ cacheRemoveAllAnnotation != null)) {
       //Check for more than one caching annotation
       throw new AnnotationFormatError(
           "Multiple cache annotations were found on " + method + " only one cache annotation per method is allowed");
@@ -192,9 +192,9 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
     } else if (cachePutAnnotation != null) {
       staticCacheInvocationContext =
           this.createCachePutMethodDetails(cachePutAnnotation, cacheDefaultsAnnotation, method, targetClass);
-    } else if (cacheRemoveEntryAnnotation != null) {
+    } else if (cacheRemoveAnnotation != null) {
       staticCacheInvocationContext =
-          this.createCacheRemoveEntryMethodDetails(cacheRemoveEntryAnnotation, cacheDefaultsAnnotation, method, targetClass);
+          this.createCacheRemoveEntryMethodDetails(cacheRemoveAnnotation, cacheDefaultsAnnotation, method, targetClass);
     } else if (cacheRemoveAllAnnotation != null) {
       staticCacheInvocationContext =
           this.createCacheRemoveAllMethodDetails(cacheRemoveAllAnnotation, cacheDefaultsAnnotation, method, targetClass);
@@ -336,34 +336,34 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
   }
 
   /**
-   * Create a StaticCacheInvocationContext implementation specific to the {@link CacheRemoveEntry} annotated method
+   * Create a StaticCacheInvocationContext implementation specific to the {@link javax.cache.annotation.CacheRemove} annotated method
    *
-   * @param cacheRemoveEntryAnnotation The annotation on the method
+   * @param cacheRemoveAnnotation The annotation on the method
    * @param cacheDefaultsAnnotation    The defaults annotation for the class, if it exists
    * @param method                     The annotated method
    * @param targetClass                The intercepted class
    * @return Details on the annotated method
    */
   protected CacheRemoveEntryMethodDetails createCacheRemoveEntryMethodDetails(
-      CacheRemoveEntry cacheRemoveEntryAnnotation, CacheDefaults cacheDefaultsAnnotation,
+      CacheRemove cacheRemoveAnnotation, CacheDefaults cacheDefaultsAnnotation,
       Method method, Class<? extends Object> targetClass) {
 
     //Determine the name of the cache
-    final String methodCacheName = cacheRemoveEntryAnnotation.cacheName();
+    final String methodCacheName = cacheRemoveAnnotation.cacheName();
 
     //Create the method details instance
-    final CacheMethodDetails<CacheRemoveEntry> cacheMethodDetails =
-        createCacheMethodDetails(cacheRemoveEntryAnnotation, cacheDefaultsAnnotation, methodCacheName, method, targetClass);
+    final CacheMethodDetails<CacheRemove> cacheMethodDetails =
+        createCacheMethodDetails(cacheRemoveAnnotation, cacheDefaultsAnnotation, methodCacheName, method, targetClass);
 
     //Find the cache resolver factory
-    final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheRemoveEntryAnnotation.cacheResolverFactory();
+    final Class<? extends CacheResolverFactory> cacheResolverFactoryType = cacheRemoveAnnotation.cacheResolverFactory();
     final CacheResolverFactory cacheResolverFactory = this.getCacheResolverFactory(cacheResolverFactoryType, cacheDefaultsAnnotation);
 
     //Find the key generator
-    final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheRemoveEntryAnnotation.cacheKeyGenerator();
+    final Class<? extends CacheKeyGenerator> cacheKeyGeneratorType = cacheRemoveAnnotation.cacheKeyGenerator();
     final CacheKeyGenerator cacheKeyGenerator = this.getCacheKeyGenerator(cacheKeyGeneratorType, cacheDefaultsAnnotation);
 
-    //Load parameter data, CacheValue is not allowed for CacheRemoveEntry
+    //Load parameter data, CacheValue is not allowed for CacheRemove
     final ParameterDetails parameterDetails = getParameterDetails(method, false);
 
     //Get the cache resolver to use for the method
@@ -621,7 +621,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
       return generatedCacheNameBuilder.toString();
     }
 
-    throw new AnnotationFormatError("cacheName must be specified in either CacheDefaults or CacheRemoveEntry or CacheRemoveAll for: " + method);
+    throw new AnnotationFormatError("cacheName must be specified in either CacheDefaults or CacheRemove or CacheRemoveAll for: " + method);
   }
 
   /**

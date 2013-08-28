@@ -36,7 +36,7 @@ public interface CacheContextSource<I> {
 
   /**
    * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult},
-   * {@link javax.cache.annotation.CachePut}, or {@link javax.cache.annotation.CacheRemoveEntry}
+   * {@link javax.cache.annotation.CachePut}, or {@link javax.cache.annotation.CacheRemove}
    *
    * @param invocation The intercepted invocation
    * @return Information about the invocation
@@ -45,7 +45,7 @@ public interface CacheContextSource<I> {
 
   /**
    * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult},
-   * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry},
+   * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemove},
    * or {@link javax.cache.annotation.CacheRemoveAll}
    *
    * @param invocation The intercepted invocation
@@ -55,7 +55,7 @@ public interface CacheContextSource<I> {
 
   /**
    * Get static information about a method annotated with {@link javax.cache.annotation.CacheResult},
-   * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemoveEntry},
+   * {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemove},
    * or {@link javax.cache.annotation.CacheRemoveAll}
    *
    * @param method      The annotated method

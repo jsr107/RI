@@ -19,14 +19,14 @@ package org.jsr107.ri.annotations;
 
 import javax.cache.Cache;
 import javax.cache.annotation.CacheKeyGenerator;
-import javax.cache.annotation.CacheRemoveEntry;
+import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.GeneratedCacheKey;
 import java.lang.annotation.Annotation;
 
 
 /**
- * Interceptor for {@link CacheRemoveEntry}
+ * Interceptor for {@link javax.cache.annotation.CacheRemove}
  *
  * @param <I> The intercepted method invocation
  * @author Rick Hightower
@@ -36,7 +36,7 @@ import java.lang.annotation.Annotation;
 public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CacheRemoveEntryMethodDetails> {
 
   /**
-   * Handles the {@link Cache#remove(Object)} as specified for the {@link CacheRemoveEntry} annotation
+   * Handles the {@link Cache#remove(Object)} as specified for the {@link javax.cache.annotation.CacheRemove} annotation
    *
    * @param cacheContextSource The intercepted invocation
    * @param invocation         The intercepted invocation
@@ -49,8 +49,8 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
     final CacheRemoveEntryMethodDetails methodDetails =
         this.getStaticCacheKeyInvocationContext(cacheKeyInvocationContext, InterceptorType.CACHE_REMOVE_ENTRY);
 
-    final CacheRemoveEntry cacheRemoveEntryAnnotation = methodDetails.getCacheAnnotation();
-    final boolean afterInvocation = cacheRemoveEntryAnnotation.afterInvocation();
+    final CacheRemove cacheRemoveAnnotation = methodDetails.getCacheAnnotation();
+    final boolean afterInvocation = cacheRemoveAnnotation.afterInvocation();
 
     //If pre-invocation - remove entry
     if (!afterInvocation) {
@@ -64,8 +64,8 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
     } catch (Throwable t) {
       if (afterInvocation) {
         //If after invocation is true and if the throwable passes the include/exclude filters and then call remove
-        final Class<? extends Throwable>[] evictFor = cacheRemoveEntryAnnotation.evictFor();
-        final Class<? extends Throwable>[] noEvictFor = cacheRemoveEntryAnnotation.noEvictFor();
+        final Class<? extends Throwable>[] evictFor = cacheRemoveAnnotation.evictFor();
+        final Class<? extends Throwable>[] noEvictFor = cacheRemoveAnnotation.noEvictFor();
 
         //Check for empty/null here since isIncluded returns true for those cases
         final boolean cache = ClassFilter.isIncluded(t, evictFor, noEvictFor, false);
