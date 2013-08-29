@@ -30,6 +30,11 @@ public enum MutableEntryOperation {
   NONE,
 
   /**
+   * Acceess an existing {@link org.jsr107.ri.RICachedValue}.
+   */
+  ACCESS,
+
+  /**
    * Create a new {@link org.jsr107.ri.RICachedValue}.
    */
   CREATE,
