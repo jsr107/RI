@@ -1410,7 +1410,7 @@ public final class RICache<K, V> implements Cache<K, V> {
       start = statisticsEnabled() ? System.nanoTime() : 0;
 
       EntryProcessorEntry<K, V> entry = new EntryProcessorEntry<>(valueConverter, key,
-          cachedValue, now, dispatcher);
+        cachedValue, now, dispatcher, configuration.isReadThrough() ? cacheLoader : null);
       try {
         result = entryProcessor.process(entry, arguments);
       } catch (Exception e) {
@@ -1425,6 +1425,19 @@ public final class RICache<K, V> implements Cache<K, V> {
       long expiryTime;
       switch (entry.getOperation()) {
         case NONE:
+          break;
+
+        case ACCESS:
+          // update Access ExpiryPolicy for entry.
+          try {
+            duration = expiryPolicy.getExpiryForAccessedEntry(key);
+            if (duration != null) {
+              long expiryTime1 = duration.getAdjustedTime(now);
+              cachedValue.setExpiryTime(expiryTime1);
+            }
+          } catch (Throwable t) {
+            //leave the expiry time untouched when we can't determine a duration
+          }
           break;
 
         case CREATE:
@@ -1711,18 +1724,16 @@ public final class RICache<K, V> implements Cache<K, V> {
           statistics.increaseCacheMisses(1);
         }
 
-        if (cacheLoader == null) {
-          return null;
-        }
-
         Entry<K, ? extends V> entry = null;
-        try {
-          entry = cacheLoader.load(key);
-        } catch (Exception e) {
-          if (!(e instanceof CacheLoaderException)) {
-            throw new CacheLoaderException("Exception in CacheLoader", e);
-          } else {
-            throw e;
+        if (configuration.isReadThrough() && cacheLoader != null) {
+          try {
+            entry = cacheLoader.load(key);
+          } catch (Exception e) {
+            if (!(e instanceof CacheLoaderException)) {
+              throw new CacheLoaderException("Exception in CacheLoader", e);
+            } else {
+              throw e;
+            }
           }
         }
 

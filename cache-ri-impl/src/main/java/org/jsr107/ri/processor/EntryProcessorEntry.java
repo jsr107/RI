@@ -21,6 +21,9 @@ import org.jsr107.ri.RICacheEventDispatcher;
 import org.jsr107.ri.RICachedValue;
 import org.jsr107.ri.RIInternalConverter;
 
+import javax.cache.Cache;
+import javax.cache.integration.CacheLoader;
+import javax.cache.integration.CacheLoaderException;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.MutableEntry;
 
@@ -68,6 +71,11 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
   private RICacheEventDispatcher<K, V> dispatcher;
 
   /**
+   * CacheLoader to call if getValue() would return null.
+   */
+  private CacheLoader<K, V> cacheLoader;
+
+  /**
    * Construct a {@link MutableEntry}
    *
    * @param key         the key for the {@link MutableEntry}
@@ -75,10 +83,12 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
    *                    (may be <code>null</code>)
    * @param now         the current time
    * @param dispatcher  the dispatch to capture events to dispatch
+   * @param cacheLoader cacheLoader should be non-null only if configuration.isReadThrough is true.
    */
   public EntryProcessorEntry(RIInternalConverter<V> converter, K key,
                       RICachedValue cachedValue, long now,
-                      RICacheEventDispatcher<K, V> dispatcher) {
+                      RICacheEventDispatcher<K, V> dispatcher,
+                      CacheLoader<K, V> cacheLoader) {
     this.converter = converter;
     this.key = key;
     this.cachedValue = cachedValue;
@@ -86,6 +96,7 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
     this.value = null;
     this.now = now;
     this.dispatcher = dispatcher;
+    this.cacheLoader = cacheLoader;
   }
 
   /**
@@ -109,7 +120,31 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
         value = internalValue == null ? null : converter.fromInternal(internalValue);
       }
     }
+    if (value != null) {
 
+      // mark as Accessed so AccessedExpiry will be computed upon return from entry processor.
+      if (operation == MutableEntryOperation.NONE) {
+        operation = MutableEntryOperation.ACCESS;
+      }
+    } else {
+      // check for read-through
+      if (cacheLoader != null)  {
+        Cache.Entry<K, ? extends V> entry = null;
+        try {
+          entry = cacheLoader.load(key);
+          if (entry != null) {
+            operation = MutableEntryOperation.CREATE;
+            value = entry.getValue();
+          }
+        } catch (Exception e) {
+          if (!(e instanceof CacheLoaderException)) {
+            throw new CacheLoaderException("Exception in CacheLoader", e);
+          } else {
+            throw e;
+          }
+        }
+      }
+    }
     return value;
   }
 
