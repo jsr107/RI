@@ -22,9 +22,6 @@ import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
-import javax.transaction.UserTransaction;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.ArrayList;
@@ -171,20 +168,6 @@ public class RICacheManager implements CacheManager {
       throw new NullPointerException("configuration must not be null");
     }
 
-    if ((!configuration.isStoreByValue()) && configuration.isTransactionsEnabled()) {
-      throw new IllegalArgumentException("can't use store-by-reference and transactions together");
-    }
-
-    if (configuration.getTransactionIsolationLevel() == IsolationLevel.NONE &&
-        configuration.getTransactionMode() != Mode.NONE) {
-      throw new IllegalArgumentException("isolation level expected when mode specified");
-    }
-
-    if (configuration.getTransactionIsolationLevel() != IsolationLevel.NONE &&
-        configuration.getTransactionMode() == Mode.NONE) {
-      throw new IllegalArgumentException("mode expected when isolation level specified");
-    }
-
     synchronized (caches) {
       RICache<?, ?> cache = caches.get(cacheName);
 
@@ -321,14 +304,6 @@ public class RICacheManager implements CacheManager {
     synchronized (caches) {
       caches.remove(cacheName);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public UserTransaction getUserTransaction() {
-    throw new UnsupportedOperationException("Transactions are not supported.");
   }
 
   /**

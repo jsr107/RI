@@ -25,15 +25,6 @@
         <module>cache-ri-impl</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.1</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
     <dependencyManagement>
         <dependencies>
             <dependency>

@@ -74,8 +74,6 @@ import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statis
  * the size of caches or provide eviction. It therefore is not suitable for use in production. Please use a
  * production implementation of the API.
  * <p/>
- * This implementation implements all optional parts of JSR107 except for the Transactions chapter. Transactions support
- * simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*

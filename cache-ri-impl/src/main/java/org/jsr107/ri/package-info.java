@@ -21,8 +21,6 @@
  This is meant to act as a proof of concept for the API. It is not threadsafe or high performance. It therefore is
  not suitable for use in production. Please use a production implementation of the API.
  <p/>
- This implementation implements all optional parts of JSR107 except for the Transactions chapter. Transactions support
- simply uses the JTA API. The JSR107 specification details how JTA should be applied to caches.
 
  @author Greg Luck
  @author Yannis Cosmadopoulos

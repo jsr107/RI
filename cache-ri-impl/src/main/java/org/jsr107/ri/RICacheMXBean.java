@@ -18,8 +18,6 @@ package org.jsr107.ri;
 
 import javax.cache.Cache;
 import javax.cache.management.CacheMXBean;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
 
 /**
  * Class to help implementers
@@ -80,33 +78,4 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
   public boolean isManagementEnabled() {
     return cache.getConfiguration().isManagementEnabled();
   }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean isTransactionsEnabled() {
-    return cache.getConfiguration().isTransactionsEnabled();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public IsolationLevel getTransactionIsolationLevel() {
-    return cache.getConfiguration().getTransactionIsolationLevel();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public Mode getTransactionMode() {
-    return cache.getConfiguration().getTransactionMode();
-  }
-
-//    @Override
-//    public ExpiryPolicy getExpiryPolicyFactory() {
-//        return null;  //To change body of implemented methods use File | Settings | File Templates.
-//    }
 }

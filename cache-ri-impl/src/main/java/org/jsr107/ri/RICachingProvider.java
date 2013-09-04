@@ -205,8 +205,6 @@ public class RICachingProvider implements CachingProvider {
   @Override
   public boolean isSupported(OptionalFeature optionalFeature) {
     switch (optionalFeature) {
-      case TRANSACTIONS:
-        return false;
 
       case STORE_BY_REFERENCE:
         return true;
