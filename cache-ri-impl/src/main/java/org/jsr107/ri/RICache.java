@@ -1701,7 +1701,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     long now = System.currentTimeMillis();
     long start = statisticsEnabled() ? System.nanoTime() : 0;
 
-
     Object internalKey = keyConverter.toInternal(key);
     RICachedValue cachedValue = null;
     V value = null;
@@ -1723,10 +1722,9 @@ public final class RICache<K, V> implements Cache<K, V> {
           statistics.increaseCacheMisses(1);
         }
 
-        Entry<K, ? extends V> entry = null;
         if (configuration.isReadThrough() && cacheLoader != null) {
           try {
-            entry = cacheLoader.load(key);
+            value = cacheLoader.load(key);
           } catch (Exception e) {
             if (!(e instanceof CacheLoaderException)) {
               throw new CacheLoaderException("Exception in CacheLoader", e);
@@ -1736,11 +1734,9 @@ public final class RICache<K, V> implements Cache<K, V> {
           }
         }
 
-        if (entry == null) {
+        if (value == null) {
           return null;
         }
-
-        value = entry.getValue();
 
         Duration duration;
         try {

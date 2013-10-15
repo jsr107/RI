@@ -21,7 +21,6 @@ import org.jsr107.ri.RICacheEventDispatcher;
 import org.jsr107.ri.RICachedValue;
 import org.jsr107.ri.RIInternalConverter;
 
-import javax.cache.Cache;
 import javax.cache.integration.CacheLoader;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.processor.EntryProcessor;
@@ -129,12 +128,10 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
     } else {
       // check for read-through
       if (cacheLoader != null)  {
-        Cache.Entry<K, ? extends V> entry = null;
         try {
-          entry = cacheLoader.load(key);
-          if (entry != null) {
+          value = cacheLoader.load(key);
+          if (value != null) {
             operation = MutableEntryOperation.CREATE;
-            value = entry.getValue();
           }
         } catch (Exception e) {
           if (!(e instanceof CacheLoaderException)) {
