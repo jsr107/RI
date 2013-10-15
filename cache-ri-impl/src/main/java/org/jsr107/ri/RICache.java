@@ -1302,8 +1302,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
       }
 
-      //delete the entries
-      if (isWriteThrough) {
+      //delete the entries (when there are some)
+      if (isWriteThrough && keysToDelete.size() > 0) {
         try {
           cacheWriter.deleteAll(keysToDelete);
         } catch (Exception e) {
