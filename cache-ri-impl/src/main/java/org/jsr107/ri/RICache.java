@@ -18,6 +18,7 @@
 package org.jsr107.ri;
 
 import org.jsr107.ri.processor.EntryProcessorEntry;
+import org.jsr107.ri.processor.MutableEntryOperation;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -1450,8 +1451,12 @@ public final class RICache<K, V> implements Cache<K, V> {
           break;
 
         case CREATE:
+        case LOAD:
           RIEntry<K, V> e = new RIEntry<K, V>(key, entry.getValue());
-          writeCacheEntry(e);
+
+          if (entry.getOperation() == MutableEntryOperation.CREATE) {
+            writeCacheEntry(e);
+          }
 
           try {
             duration = expiryPolicy.getExpiryForCreation();

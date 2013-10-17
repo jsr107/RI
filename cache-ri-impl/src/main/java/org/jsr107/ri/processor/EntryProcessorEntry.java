@@ -85,9 +85,9 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
    * @param cacheLoader cacheLoader should be non-null only if configuration.isReadThrough is true.
    */
   public EntryProcessorEntry(RIInternalConverter<V> converter, K key,
-                      RICachedValue cachedValue, long now,
-                      RICacheEventDispatcher<K, V> dispatcher,
-                      CacheLoader<K, V> cacheLoader) {
+                             RICachedValue cachedValue, long now,
+                             RICacheEventDispatcher<K, V> dispatcher,
+                             CacheLoader<K, V> cacheLoader) {
     this.converter = converter;
     this.key = key;
     this.cachedValue = cachedValue;
@@ -119,19 +119,19 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
         value = internalValue == null ? null : converter.fromInternal(internalValue);
       }
     }
-    if (value != null) {
 
+    if (value != null) {
       // mark as Accessed so AccessedExpiry will be computed upon return from entry processor.
       if (operation == MutableEntryOperation.NONE) {
         operation = MutableEntryOperation.ACCESS;
       }
     } else {
       // check for read-through
-      if (cacheLoader != null)  {
+      if (cacheLoader != null) {
         try {
           value = cacheLoader.load(key);
           if (value != null) {
-            operation = MutableEntryOperation.CREATE;
+            operation = MutableEntryOperation.LOAD;
           }
         } catch (Exception e) {
           if (!(e instanceof CacheLoaderException)) {
@@ -158,7 +158,8 @@ public class EntryProcessorEntry<K, V> implements MutableEntry<K, V> {
    */
   @Override
   public void remove() {
-    operation = (operation == MutableEntryOperation.CREATE) ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
+    operation = (operation == MutableEntryOperation.CREATE || operation == MutableEntryOperation.LOAD)
+        ? MutableEntryOperation.NONE : MutableEntryOperation.REMOVE;
     value = null;
   }
 

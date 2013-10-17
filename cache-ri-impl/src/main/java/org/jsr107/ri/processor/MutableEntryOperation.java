@@ -30,7 +30,7 @@ public enum MutableEntryOperation {
   NONE,
 
   /**
-   * Acceess an existing {@link org.jsr107.ri.RICachedValue}.
+   * Access an existing {@link org.jsr107.ri.RICachedValue}.
    */
   ACCESS,
 
@@ -38,6 +38,11 @@ public enum MutableEntryOperation {
    * Create a new {@link org.jsr107.ri.RICachedValue}.
    */
   CREATE,
+
+  /**
+   * Loaded a new {@link org.jsr107.ri.RICachedValue}.
+   */
+  LOAD,
 
   /**
    * Remove the {@link org.jsr107.ri.RICachedValue} (and thus the Cache Entry).
