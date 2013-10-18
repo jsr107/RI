@@ -21,9 +21,9 @@ package org.jsr107.ri;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
 import java.util.Set;
 
 
@@ -34,6 +34,9 @@ import java.util.Set;
  * @since 1.0
  */
 public final class MBeanServerRegistrationUtility {
+
+  //ensure everything gets put in one MBeanServer
+  private static MBeanServer mBeanServer = MBeanServerFactory.createMBeanServer();
 
   /**
    * The type of registered Object
@@ -59,13 +62,12 @@ public final class MBeanServerRegistrationUtility {
 
 
   /**
-   * Utility method for registering CacheStatistics with the platform MBeanServer
+   * Utility method for registering CacheStatistics with the MBeanServer
    *
    * @param cache the cache to register
    */
   static void registerCacheObject(RICache cache, ObjectNameType objectNameType) {
     //these can change during runtime, so always look it up
-    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
     ObjectName registeredObjectName = calculateObjectName(cache, objectNameType);
     try {
       if (objectNameType.equals(ObjectNameType.Configuration)) {
@@ -83,6 +85,7 @@ public final class MBeanServerRegistrationUtility {
     }
   }
 
+
   /**
    * Checks whether an ObjectName is already registered.
    *
@@ -91,7 +94,6 @@ public final class MBeanServerRegistrationUtility {
   static boolean isRegistered(RICache cache, ObjectNameType objectNameType) {
 
     Set<ObjectName> registeredObjectNames = null;
-    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     ObjectName objectName = calculateObjectName(cache, objectNameType);
     registeredObjectNames = mBeanServer.queryNames(objectName, null);
@@ -108,7 +110,6 @@ public final class MBeanServerRegistrationUtility {
   static void unregisterCacheObject(RICache cache, ObjectNameType objectNameType) {
 
     Set<ObjectName> registeredObjectNames = null;
-    MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     ObjectName objectName = calculateObjectName(cache, objectNameType);
     registeredObjectNames = mBeanServer.queryNames(objectName, null);
