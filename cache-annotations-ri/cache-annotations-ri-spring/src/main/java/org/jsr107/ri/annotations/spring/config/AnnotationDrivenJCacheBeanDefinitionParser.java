@@ -124,9 +124,9 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
   }
 
   /**
-   * Create the {@link Pointcut} used to apply the caching interceptor
+   * Create the {@link RuntimeBeanReference} used to apply the caching interceptor
    *
-   * @return Reference to the {@link Pointcut}. Should never be null.
+   * @return Reference to the {@link RuntimeBeanReference}. Should never be null.
    */
   protected RuntimeBeanReference setupPointcut(ParserContext parserContext, Object elementSource,
                                                RuntimeBeanReference cacheOperationSourceRuntimeReference,
@@ -172,7 +172,8 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
   }
 
   /**
-   * Create {@link org.springframework.aop.PointcutAdvisor} that puts the {@link org.springframework.aop.Pointcut} and {@link MethodInterceptor} together.
+   * Create {@link org.springframework.aop.PointcutAdvisor} that puts the
+   * {@link org.springframework.aop.Pointcut} and {@link AbstractCacheInterceptor} together.
    */
   protected void setupPointcutAdvisor(Class<? extends AbstractCacheInterceptor<?>> interceptorClass,
                                       Element element, ParserContext parserContext,

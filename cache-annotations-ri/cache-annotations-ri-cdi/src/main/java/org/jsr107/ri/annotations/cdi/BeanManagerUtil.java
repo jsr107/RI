@@ -30,16 +30,10 @@ import java.util.Set;
 public class BeanManagerUtil {
 
 
-  /**
-   *
-   */
   @Inject
   private BeanManager beanManager;
 
   /**
-   * @param <T>
-   * @param type
-   * @param qualifiers
    * @return the bean
    */
   public <T> T getBeanByType(Class<T> type, Annotation... qualifiers) {
