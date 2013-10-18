@@ -17,6 +17,8 @@
 
 package org.jsr107.ri;
 
+import org.jsr107.ri.spi.RICachingProvider;
+
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;

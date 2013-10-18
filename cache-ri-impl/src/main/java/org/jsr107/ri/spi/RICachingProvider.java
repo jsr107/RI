@@ -14,7 +14,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.jsr107.ri;
+package org.jsr107.ri.spi;
+
+import org.jsr107.ri.RICacheManager;
 
 import javax.cache.CacheException;
 import javax.cache.CacheManager;

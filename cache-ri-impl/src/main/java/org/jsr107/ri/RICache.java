@@ -17,6 +17,9 @@
 
 package org.jsr107.ri;
 
+import org.jsr107.ri.event.RICacheEntryEvent;
+import org.jsr107.ri.event.RICacheEntryListenerRegistration;
+import org.jsr107.ri.event.RICacheEventDispatcher;
 import org.jsr107.ri.management.MBeanServerRegistrationUtility;
 import org.jsr107.ri.management.RICacheMXBean;
 import org.jsr107.ri.management.RICacheStatisticsMXBean;
@@ -135,7 +138,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   private final ExpiryPolicy expiryPolicy;
 
   /**
-   * The {@link RICacheEntryListenerRegistration}s for the {@link Cache}.
+   * The {@link org.jsr107.ri.event.RICacheEntryListenerRegistration}s for the {@link Cache}.
    */
   private final CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>> listenerRegistrations;
 

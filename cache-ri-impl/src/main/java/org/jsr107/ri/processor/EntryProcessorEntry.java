@@ -17,7 +17,7 @@
 
 package org.jsr107.ri.processor;
 
-import org.jsr107.ri.RICacheEventDispatcher;
+import org.jsr107.ri.event.RICacheEventDispatcher;
 import org.jsr107.ri.RICachedValue;
 import org.jsr107.ri.RIInternalConverter;
 

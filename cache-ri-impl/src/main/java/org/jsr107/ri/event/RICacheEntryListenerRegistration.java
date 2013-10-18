@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.jsr107.ri;
+package org.jsr107.ri.event;
 
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.event.CacheEntryEvent;
@@ -29,7 +29,7 @@ import javax.cache.event.CacheEntryListener;
  * @param <V> the type of values
  * @author Brian Oliver
  */
-class RICacheEntryListenerRegistration<K, V> {
+public class RICacheEntryListenerRegistration<K, V> {
 
   private final CacheEntryListenerConfiguration<K, V> configuration;
   private CacheEntryListener<? super K, ? super V> listener;
@@ -146,7 +146,7 @@ class RICacheEntryListenerRegistration<K, V> {
    * Gets the underlying configuration used to create this registration
    * @return the configuration
    */
-  CacheEntryListenerConfiguration<K, V> getConfiguration() {
+  public CacheEntryListenerConfiguration<K, V> getConfiguration() {
     return configuration;
   }
 }

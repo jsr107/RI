@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.jsr107.ri;
+package org.jsr107.ri.event;
 
 import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Factory;
