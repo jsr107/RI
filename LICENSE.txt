@@ -1,6 +1,6 @@
 /**
- *  Copyright 2011 Terracotta, Inc.
- *  Copyright 2011 Oracle, Inc.
+ *  Copyright 2011-2013 Terracotta, Inc.
+ *  Copyright 2011-2013 Oracle, Inc.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
