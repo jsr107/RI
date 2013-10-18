@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.jsr107.ri;
+package org.jsr107.ri.management;
 
 import com.sun.jmx.mbeanserver.JmxMBeanServer;
 

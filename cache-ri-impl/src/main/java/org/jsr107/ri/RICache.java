@@ -17,6 +17,9 @@
 
 package org.jsr107.ri;
 
+import org.jsr107.ri.management.MBeanServerRegistrationUtility;
+import org.jsr107.ri.management.RICacheMXBean;
+import org.jsr107.ri.management.RICacheStatisticsMXBean;
 import org.jsr107.ri.processor.EntryProcessorEntry;
 import org.jsr107.ri.processor.MutableEntryOperation;
 
@@ -64,8 +67,8 @@ import static javax.cache.event.EventType.CREATED;
 import static javax.cache.event.EventType.EXPIRED;
 import static javax.cache.event.EventType.REMOVED;
 import static javax.cache.event.EventType.UPDATED;
-import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
-import static org.jsr107.ri.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
+import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
+import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
 
 /**
  * The reference implementation for JSR107.
@@ -1804,7 +1807,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    *
    * @return the size in entries of the cache
    */
-  long getSize() {
+  public long getSize() {
     return entries.size();
   }
 

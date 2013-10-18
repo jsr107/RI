@@ -16,7 +16,9 @@
  */
 
 
-package org.jsr107.ri;
+package org.jsr107.ri.management;
+
+import org.jsr107.ri.RICache;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -41,7 +43,7 @@ public final class MBeanServerRegistrationUtility {
   /**
    * The type of registered Object
    */
-  enum ObjectNameType {
+  public enum ObjectNameType {
 
     /**
      * Cache Statistics
@@ -66,7 +68,8 @@ public final class MBeanServerRegistrationUtility {
    *
    * @param cache the cache to register
    */
-  static void registerCacheObject(RICache cache, ObjectNameType objectNameType) {
+  public static void registerCacheObject(RICache cache,
+                                    ObjectNameType objectNameType) {
     //these can change during runtime, so always look it up
     ObjectName registeredObjectName = calculateObjectName(cache, objectNameType);
     try {
@@ -107,7 +110,8 @@ public final class MBeanServerRegistrationUtility {
    *
    * @throws CacheException - all exceptions are wrapped in CacheException
    */
-  static void unregisterCacheObject(RICache cache, ObjectNameType objectNameType) {
+  public static void unregisterCacheObject(RICache cache,
+                                     ObjectNameType objectNameType) {
 
     Set<ObjectName> registeredObjectNames = null;
 

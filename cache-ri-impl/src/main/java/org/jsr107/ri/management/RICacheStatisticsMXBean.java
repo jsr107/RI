@@ -15,7 +15,9 @@
  *  limitations under the License.
  */
 
-package org.jsr107.ri;
+package org.jsr107.ri.management;
+
+import org.jsr107.ri.RICache;
 
 import javax.cache.Cache;
 import javax.cache.management.CacheStatisticsMXBean;
@@ -213,7 +215,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
    *
    * @param number the number to increase the counter by
    */
-  void increaseCacheRemovals(long number) {
+  public void increaseCacheRemovals(long number) {
     cacheRemovals.getAndAdd(number);
   }
 
@@ -222,7 +224,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
    *
    * @param number the number to increase the counter by
    */
-  void increaseCacheExpiries(long number) {
+  public void increaseCacheExpiries(long number) {
     cacheExpiries.getAndAdd(number);
   }
 
@@ -231,7 +233,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
    *
    * @param number the number to increase the counter by
    */
-  void increaseCachePuts(long number) {
+  public void increaseCachePuts(long number) {
     cachePuts.getAndAdd(number);
   }
 
@@ -240,7 +242,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
    *
    * @param number the number to increase the counter by
    */
-  void increaseCacheHits(long number) {
+  public void increaseCacheHits(long number) {
     cacheHits.getAndAdd(number);
   }
 
@@ -249,7 +251,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
    *
    * @param number the number to increase the counter by
    */
-  void increaseCacheMisses(long number) {
+  public void increaseCacheMisses(long number) {
     cacheMisses.getAndAdd(number);
   }
 
@@ -258,7 +260,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
    *
    * @param number the number to increase the counter by
    */
-  void increaseCacheEvictions(long number) {
+  public void increaseCacheEvictions(long number) {
     cacheEvictions.getAndAdd(number);
   }
 
