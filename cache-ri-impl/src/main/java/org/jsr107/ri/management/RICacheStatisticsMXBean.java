@@ -27,6 +27,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The reference implementation of {@link CacheStatisticsMXBean}.
+ * 
+ * @author Greg Luck
+ * @author Dhrubajyoti Gogoi
  */
 public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializable {
 
@@ -99,7 +102,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
     if (hits == 0) {
       return 0;
     }
-    return hits / getCacheGets();
+    return (float) hits / getCacheGets() * 100.0f;
   }
 
   /**
@@ -121,7 +124,7 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
     if (misses == 0) {
       return 0;
     }
-    return misses / getCacheGets();
+    return (float) misses / getCacheGets() * 100.0f;
   }
 
   /**
