@@ -535,7 +535,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         if (isExpired) {
           V expiredValue = valueConverter.fromInternal(cachedValue.get());
-          dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+          processExpiries(key, dispatcher, expiredValue);
         }
 
         Duration duration;
@@ -613,7 +613,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         if (isExpired) {
           V expiredValue = valueConverter.fromInternal(cachedValue.get());
-          dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+          processExpiries(key, dispatcher, expiredValue);
         }
 
         Duration duration;
@@ -757,7 +757,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           if (isExpired) {
             V expiredValue = valueConverter.fromInternal(cachedValue.get());
-            dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+            processExpiries(key, dispatcher, expiredValue);
           }
 
           Duration duration;
@@ -846,7 +846,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         if (isExpired) {
           V expiredValue = valueConverter.fromInternal(cachedValue.get());
-          dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+          processExpiries(key, dispatcher, expiredValue);
         }
 
         Duration duration;
@@ -878,6 +878,11 @@ public final class RICache<K, V> implements Cache<K, V> {
       statistics.addPutTimeNano(System.nanoTime() - start);
     }
     return result;
+  }
+
+  private void processExpiries(K key, RICacheEventDispatcher<K, V> dispatcher, V expiredValue) {
+    entries.remove(key);
+    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
   }
 
   /**
@@ -1253,7 +1258,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           V value = valueConverter.fromInternal(cachedValue.get());
 
           if (cachedValue.isExpiredAt(now)) {
-            dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, value, EXPIRED));
+            processExpiries(key, dispatcher, value);
           } else {
             dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
           }
@@ -1340,7 +1345,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
 
           if (cachedValue.isExpiredAt(now)) {
-            dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, value, EXPIRED));
+            processExpiries(key, dispatcher, value);
           } else {
             dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
           }
@@ -1476,7 +1481,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           if (cachedValue.isExpiredAt(now)) {
             V previousValue = valueConverter.fromInternal(cachedValue.get());
-            dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, previousValue, EXPIRED));
+            processExpiries(key, dispatcher, previousValue);
           }
 
           entries.put(internalKey, cachedValue);
@@ -1736,7 +1741,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         V expiredValue = isExpired ? valueConverter.fromInternal(cachedValue.get()) : null;
 
         if (isExpired) {
-          dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+          processExpiries(key, dispatcher, expiredValue);
         }
 
         if (statisticsEnabled()) {
