@@ -509,6 +509,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   @Override
   public void put(K key, V value) {
     long start = statisticsEnabled() ? System.nanoTime() : 0;
+    int putCount = 0;
     ensureOpen();
     if (value == null) {
       throw new NullPointerException("null value specified for key " + key);
@@ -561,6 +562,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           processExpiries(key, dispatcher, valueConverter.fromInternal(cachedValue.get()));
         } else {
           entries.put(internalKey, cachedValue);
+          putCount++;
           dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, EventType.CREATED));
         }
 
@@ -582,6 +584,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
 
         cachedValue.setInternalValue(internalValue, now);
+        putCount++;
 
         dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, EventType.UPDATED));
       }
@@ -591,8 +594,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     } finally {
       lockManager.unLock(key);
     }
-    if (statisticsEnabled()) {
-      statistics.increaseCachePuts(1);
+    if (statisticsEnabled() && putCount > 0) {
+      statistics.increaseCachePuts(putCount);
       statistics.addPutTimeNano(System.nanoTime() - start);
     }
   }
@@ -608,6 +611,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     long now = System.currentTimeMillis();
 
     V result;
+    int putCount = 0;
     lockManager.lock(key);
     try {
       RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
@@ -619,6 +623,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
       boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
       if (cachedValue == null || isExpired) {
+        result = null;
 
         RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
         writeCacheEntry(entry);
@@ -637,12 +642,13 @@ public final class RICache<K, V> implements Cache<K, V> {
         long expiryTime = duration.getAdjustedTime(now);
 
         cachedValue = new RICachedValue(internalValue, now, expiryTime);
-        entries.put(internalKey, cachedValue);
-        result = null;
-
-        dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
-
-        //TODO: count the "miss" in the statistics
+        if (cachedValue.isExpiredAt(now)) {
+            processExpiries(key, dispatcher, value);
+        } else {
+            entries.put(internalKey, cachedValue);
+            putCount++;
+            dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+        }
 
       } else {
         V oldValue = valueConverter.fromInternal(cachedValue.getInternalValue(now));
@@ -659,7 +665,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           //leave the expiry time untouched when we can't determine a duration
         }
         cachedValue.setInternalValue(internalValue, now);
-
+        putCount++;
         result = oldValue;
 
         dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
@@ -671,13 +677,20 @@ public final class RICache<K, V> implements Cache<K, V> {
       lockManager.unLock(key);
     }
     if (statisticsEnabled()) {
-      statistics.increaseCachePuts(1);
-      statistics.addPutTimeNano(System.nanoTime() - start);
-    }
-    if (result != null) {
-      statistics.increaseCacheHits(1);
+
+      if (result == null) {
+        statistics.increaseCacheMisses(1);
+      } else {
+        statistics.increaseCacheHits(1);
+      }
       statistics.addGetTimeNano(System.nanoTime() - start);
+
+      if (putCount > 0) {
+        statistics.increaseCachePuts(putCount);
+        statistics.addPutTimeNano(System.nanoTime() - start);
+      }
     }
+
     return result;
   }
 
@@ -708,6 +721,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     long start = statisticsEnabled() ? System.nanoTime() : 0;
 
     long now = System.currentTimeMillis();
+    int putCount = 0;
 
     if (map.containsKey(null)) {
       throw new NullPointerException("key");
@@ -781,10 +795,19 @@ public final class RICache<K, V> implements Cache<K, V> {
           long expiryTime = duration.getAdjustedTime(now);
 
           cachedValue = new RICachedValue(internalValue, now, expiryTime);
+          if (cachedValue.isExpiredAt(now))  {
+            processExpiries(key, dispatcher, value);
+          } else {
+            entries.put(internalKey, cachedValue);
 
-          entries.put(internalKey, cachedValue);
+            dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
 
-          dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+            // this method called from loadAll when useWriteThrough is false. do not count loads as puts per statistics
+            // table in specification.
+            if (useWriteThrough) {
+              putCount++;
+            }
+          }
         } else if (replaceExistingValues) {
           V oldValue = valueConverter.fromInternal(cachedValue.get());
 
@@ -799,6 +822,11 @@ public final class RICache<K, V> implements Cache<K, V> {
           }
 
           cachedValue.setInternalValue(internalValue, now);
+
+          // do not count loadAll calls as puts. useWriteThrough is false when called from loadAll.
+          if (useWriteThrough) {
+              putCount++;
+          }
 
           dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
         }
@@ -816,8 +844,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     //dispatch events
     dispatcher.dispatch(listenerRegistrations);
 
-    if (statisticsEnabled()) {
-      statistics.increaseCachePuts(map.size());
+    if (statisticsEnabled() && putCount > 0) {
+      statistics.increaseCachePuts(putCount);
       statistics.addPutTimeNano(System.nanoTime() - start);
     }
 
@@ -870,10 +898,17 @@ public final class RICache<K, V> implements Cache<K, V> {
         long expiryTime = duration.getAdjustedTime(now);
 
         cachedValue = new RICachedValue(internalValue, now, expiryTime);
-        entries.put(internalKey, cachedValue);
-        result = true;
+        if (cachedValue.isExpiredAt(now)) {
+            processExpiries(key, dispatcher, value);
 
-        dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+            // no expiry event for created entry that expires before put in cache. do not put entry in cache.
+            result = false;
+        } else {
+            entries.put(internalKey, cachedValue);
+            result = true;
+
+            dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+        }
       } else {
         result = false;
       }
@@ -884,7 +919,6 @@ public final class RICache<K, V> implements Cache<K, V> {
       lockManager.unLock(key);
     }
 
-    //TODO: this is incorrect.  it should only do this if we actually do a put
     if (result && statisticsEnabled()) {
       statistics.increaseCachePuts(1);
       statistics.addPutTimeNano(System.nanoTime() - start);
@@ -1005,6 +1039,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     ensureOpen();
 
     long now = System.currentTimeMillis();
+    long start = statisticsEnabled() ? System.nanoTime() : 0;
 
     V result;
     lockManager.lock(key);
@@ -1027,9 +1062,11 @@ public final class RICache<K, V> implements Cache<K, V> {
       lockManager.unLock(key);
     }
     if (statisticsEnabled()) {
+      statistics.addGetTimeNano(System.nanoTime() - start);
       if (result != null) {
         statistics.increaseCacheHits(1);
         statistics.increaseCacheRemovals(1);
+        statistics.addRemoveTimeNano(System.nanoTime() - start);
       } else {
         statistics.increaseCacheMisses(1);
       }
@@ -1174,6 +1211,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     long now = System.currentTimeMillis();
+    long start = statisticsEnabled() ? System.nanoTime() : 0;
 
     V result;
     lockManager.lock(key);
@@ -1210,9 +1248,11 @@ public final class RICache<K, V> implements Cache<K, V> {
       lockManager.unLock(key);
     }
     if (statisticsEnabled()) {
+      statistics.addGetTimeNano(System.nanoTime() - start);
       if (result != null) {
         statistics.increaseCacheHits(1);
         statistics.increaseCachePuts(1);
+        statistics.addPutTimeNano(System.nanoTime() - start);
       } else {
         statistics.increaseCacheMisses(1);
       }
@@ -1494,16 +1534,17 @@ public final class RICache<K, V> implements Cache<K, V> {
           if (cachedValue.isExpiredAt(now)) {
             V previousValue = valueConverter.fromInternal(cachedValue.get());
             processExpiries(key, dispatcher, previousValue);
-          }
+          } else {
+            entries.put(internalKey, cachedValue);
 
-          entries.put(internalKey, cachedValue);
+            dispatcher.addEvent(CacheEntryCreatedListener.class,
+                  new RICacheEntryEvent<K, V>(this, key, entry.getValue(), CREATED));
 
-          dispatcher.addEvent(CacheEntryCreatedListener.class,
-              new RICacheEntryEvent<K, V>(this, key, entry.getValue(), CREATED));
-
-          if (statisticsEnabled()) {
-            statistics.increaseCachePuts(1);
-            statistics.addPutTimeNano(System.nanoTime() - start);
+            // do not count LOAD as a put for cache statistics.
+            if (statisticsEnabled() && entry.getOperation() == MutableEntryOperation.CREATE) {
+                statistics.increaseCachePuts(1);
+                statistics.addPutTimeNano(System.nanoTime() - start);
+            }
           }
 
           break;
@@ -1793,6 +1834,8 @@ public final class RICache<K, V> implements Cache<K, V> {
           entries.put(internalKey, cachedValue);
 
           dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+
+          // do not consider a load as a put for cache statistics.
         }
       } else {
         value = valueConverter.fromInternal(cachedValue.getInternalValue(now));
@@ -1878,7 +1921,7 @@ public final class RICache<K, V> implements Cache<K, V> {
      * iterator.
      */
     private void fetch() {
-
+      long start = statisticsEnabled() ? System.nanoTime() : 0;
       while (nextEntry == null && iterator.hasNext()) {
 
         Map.Entry<Object, RICachedValue> entry = iterator.next();
@@ -1903,6 +1946,10 @@ public final class RICache<K, V> implements Cache<K, V> {
           }
         } finally {
           lockManager.unLock(key);
+          if (statisticsEnabled() && nextEntry != null) {
+              statistics.increaseCacheHits(1);
+              statistics.addGetTimeNano(System.nanoTime() - start);
+          }
         }
       }
     }
@@ -1941,10 +1988,11 @@ public final class RICache<K, V> implements Cache<K, V> {
      */
     @Override
     public void remove() {
-
+      int cacheRemovals = 0;
       if (lastEntry == null) {
         throw new IllegalStateException("Must progress to the next entry to remove");
       } else {
+        long start = statisticsEnabled() ? System.nanoTime() : 0;
         lockManager.lock(lastEntry.getKey());
         try {
           deleteCacheEntry(lastEntry.getKey());
@@ -1955,6 +2003,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           //we simply don't care here as multiple-threads are ok to remove and see
           //such side-effects
           iterator.remove();
+          cacheRemovals++;
 
           //raise "remove" event
           RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
@@ -1967,6 +2016,10 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           //reset lastEntry (we can't attempt to remove it again)
           lastEntry = null;
+          if (statisticsEnabled() && cacheRemovals > 0) {
+            statistics.increaseCacheRemovals(cacheRemovals);
+            statistics.addRemoveTimeNano(System.nanoTime() - start);
+          }
         }
       }
     }
