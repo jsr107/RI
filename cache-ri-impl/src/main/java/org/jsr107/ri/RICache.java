@@ -50,28 +50,26 @@ import javax.cache.processor.EntryProcessorException;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static javax.cache.event.EventType.CREATED;
 import static javax.cache.event.EventType.EXPIRED;
 import static javax.cache.event.EventType.REMOVED;
 import static javax.cache.event.EventType.UPDATED;
-import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
-import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
+import static org.jsr107.ri.management.MBeanServerRegistrationUtility
+    .ObjectNameType.Configuration;
+import static org.jsr107.ri.management.MBeanServerRegistrationUtility
+    .ObjectNameType.Statistics;
 
 /**
  * The reference implementation for JSR107.
@@ -1833,90 +1831,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     return entries.size();
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  private static class RIEntry<K, V> implements Entry<K, V> {
-    private final K key;
-    private final V value;
-    private final V oldValue;
-
-    public RIEntry(K key, V value) {
-      if (key == null) {
-        throw new NullPointerException("key");
-      }
-      if (value == null) {
-        throw new NullPointerException("value");
-      }
-
-      this.key = key;
-      this.value = value;
-      this.oldValue = null;
-    }
-
-    public RIEntry(K key, V value, V oldValue) {
-      if (key == null) {
-        throw new NullPointerException("key");
-      }
-      if (value == null) {
-        throw new NullPointerException("value");
-      }
-      if (oldValue == null) {
-        throw new NullPointerException("oldValue");
-      }
-
-      this.key = key;
-      this.value = value;
-      this.oldValue = oldValue;
-    }
-
-    @Override
-    public K getKey() {
-      return key;
-    }
-
-    @Override
-    public V getValue() {
-      return value;
-    }
-
-    public V getOldValue() {
-      return oldValue;
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> clazz) {
-      if (clazz != null && clazz.isInstance(this)) {
-        return (T) this;
-      } else {
-        throw new IllegalArgumentException("Class " + clazz + " is unknown to this implementation");
-      }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || ((Object) this).getClass() != o.getClass()) return false;
-
-      RIEntry<?, ?> e2 = (RIEntry<?, ?>) o;
-
-      return this.getKey().equals(e2.getKey()) &&
-          this.getValue().equals(e2.getValue()) &&
-          (this.oldValue == null && e2.oldValue == null ||
-              this.getOldValue().equals(e2.getOldValue()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-      return getKey().hashCode();
-    }
-  }
 
   /**
    * An {@link Iterator} over Cache {@link Entry}s that lazily converts
@@ -2057,124 +1971,5 @@ public final class RICache<K, V> implements Cache<K, V> {
       }
     }
   }
-
-  /**
-   * Callable used for cache loader.
-   *
-   * @param <K> the type of the key
-   * @param <V> the type of the value
-   */
-  private static class RICacheLoaderLoadAllCallable<K, V> implements Callable<Map<K, ? extends V>> {
-    private final RICache<K, V> cache;
-    private final CacheLoader<K, ? extends V> cacheLoader;
-    private final Collection<? extends K> keys;
-
-    RICacheLoaderLoadAllCallable(RICache<K, V> cache, CacheLoader<K, ? extends V> cacheLoader, Collection<? extends K> keys) {
-      this.cache = cache;
-      this.cacheLoader = cacheLoader;
-      this.keys = keys;
-    }
-
-    @Override
-    public Map<K, ? extends V> call() throws Exception {
-      ArrayList<K> keysNotInStore = new ArrayList<K>();
-      for (K key : keys) {
-        if (!cache.containsKey(key)) {
-          keysNotInStore.add(key);
-        }
-      }
-      Map<K, ? extends V> value;
-      try {
-        value = cacheLoader.loadAll(keysNotInStore);
-      } catch (Exception e) {
-        if (!(e instanceof CacheLoaderException)) {
-          throw new CacheLoaderException("Exception in CacheLoader", e);
-        } else {
-          throw e;
-        }
-      }
-
-      cache.putAll(value);
-      return value;
-    }
-  }
-
-  /**
-   * A mechanism to manage locks for a collection of objects.
-   *
-   * @param <K> the type of the object to be locked
-   */
-  private static final class LockManager<K> {
-    private final ConcurrentHashMap<K, ReentrantLock> locks = new ConcurrentHashMap<K, ReentrantLock>();
-    private final LockFactory lockFactory = new LockFactory();
-
-    private LockManager() {
-    }
-
-    /**
-     * Lock the object
-     *
-     * @param key the key
-     */
-    private void lock(K key) {
-      ReentrantLock lock = lockFactory.getLock();
-
-      while (true) {
-        ReentrantLock oldLock = locks.putIfAbsent(key, lock);
-        if (oldLock == null) {
-          return;
-        }
-        // there was a lock
-        oldLock.lock();
-        // now we have it. Because of possibility that someone had it for remove,
-        // we don't re-use directly
-        lockFactory.release(oldLock);
-      }
-    }
-
-    /**
-     * Unlock the object
-     *
-     * @param key the object
-     */
-    private void unLock(K key) {
-      ReentrantLock lock = locks.remove(key);
-      lockFactory.release(lock);
-    }
-
-    /**
-     * A factory for {@link ReentrantLock}s.
-     */
-    private static final class LockFactory {
-      private static final int CAPACITY = 100;
-      private static final ArrayList<ReentrantLock> LOCKS = new ArrayList<ReentrantLock>(CAPACITY);
-
-      private LockFactory() {
-      }
-
-      private ReentrantLock getLock() {
-        ReentrantLock qLock = null;
-        synchronized (LOCKS) {
-          if (!LOCKS.isEmpty()) {
-            qLock = LOCKS.remove(0);
-          }
-        }
-
-        ReentrantLock lock = qLock != null ? qLock : new ReentrantLock();
-        lock.lock();
-        return lock;
-      }
-
-      private void release(ReentrantLock lock) {
-        lock.unlock();
-        synchronized (LOCKS) {
-          if (LOCKS.size() <= CAPACITY) {
-            LOCKS.add(lock);
-          }
-        }
-      }
-    }
-  }
-
 
 }
