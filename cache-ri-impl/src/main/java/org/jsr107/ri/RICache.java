@@ -516,6 +516,9 @@ public final class RICache<K, V> implements Cache<K, V> {
       throw new NullPointerException("null value specified for key " + key);
     }
 
+
+
+
     lockManager.lock(key);
     try {
       RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
@@ -527,16 +530,18 @@ public final class RICache<K, V> implements Cache<K, V> {
 
       RICachedValue cachedValue = entries.get(internalKey);
 
-      boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
-      if (cachedValue == null || isExpired) {
+      boolean isOldEntryExpired = cachedValue != null && cachedValue.isExpiredAt(now);
+
+      if (isOldEntryExpired) {
+        V expiredValue = valueConverter.fromInternal(cachedValue.get());
+        processExpiries(key, dispatcher, expiredValue);
+      }
+
+      if (cachedValue == null || isOldEntryExpired) {
 
         RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
-        writeCacheEntry(entry);
 
-        if (isExpired) {
-          V expiredValue = valueConverter.fromInternal(cachedValue.get());
-          processExpiries(key, dispatcher, expiredValue);
-        }
+
 
         Duration duration;
         try {
@@ -548,9 +553,18 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         cachedValue = new RICachedValue(internalValue, now, expiryTime);
 
-        entries.put(internalKey, cachedValue);
+        //todo #32 writes should not happen on a new expired entry
+        writeCacheEntry(entry);
 
-        dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, EventType.CREATED));
+
+        //check that new entry is not already expired, in which case it should
+        // not be added to the cache or listeners called or writers called.
+        if (cachedValue.isExpiredAt(now)) {
+          processExpiries(key, dispatcher, valueConverter.fromInternal(cachedValue.get()));
+        } else {
+          entries.put(internalKey, cachedValue);
+          dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, EventType.CREATED));
+        }
 
       } else {
 
