@@ -16,4 +16,7 @@
     <suppress checks="NPathComplexity" files="AbstractCacheLookupUtil.java"/>
     <suppress checks="CyclomaticComplexity" files="AbstractCacheLookupUtil.java"/>
 
+    <!--Exclude Clover instrumented sources-->
+    <suppress checks="" files="[\\/]src-instrumented[\\/]"/>
+
 </suppressions>

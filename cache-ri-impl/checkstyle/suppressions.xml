@@ -35,4 +35,8 @@
     <suppress checks="NPathComplexity" files="RICacheEntryListenerRegistration.java"/>
 
     <suppress checks="NPathComplexity" files="RICachingProvider.java"/>
+
+    <!--Exclude Clover instrumented sources-->
+    <suppress checks="" files="[\\/]src-instrumented[\\/]"/>
+
 </suppressions>

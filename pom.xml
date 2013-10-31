@@ -137,6 +137,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.atlassian.maven.plugins</groupId>
+                <artifactId>maven-clover2-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <cloverDatabase>${java.io.tmpdir}/clover/clover.db</cloverDatabase>
+                    <singleCloverDatabase>true</singleCloverDatabase>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
