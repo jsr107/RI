@@ -36,6 +36,9 @@
 
     <suppress checks="NPathComplexity" files="RICachingProvider.java"/>
 
+    <suppress checks="NestedIfDepth" files="RICache.java"/>
+
+
     <!--Exclude Clover instrumented sources-->
     <suppress checks="" files="[\\/]src-instrumented[\\/]"/>
 

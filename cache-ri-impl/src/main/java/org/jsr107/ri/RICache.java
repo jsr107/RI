@@ -76,7 +76,8 @@ import static org.jsr107.ri.management.MBeanServerRegistrationUtility
  * <p/>
  * This is meant to act as a proof of concept for the API. It is not threadsafe or
  * high performance and does limit
- * the size of caches or provide eviction. It therefore is not suitable for use in production. Please use a
+ * the size of caches or provide eviction. It therefore is not suitable for use in
+ * production. Please use a
  * production implementation of the API.
  * <p/>
  *
@@ -136,9 +137,11 @@ public final class RICache<K, V> implements Cache<K, V> {
   private final ExpiryPolicy expiryPolicy;
 
   /**
-   * The {@link org.jsr107.ri.event.RICacheEntryListenerRegistration}s for the {@link Cache}.
+   * The {@link org.jsr107.ri.event.RICacheEntryListenerRegistration}s for the
+   * {@link Cache}.
    */
-  private final CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>> listenerRegistrations;
+  private final CopyOnWriteArrayList<RICacheEntryListenerRegistration<K,
+      V>> listenerRegistrations;
 
   /**
    * The open/closed state of the Cache.
@@ -209,11 +212,11 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     entries = new RISimpleInternalMap<Object, RICachedValue>();
 
-    listenerRegistrations = new CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>>();
+    listenerRegistrations = new
+        CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>>();
     //establish all of the listeners
-    for (CacheEntryListenerConfiguration<K, V> listenerConfiguration : configuration
-        .getCacheEntryListenerConfigurations()) {
-
+    for (CacheEntryListenerConfiguration<K, V> listenerConfiguration :
+        configuration.getCacheEntryListenerConfigurations()) {
       createAndAddListener(listenerConfiguration);
     }
 
@@ -235,7 +238,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
   //todo concurrency
   private void createAndAddListener(CacheEntryListenerConfiguration<K, V> listenerConfiguration) {
-    RICacheEntryListenerRegistration<K, V> registration = new RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
+    RICacheEntryListenerRegistration<K, V> registration = new
+        RICacheEntryListenerRegistration<K, V>(listenerConfiguration);
     listenerRegistrations.add(registration);
   }
 
@@ -243,7 +247,8 @@ public final class RICache<K, V> implements Cache<K, V> {
   private void removeListener(CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
 
     if (cacheEntryListenerConfiguration == null) {
-      throw new NullPointerException("CacheEntryListenerConfiguration can't be null");
+      throw new NullPointerException("CacheEntryListenerConfiguration can't be " +
+          "null");
     }
 
     for (RICacheEntryListenerRegistration<K, V> listenerRegistration : listenerRegistrations) {
@@ -294,7 +299,8 @@ public final class RICache<K, V> implements Cache<K, V> {
   @Override
   public synchronized void close() {
     if (!isClosed) {
-      //ensure that any further access to this Cache will raise an IllegalStateException
+      //ensure that any further access to this Cache will raise an
+      // IllegalStateException
       isClosed = true;
 
       //ensure that the cache may no longer be accessed via the CacheManager
@@ -443,7 +449,9 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public void loadAll(final Set<? extends K> keys, final boolean replaceExistingValues, final CompletionListener completionListener) {
+  public void loadAll(final Set<? extends K> keys,
+                      final boolean replaceExistingValues,
+                      final CompletionListener completionListener) {
     ensureOpen();
     if (keys == null) {
       throw new NullPointerException("keys");
@@ -516,8 +524,6 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
 
-
-
     lockManager.lock(key);
     try {
       RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
@@ -539,7 +545,6 @@ public final class RICache<K, V> implements Cache<K, V> {
       if (cachedValue == null || isOldEntryExpired) {
 
         RIEntry<K, V> entry = new RIEntry<K, V>(key, value);
-
 
 
         Duration duration;
@@ -586,7 +591,9 @@ public final class RICache<K, V> implements Cache<K, V> {
         cachedValue.setInternalValue(internalValue, now);
         putCount++;
 
-        dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, EventType.UPDATED));
+        dispatcher.addEvent(CacheEntryUpdatedListener.class,
+            new RICacheEntryEvent<K, V>(this, key, value, oldValue,
+                EventType.UPDATED));
       }
 
       dispatcher.dispatch(listenerRegistrations);
@@ -643,11 +650,12 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         cachedValue = new RICachedValue(internalValue, now, expiryTime);
         if (cachedValue.isExpiredAt(now)) {
-            processExpiries(key, dispatcher, value);
+          processExpiries(key, dispatcher, value);
         } else {
-            entries.put(internalKey, cachedValue);
-            putCount++;
-            dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+          entries.put(internalKey, cachedValue);
+          putCount++;
+          dispatcher.addEvent(CacheEntryCreatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, value, CREATED));
         }
 
       } else {
@@ -704,7 +712,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
   /**
    */
-  public void putAll(Map<? extends K, ? extends V> map, boolean replaceExistingValues) {
+  public void putAll(Map<? extends K, ? extends V> map,
+                     boolean replaceExistingValues) {
     putAll(map, replaceExistingValues, true);
   }
 
@@ -713,10 +722,13 @@ public final class RICache<K, V> implements Cache<K, V> {
    * values and optionally writing values when Write Through is configured.
    *
    * @param map                   the Map of entries to put
-   * @param replaceExistingValues should existing values be replaced by those in the map?
+   * @param replaceExistingValues should existing values be replaced by those in
+   *                              the map?
    * @param useWriteThrough       should write-through be used if it is configured
    */
-  public void putAll(Map<? extends K, ? extends V> map, final boolean replaceExistingValues, boolean useWriteThrough) {
+  public void putAll(Map<? extends K, ? extends V> map,
+                     final boolean replaceExistingValues,
+                     boolean useWriteThrough) {
     ensureOpen();
     long start = statisticsEnabled() ? System.nanoTime() : 0;
 
@@ -732,10 +744,12 @@ public final class RICache<K, V> implements Cache<K, V> {
     RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
 
     try {
-      boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null && useWriteThrough;
+      boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter !=
+          null && useWriteThrough;
 
       //lock all of the keys in the map
-      ArrayList<Cache.Entry<? extends K, ? extends V>> entriesToWrite = new ArrayList<Cache.Entry<? extends K, ? extends V>>();
+      ArrayList<Cache.Entry<? extends K, ? extends V>> entriesToWrite = new
+          ArrayList<Cache.Entry<? extends K, ? extends V>>();
       HashSet<K> keysToPut = new HashSet<K>();
       for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
         K key = entry.getKey();
@@ -795,14 +809,16 @@ public final class RICache<K, V> implements Cache<K, V> {
           long expiryTime = duration.getAdjustedTime(now);
 
           cachedValue = new RICachedValue(internalValue, now, expiryTime);
-          if (cachedValue.isExpiredAt(now))  {
+          if (cachedValue.isExpiredAt(now)) {
             processExpiries(key, dispatcher, value);
           } else {
             entries.put(internalKey, cachedValue);
 
-            dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+            dispatcher.addEvent(CacheEntryCreatedListener.class,
+                new RICacheEntryEvent<K, V>(this, key, value, CREATED));
 
-            // this method called from loadAll when useWriteThrough is false. do not count loads as puts per statistics
+            // this method called from loadAll when useWriteThrough is false. do
+            // not count loads as puts per statistics
             // table in specification.
             if (useWriteThrough) {
               putCount++;
@@ -823,12 +839,14 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           cachedValue.setInternalValue(internalValue, now);
 
-          // do not count loadAll calls as puts. useWriteThrough is false when called from loadAll.
+          // do not count loadAll calls as puts. useWriteThrough is false when
+          // called from loadAll.
           if (useWriteThrough) {
-              putCount++;
+            putCount++;
           }
 
-          dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
+          dispatcher.addEvent(CacheEntryUpdatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
         }
       }
     } finally {
@@ -899,15 +917,17 @@ public final class RICache<K, V> implements Cache<K, V> {
 
         cachedValue = new RICachedValue(internalValue, now, expiryTime);
         if (cachedValue.isExpiredAt(now)) {
-            processExpiries(key, dispatcher, value);
+          processExpiries(key, dispatcher, value);
 
-            // no expiry event for created entry that expires before put in cache. do not put entry in cache.
-            result = false;
+          // no expiry event for created entry that expires before put in cache.
+          // do not put entry in cache.
+          result = false;
         } else {
-            entries.put(internalKey, cachedValue);
-            result = true;
+          entries.put(internalKey, cachedValue);
+          result = true;
 
-            dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+          dispatcher.addEvent(CacheEntryCreatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, value, CREATED));
         }
       } else {
         result = false;
@@ -926,9 +946,11 @@ public final class RICache<K, V> implements Cache<K, V> {
     return result;
   }
 
-  private void processExpiries(K key, RICacheEventDispatcher<K, V> dispatcher, V expiredValue) {
+  private void processExpiries(K key, RICacheEventDispatcher<K, V> dispatcher,
+                               V expiredValue) {
     entries.remove(key);
-    dispatcher.addEvent(CacheEntryExpiredListener.class, new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+    dispatcher.addEvent(CacheEntryExpiredListener.class,
+        new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
   }
 
   /**
@@ -957,8 +979,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         entries.remove(internalKey);
         V value = valueConverter.fromInternal(cachedValue.get());
 
-        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
-        dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K,
+            V>();
+        dispatcher.addEvent(CacheEntryRemovedListener.class,
+            new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
         dispatcher.dispatch(listenerRegistrations);
 
         result = true;
@@ -1002,8 +1026,10 @@ public final class RICache<K, V> implements Cache<K, V> {
 
           entries.remove(internalKey);
 
-          RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
-          dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
+          RICacheEventDispatcher<K, V> dispatcher = new
+              RICacheEventDispatcher<K, V>();
+          dispatcher.addEvent(CacheEntryRemovedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
           dispatcher.dispatch(listenerRegistrations);
 
           result = true;
@@ -1054,8 +1080,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         entries.remove(internalKey);
         result = valueConverter.fromInternal(cachedValue.getInternalValue(now));
 
-        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
-        dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, result, REMOVED));
+        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K,
+            V>();
+        dispatcher.addEvent(CacheEntryRemovedListener.class,
+            new RICacheEntryEvent<K, V>(this, key, result, REMOVED));
         dispatcher.dispatch(listenerRegistrations);
       }
     } finally {
@@ -1118,8 +1146,10 @@ public final class RICache<K, V> implements Cache<K, V> {
           Object newInternalValue = valueConverter.toInternal(newValue);
           cachedValue.setInternalValue(newInternalValue, now);
 
-          RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
-          dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, newValue, oldValue, UPDATED));
+          RICacheEventDispatcher<K, V> dispatcher = new
+              RICacheEventDispatcher<K, V>();
+          dispatcher.addEvent(CacheEntryUpdatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, newValue, oldValue, UPDATED));
           dispatcher.dispatch(listenerRegistrations);
 
           result = true;
@@ -1185,8 +1215,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         Object internalValue = valueConverter.toInternal(value);
         cachedValue.setInternalValue(internalValue, now);
 
-        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
-        dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
+        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K,
+            V>();
+        dispatcher.addEvent(CacheEntryUpdatedListener.class,
+            new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
         dispatcher.dispatch(listenerRegistrations);
 
         result = true;
@@ -1238,8 +1270,10 @@ public final class RICache<K, V> implements Cache<K, V> {
         Object internalValue = valueConverter.toInternal(value);
         cachedValue.setInternalValue(internalValue, now);
 
-        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
-        dispatcher.addEvent(CacheEntryUpdatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
+        RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K,
+            V>();
+        dispatcher.addEvent(CacheEntryUpdatedListener.class,
+            new RICacheEntryEvent<K, V>(this, key, value, oldValue, UPDATED));
         dispatcher.dispatch(listenerRegistrations);
 
         result = oldValue;
@@ -1271,6 +1305,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     CacheException exception = null;
     HashSet<K> lockedKeys = new HashSet<K>();
+    HashSet<K> cacheWriterKeys = new HashSet<K>();
+    cacheWriterKeys.addAll(keys);
 
     RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
 
@@ -1278,44 +1314,76 @@ public final class RICache<K, V> implements Cache<K, V> {
       boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
 
       //lock all of the keys
-      HashSet<K> keysToDelete = new HashSet<K>();
+      HashSet<Object> deletedKeys = new HashSet<Object>();
 
+
+      //lock the keys
       for (K key : keys) {
         lockManager.lock(key);
-
         lockedKeys.add(key);
-
-        if (isWriteThrough) {
-          keysToDelete.add(key);
-        }
       }
 
-      //delete the entries
+      //call write-through on deleted entries
       if (isWriteThrough) {
         try {
-          cacheWriter.deleteAll(keysToDelete);
+          cacheWriter.deleteAll(cacheWriterKeys);
         } catch (Exception e) {
           if (!(e instanceof CacheWriterException)) {
             exception = new CacheWriterException("Exception during write", e);
           }
         }
-      }
 
-      //remove the deleted keys that were successfully deleted
-      for (K key : lockedKeys) {
-        if (!keysToDelete.contains(key)) {
-          Object internalKey = keyConverter.toInternal(key);
-          RICachedValue cachedValue = entries.remove(internalKey);
+        //At this point, cacheWriterKeys will contain only those that were _not_ written
+        //Now delete only those that the writer deleted
+        for (K key : lockedKeys) {
+          //only delete those keys which the writer deleted. per CacheWriter spec.
+          if (!cacheWriterKeys.contains(key)) {
+            Object internalKey = keyConverter.toInternal(key);
+            if (entries.containsKey(internalKey)) {
+              RICachedValue cachedValue = entries.remove(internalKey);
+              deletedKeys.add(key);
 
-          V value = valueConverter.fromInternal(cachedValue.get());
+              V value = valueConverter.fromInternal(cachedValue.get());
 
-          if (cachedValue.isExpiredAt(now)) {
-            processExpiries(key, dispatcher, value);
-          } else {
-            dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+              if (cachedValue.isExpiredAt(now)) {
+                processExpiries(key, dispatcher, value);
+              } else {
+                dispatcher.addEvent(CacheEntryRemovedListener.class,
+                    new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+              }
+            }
           }
         }
       }
+
+
+      //work out what needs to be deleted
+      if (!isWriteThrough) {
+        for (K key : lockedKeys) {
+          //only delete those keys which the writer deleted. per CacheWriter spec.
+          Object internalKey = keyConverter.toInternal(key);
+          if (entries.containsKey(internalKey)) {
+            RICachedValue cachedValue = entries.remove(internalKey);
+            deletedKeys.add(key);
+
+            V value = valueConverter.fromInternal(cachedValue.get());
+
+            if (cachedValue.isExpiredAt(now)) {
+              processExpiries(key, dispatcher, value);
+            } else {
+              dispatcher.addEvent(CacheEntryRemovedListener.class,
+                  new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+            }
+          }
+
+        }
+      }
+
+      //Update stats
+      if (statisticsEnabled()) {
+        statistics.increaseCacheRemovals(deletedKeys.size());
+      }
+
 
     } finally {
       //unlock all of the keys
@@ -1326,10 +1394,6 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     dispatcher.dispatch(listenerRegistrations);
 
-    //TODO: this should simply be the number of actual entries removed (not including expired)
-    if (statisticsEnabled()) {
-      statistics.increaseCacheRemovals(keys.size());
-    }
 
     if (exception != null) {
       throw exception;
@@ -1354,7 +1418,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
 
     try {
-      boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
+      boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter !=
+          null;
 
       //lock all of the keys
       HashSet<K> keysToDelete = new HashSet<K>();
@@ -1399,7 +1464,8 @@ public final class RICache<K, V> implements Cache<K, V> {
           if (cachedValue.isExpiredAt(now)) {
             processExpiries(key, dispatcher, value);
           } else {
-            dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+            dispatcher.addEvent(CacheEntryRemovedListener.class,
+                new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
           }
         }
       }
@@ -1449,7 +1515,8 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public <T> T invoke(K key, javax.cache.processor.EntryProcessor<K, V, T> entryProcessor, Object... arguments) {
+  public <T> T invoke(K key, javax.cache.processor.EntryProcessor<K, V,
+      T> entryProcessor, Object... arguments) {
     ensureOpen();
     if (key == null) {
       throw new NullPointerException();
@@ -1484,7 +1551,7 @@ public final class RICache<K, V> implements Cache<K, V> {
       start = statisticsEnabled() ? System.nanoTime() : 0;
 
       EntryProcessorEntry<K, V> entry = new EntryProcessorEntry<>(valueConverter, key,
-        cachedValue, now, dispatcher, configuration.isReadThrough() ? cacheLoader : null);
+          cachedValue, now, dispatcher, configuration.isReadThrough() ? cacheLoader : null);
       try {
         result = entryProcessor.process(entry, arguments);
       } catch (Exception e) {
@@ -1528,7 +1595,8 @@ public final class RICache<K, V> implements Cache<K, V> {
           }
           expiryTime = duration.getAdjustedTime(now);
 
-          cachedValue = new RICachedValue(valueConverter.toInternal(entry.getValue()),
+          cachedValue = new RICachedValue(valueConverter.toInternal(entry
+              .getValue()),
               now, expiryTime);
 
           if (cachedValue.isExpiredAt(now)) {
@@ -1538,12 +1606,13 @@ public final class RICache<K, V> implements Cache<K, V> {
             entries.put(internalKey, cachedValue);
 
             dispatcher.addEvent(CacheEntryCreatedListener.class,
-                  new RICacheEntryEvent<K, V>(this, key, entry.getValue(), CREATED));
+                new RICacheEntryEvent<K, V>(this, key, entry.getValue(), CREATED));
 
             // do not count LOAD as a put for cache statistics.
-            if (statisticsEnabled() && entry.getOperation() == MutableEntryOperation.CREATE) {
-                statistics.increaseCachePuts(1);
-                statistics.addPutTimeNano(System.nanoTime() - start);
+            if (statisticsEnabled() && entry.getOperation() ==
+                MutableEntryOperation.CREATE) {
+              statistics.increaseCachePuts(1);
+              statistics.addPutTimeNano(System.nanoTime() - start);
             }
           }
 
@@ -1611,7 +1680,8 @@ public final class RICache<K, V> implements Cache<K, V> {
    */
   @Override
   public <T> Map<K, T> invokeAll(Set<? extends K> keys,
-                                 javax.cache.processor.EntryProcessor<K, V, T> entryProcessor,
+                                 javax.cache.processor.EntryProcessor<K, V,
+                                     T> entryProcessor,
                                  Object... arguments) {
 
     ensureOpen();
@@ -1691,7 +1761,8 @@ public final class RICache<K, V> implements Cache<K, V> {
 
   private void ensureOpen() {
     if (isClosed()) {
-      throw new IllegalStateException("Cache operations can not be performed. The cache closed");
+      throw new IllegalStateException("Cache operations can not be performed. " +
+          "The cache closed");
     }
   }
 
@@ -1701,7 +1772,8 @@ public final class RICache<K, V> implements Cache<K, V> {
       return cls.cast(this);
     }
 
-    throw new IllegalArgumentException("Unwrapping to " + cls + " is not a supported by this implementation");
+    throw new IllegalArgumentException("Unwrapping to " + cls + " is not a " +
+        "supported by this implementation");
   }
 
   /**
@@ -1717,7 +1789,8 @@ public final class RICache<K, V> implements Cache<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<K, V> cacheEntryListenerConfiguration) {
+  public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<K,
+      V> cacheEntryListenerConfiguration) {
     removeListener(cacheEntryListenerConfiguration);
   }
 
@@ -1833,7 +1906,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         } else {
           entries.put(internalKey, cachedValue);
 
-          dispatcher.addEvent(CacheEntryCreatedListener.class, new RICacheEntryEvent<K, V>(this, key, value, CREATED));
+          dispatcher.addEvent(CacheEntryCreatedListener.class,
+              new RICacheEntryEvent<K, V>(this, key, value, CREATED));
 
           // do not consider a load as a put for cache statistics.
         }
@@ -1909,7 +1983,8 @@ public final class RICache<K, V> implements Cache<K, V> {
      * @param iterator the {@link Iterator} over the internal entries
      * @param now      the time the iterator will use to test for expiry
      */
-    private RIEntryIterator(Iterator<Map.Entry<Object, RICachedValue>> iterator, long now) {
+    private RIEntryIterator(Iterator<Map.Entry<Object, RICachedValue>> iterator,
+                            long now) {
       this.iterator = iterator;
       this.nextEntry = null;
       this.lastEntry = null;
@@ -1931,7 +2006,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         lockManager.lock(key);
         try {
           if (!cachedValue.isExpiredAt(now)) {
-            V value = (V) RICache.this.valueConverter.fromInternal(cachedValue.getInternalValue(now));
+            V value = (V) RICache.this.valueConverter.fromInternal(cachedValue
+                .getInternalValue(now));
             nextEntry = new RIEntry<K, V>(key, value);
 
             try {
@@ -1947,8 +2023,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         } finally {
           lockManager.unLock(key);
           if (statisticsEnabled() && nextEntry != null) {
-              statistics.increaseCacheHits(1);
-              statistics.addGetTimeNano(System.nanoTime() - start);
+            statistics.increaseCacheHits(1);
+            statistics.addGetTimeNano(System.nanoTime() - start);
           }
         }
       }
@@ -1990,15 +2066,18 @@ public final class RICache<K, V> implements Cache<K, V> {
     public void remove() {
       int cacheRemovals = 0;
       if (lastEntry == null) {
-        throw new IllegalStateException("Must progress to the next entry to remove");
+        throw new IllegalStateException("Must progress to the next entry to " +
+            "remove");
       } else {
         long start = statisticsEnabled() ? System.nanoTime() : 0;
         lockManager.lock(lastEntry.getKey());
         try {
           deleteCacheEntry(lastEntry.getKey());
 
-          //NOTE: there is the possibility here that the entry the application retrieved
-          //may have been replaced / expired or already removed since it retrieved it.
+          //NOTE: there is the possibility here that the entry the application
+          // retrieved
+          //may have been replaced / expired or already removed since it
+          // retrieved it.
 
           //we simply don't care here as multiple-threads are ok to remove and see
           //such side-effects
@@ -2006,9 +2085,11 @@ public final class RICache<K, V> implements Cache<K, V> {
           cacheRemovals++;
 
           //raise "remove" event
-          RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
+          RICacheEventDispatcher<K, V> dispatcher = new
+              RICacheEventDispatcher<K, V>();
           dispatcher.addEvent(CacheEntryRemovedListener.class,
-              new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(), lastEntry.getValue(), REMOVED));
+              new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(),
+                  lastEntry.getValue(), REMOVED));
           dispatcher.dispatch(listenerRegistrations);
 
         } finally {
