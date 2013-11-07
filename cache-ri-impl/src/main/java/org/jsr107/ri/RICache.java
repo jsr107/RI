@@ -66,10 +66,8 @@ import static javax.cache.event.EventType.CREATED;
 import static javax.cache.event.EventType.EXPIRED;
 import static javax.cache.event.EventType.REMOVED;
 import static javax.cache.event.EventType.UPDATED;
-import static org.jsr107.ri.management.MBeanServerRegistrationUtility
-    .ObjectNameType.Configuration;
-import static org.jsr107.ri.management.MBeanServerRegistrationUtility
-    .ObjectNameType.Statistics;
+import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectNameType.Configuration;
+import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectNameType.Statistics;
 
 /**
  * The reference implementation for JSR107.
