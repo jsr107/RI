@@ -521,6 +521,8 @@ public final class RICache<K, V> implements Cache<K, V> {
       throw new NullPointerException("null value specified for key " + key);
     }
 
+    checkTypesAgainstConfiguredTypes(key, value);
+
 
     lockManager.lock(key);
     try {
@@ -602,6 +604,29 @@ public final class RICache<K, V> implements Cache<K, V> {
     if (statisticsEnabled() && putCount > 0) {
       statistics.increaseCachePuts(putCount);
       statistics.addPutTimeNano(System.nanoTime() - start);
+    }
+  }
+
+  private void checkTypesAgainstConfiguredTypes(K key, V value) throws ClassCastException {
+    Class keyType = configuration.getKeyType();
+    Class valueType = configuration.getValueType();
+    if (Object.class != keyType) {
+      //means type checks required
+      if (keyType == null) {
+        return;
+      }
+      if (!keyType.isAssignableFrom(key.getClass())) {
+        throw new ClassCastException("Key " + key + "is not assignable to " + keyType);
+      }
+    }
+    if (Object.class != valueType) {
+      //means type checks required
+      if (valueType == null) {
+        return;
+      }
+      if (!valueType.isAssignableFrom(value.getClass())) {
+        throw new ClassCastException("Value " + value + "is not assignable to " + valueType);
+      }
     }
   }
 
@@ -879,6 +904,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     if (value == null) {
       throw new NullPointerException("null value specified for key " + key);
     }
+
+    checkTypesAgainstConfiguredTypes(key, value);
 
     long start = statisticsEnabled() ? System.nanoTime() : 0;
 
