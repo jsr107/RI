@@ -25,6 +25,7 @@ import org.jsr107.ri.management.RICacheMXBean;
 import org.jsr107.ri.management.RICacheStatisticsMXBean;
 import org.jsr107.ri.processor.EntryProcessorEntry;
 import org.jsr107.ri.processor.MutableEntryOperation;
+import org.jsr107.ri.processor.RIEntryProcessorResult;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -46,7 +47,9 @@ import javax.cache.integration.CacheWriterException;
 import javax.cache.integration.CompletionListener;
 import javax.cache.management.CacheMXBean;
 import javax.cache.management.CacheStatisticsMXBean;
+import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.EntryProcessorResult;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1699,16 +1702,13 @@ public final class RICache<K, V> implements Cache<K, V> {
     return result;
   }
 
-
   /**
    * {@inheritDoc}
    */
   @Override
-  public <T> Map<K, T> invokeAll(Set<? extends K> keys,
-                                 javax.cache.processor.EntryProcessor<K, V,
-                                     T> entryProcessor,
-                                 Object... arguments) {
-
+  public <T> Map<K, EntryProcessorResult<T>> invokeAll(Set<? extends K> keys,
+                                                       EntryProcessor<K, V, T> entryProcessor,
+                                                       Object... arguments) {
     ensureOpen();
     if (keys == null) {
       throw new NullPointerException();
@@ -1717,11 +1717,17 @@ public final class RICache<K, V> implements Cache<K, V> {
       throw new NullPointerException();
     }
 
-    HashMap<K, T> map = new HashMap<K, T>();
+    HashMap<K, EntryProcessorResult<T>> map = new HashMap<>();
     for (K key : keys) {
-      T t = invoke(key, entryProcessor, arguments);
-      if (t != null) {
-        map.put(key, t);
+      RIEntryProcessorResult<T> result = null;
+      try {
+        T t = invoke(key, entryProcessor, arguments);
+        result = t == null ? null : new RIEntryProcessorResult<T>(t);
+      } catch (Exception e) {
+        result = new RIEntryProcessorResult<T>(e);
+      }
+      if (result != null) {
+        map.put(key, result);
       }
     }
 
