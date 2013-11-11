@@ -22,6 +22,7 @@ import org.jsr107.ri.spi.RICachingProvider;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
+import javax.cache.configuration.CompleteConfiguration;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
 import java.lang.ref.WeakReference;
@@ -156,8 +157,7 @@ public class RICacheManager implements CacheManager {
    * {@inheritDoc}
    */
   @Override
-  public <K, V> Cache<K, V> createCache(String cacheName,
-                                        Configuration<K, V> configuration) throws IllegalArgumentException {
+  public <K, V, C extends Configuration<K, V>> Cache<K, V> createCache(String cacheName, C configuration) {
     if (isClosed()) {
       throw new IllegalStateException();
     }
@@ -207,7 +207,7 @@ public class RICacheManager implements CacheManager {
       if (cache == null) {
         return null;
       } else {
-        Configuration<?, ?> configuration = cache.getConfiguration();
+        Configuration<?, ?> configuration = cache.getConfiguration(CompleteConfiguration.class);
 
         if (configuration.getKeyType() != null &&
             configuration.getKeyType().equals(keyType)) {
@@ -242,7 +242,7 @@ public class RICacheManager implements CacheManager {
       if (cache == null) {
         return null;
       } else {
-        Configuration configuration = cache.getConfiguration();
+        Configuration configuration = cache.getConfiguration(CompleteConfiguration.class);
 
         if (configuration.getKeyType().equals(Object.class) &&
             configuration.getValueType().equals(Object.class)) {

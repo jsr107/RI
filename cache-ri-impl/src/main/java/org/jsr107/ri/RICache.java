@@ -31,6 +31,7 @@ import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.cache.CacheManager;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
+import javax.cache.configuration.CompleteConfiguration;
 import javax.cache.configuration.Configuration;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.event.CacheEntryCreatedListener;
@@ -168,8 +169,7 @@ public final class RICache<K, V> implements Cache<K, V> {
    * The dynamic {@link CacheEntryListenerConfiguration}s for the {@link
    * Configuration}.
    */
-  private ArrayList<CacheEntryListenerConfiguration<K,
-      V>> dynamicListenerConfigurations;
+  private ArrayList<CacheEntryListenerConfiguration<K, V>> dynamicListenerConfigurations;
 
 
   /**
@@ -372,10 +372,17 @@ public final class RICache<K, V> implements Cache<K, V> {
 
   /**
    * {@inheritDoc}
+   * todo test cannot mutate returned configuration. Need to change RI to pass test.
+   * todo positive and negative testing
+   * todo implementation testing like unwrap test
    */
   @Override
-  public Configuration<K, V> getConfiguration() {
-    return configuration;
+  public <C extends Configuration> C getConfiguration(Class<C> clazz) {
+    if (clazz.isAssignableFrom((configuration).getClass())) {
+      return clazz.cast(configuration);
+    }
+    throw new IllegalArgumentException("The configuratoon class " + clazz +
+        " is not supported by this implementation");
   }
 
   /**
@@ -1803,7 +1810,7 @@ public final class RICache<K, V> implements Cache<K, V> {
       return cls.cast(this);
     }
 
-    throw new IllegalArgumentException("Unwrapping to " + cls + " is not a " +
+    throw new IllegalArgumentException("Unwrapping to " + cls + " is not " +
         "supported by this implementation");
   }
 
@@ -1827,7 +1834,7 @@ public final class RICache<K, V> implements Cache<K, V> {
 
 
   private boolean statisticsEnabled() {
-    return getConfiguration().isStatisticsEnabled();
+    return getConfiguration(CompleteConfiguration.class).isStatisticsEnabled();
   }
 
   /**

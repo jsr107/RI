@@ -17,10 +17,14 @@
 package org.jsr107.ri.management;
 
 import javax.cache.Cache;
+import javax.cache.configuration.CompleteConfiguration;
+import javax.cache.configuration.Configuration;
 import javax.cache.management.CacheMXBean;
 
 /**
  * Class to help implementers
+ *
+ * todo add key and value types
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
@@ -44,7 +48,7 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
    */
   @Override
   public boolean isReadThrough() {
-    return cache.getConfiguration().isReadThrough();
+    return cache.getConfiguration(CompleteConfiguration.class).isReadThrough();
   }
 
   /**
@@ -52,7 +56,7 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
    */
   @Override
   public boolean isWriteThrough() {
-    return cache.getConfiguration().isWriteThrough();
+    return cache.getConfiguration(CompleteConfiguration.class).isWriteThrough();
   }
 
   /**
@@ -60,7 +64,7 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
    */
   @Override
   public boolean isStoreByValue() {
-    return cache.getConfiguration().isStoreByValue();
+    return cache.getConfiguration(Configuration.class).isStoreByValue();
   }
 
   /**
@@ -68,7 +72,7 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
    */
   @Override
   public boolean isStatisticsEnabled() {
-    return cache.getConfiguration().isStatisticsEnabled();
+    return cache.getConfiguration(CompleteConfiguration.class).isStatisticsEnabled();
   }
 
   /**
@@ -76,6 +80,6 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
    */
   @Override
   public boolean isManagementEnabled() {
-    return cache.getConfiguration().isManagementEnabled();
+    return cache.getConfiguration(CompleteConfiguration.class).isManagementEnabled();
   }
 }
