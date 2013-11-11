@@ -191,25 +191,32 @@ public final class RICache<K, V> implements Cache<K, V> {
     //we make a copy of the configuration here so that the provided one
     //may be changed and or used independently for other caches.  we do this
     //as we don't know if the provided configuration is mutable
-    this.configuration = new MutableConfiguration<K, V>(configuration);
+    if (configuration instanceof CompleteConfiguration) {
+      //support use of CompleteConfiguration
+      this.configuration = new MutableConfiguration<K, V>((MutableConfiguration) configuration);
+    } else {
+      //support use of Basic Configuration
+      MutableConfiguration mutableConfiguration = new MutableConfiguration();
+      mutableConfiguration.setStoreByValue(configuration.isStoreByValue());
+      mutableConfiguration.setTypes(configuration.getKeyType(), configuration.getValueType());
+      this.configuration = new MutableConfiguration<K, V>(mutableConfiguration);
+    }
 
     if (this.configuration.getCacheLoaderFactory() != null) {
       cacheLoader = (CacheLoader<K, V>) this.configuration.getCacheLoaderFactory().create();
     }
-
     if (this.configuration.getCacheWriterFactory() != null) {
       cacheWriter = (CacheWriter<K, V>) this.configuration.getCacheWriterFactory().create();
     }
-
-    keyConverter = configuration.isStoreByValue() ?
+    keyConverter = this.configuration.isStoreByValue() ?
         new RISerializingInternalConverter<K>(classLoader) :
         new RIReferenceInternalConverter<K>();
 
-    valueConverter = configuration.isStoreByValue() ?
+    valueConverter = this.configuration.isStoreByValue() ?
         new RISerializingInternalConverter<V>(classLoader) :
         new RIReferenceInternalConverter<V>();
 
-    expiryPolicy = configuration.getExpiryPolicyFactory().create();
+    expiryPolicy = this.configuration.getExpiryPolicyFactory().create();
 
     entries = new RISimpleInternalMap<Object, RICachedValue>();
 
@@ -217,22 +224,20 @@ public final class RICache<K, V> implements Cache<K, V> {
         CopyOnWriteArrayList<RICacheEntryListenerRegistration<K, V>>();
     //establish all of the listeners
     for (CacheEntryListenerConfiguration<K, V> listenerConfiguration :
-        configuration.getCacheEntryListenerConfigurations()) {
+        this.configuration.getCacheEntryListenerConfigurations()) {
       createAndAddListener(listenerConfiguration);
     }
 
     cacheMXBean = new RICacheMXBean<K, V>(this);
     statistics = new RICacheStatisticsMXBean(this);
-
-    //it's important that we set the status BEFORE we let management,
-    //statistics and listeners know about the cache.
+    //It's important that we set the status BEFORE we let management, statistics and listeners know about the cache.
     isClosed = false;
 
-    if (configuration.isManagementEnabled()) {
+    if (this.configuration.isManagementEnabled()) {
       setManagementEnabled(true);
     }
 
-    if (configuration.isStatisticsEnabled()) {
+    if (this.configuration.isStatisticsEnabled()) {
       setStatisticsEnabled(true);
     }
   }
@@ -372,16 +377,13 @@ public final class RICache<K, V> implements Cache<K, V> {
 
   /**
    * {@inheritDoc}
-   * todo test cannot mutate returned configuration. Need to change RI to pass test.
-   * todo positive and negative testing
-   * todo implementation testing like unwrap test
    */
   @Override
   public <C extends Configuration> C getConfiguration(Class<C> clazz) {
     if (clazz.isAssignableFrom((configuration).getClass())) {
       return clazz.cast(configuration);
     }
-    throw new IllegalArgumentException("The configuratoon class " + clazz +
+    throw new IllegalArgumentException("The configuration class " + clazz +
         " is not supported by this implementation");
   }
 
