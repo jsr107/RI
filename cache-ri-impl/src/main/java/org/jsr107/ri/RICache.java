@@ -1591,12 +1591,10 @@ public final class RICache<K, V> implements Cache<K, V> {
           cachedValue, now, dispatcher, configuration.isReadThrough() ? cacheLoader : null);
       try {
         result = entryProcessor.process(entry, arguments);
+      } catch (CacheException e) {
+        throw e;
       } catch (Exception e) {
-        if (!(e instanceof EntryProcessorException)) {
           throw new EntryProcessorException(e);
-        } else {
-          throw e;
-        }
       }
 
       Duration duration;
