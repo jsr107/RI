@@ -1574,8 +1574,14 @@ public final class RICache<K, V> implements Cache<K, V> {
 
       Object internalKey = keyConverter.toInternal(key);
       RICachedValue cachedValue = entries.get(internalKey);
+      boolean isExpired = cachedValue != null && cachedValue.isExpiredAt(now);
+
+      if (isExpired) {
+        V expiredValue = valueConverter.fromInternal(cachedValue.get());
+        processExpiries(key, dispatcher, expiredValue);
+      }
       if (statisticsEnabled()) {
-        if (cachedValue == null) {
+        if (cachedValue == null || isExpired) {
           statistics.increaseCacheMisses(1);
         } else {
           statistics.increaseCacheHits(1);
