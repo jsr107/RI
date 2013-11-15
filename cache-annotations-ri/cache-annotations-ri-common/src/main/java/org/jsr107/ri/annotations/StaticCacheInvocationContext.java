@@ -33,7 +33,7 @@ import java.util.List;
 public interface StaticCacheInvocationContext<A extends Annotation> extends CacheMethodDetails<A> {
 
   /**
-   * @return The type of intercepter this {@link CacheMethodDetailsImpl} is for
+   * @return The type of interceptor this {@link CacheMethodDetailsImpl} is for
    */
   InterceptorType getInterceptorType();
 
