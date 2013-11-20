@@ -1450,8 +1450,7 @@ public final class RICache<K, V> implements Cache<K, V> {
   public void removeAll() {
     ensureOpen();
 
-    //TODO: this is incorrect as the internal map may contain expired entries
-    int size = (statisticsEnabled()) ? entries.size() : 0;
+    int size = 0;
 
     long now = System.currentTimeMillis();
 
@@ -1461,17 +1460,12 @@ public final class RICache<K, V> implements Cache<K, V> {
     RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K, V>();
 
     try {
-      boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter !=
-          null;
+      boolean isWriteThrough = configuration.isWriteThrough() && cacheWriter != null;
 
       //lock all of the keys
       HashSet<K> keysToDelete = new HashSet<K>();
 
-      Iterator<Map.Entry<Object, RICachedValue>> iterator = entries.iterator();
-
-      while (iterator.hasNext()) {
-        Map.Entry<Object, RICachedValue> entry = iterator.next();
-
+      for (Map.Entry<Object, RICachedValue> entry : entries) {
         Object internalKey = entry.getKey();
         K key = keyConverter.fromInternal(internalKey);
 
@@ -1509,6 +1503,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           } else {
             dispatcher.addEvent(CacheEntryRemovedListener.class,
                 new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+            size++;
           }
         }
       }
@@ -1522,7 +1517,6 @@ public final class RICache<K, V> implements Cache<K, V> {
 
     dispatcher.dispatch(listenerRegistrations);
 
-    //TODO: this should simple be the number of actual entries removed
     if (statisticsEnabled()) {
       statistics.increaseCacheRemovals(size);
     }

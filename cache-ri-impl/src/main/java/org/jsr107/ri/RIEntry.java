@@ -20,7 +20,7 @@ package org.jsr107.ri;
 import javax.cache.Cache;
 
 /**
- * A {@link Cache.Entry} implementation.
+ * A cache entry implementation.
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
