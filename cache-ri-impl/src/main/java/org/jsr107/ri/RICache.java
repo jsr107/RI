@@ -535,6 +535,9 @@ public final class RICache<K, V> implements Cache<K, V> {
     long start = statisticsEnabled() ? System.nanoTime() : 0;
     int putCount = 0;
     ensureOpen();
+    if (key == null) {
+      throw new NullPointerException("null value specified for key " + key);
+    }
     if (value == null) {
       throw new NullPointerException("null value specified for key " + key);
     }

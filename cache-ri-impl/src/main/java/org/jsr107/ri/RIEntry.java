@@ -36,13 +36,6 @@ public class RIEntry<K, V> implements Cache.Entry<K, V> {
    * Constructor
    */
   public RIEntry(K key, V value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-
     this.key = key;
     this.value = value;
     this.oldValue = null;
@@ -52,16 +45,6 @@ public class RIEntry<K, V> implements Cache.Entry<K, V> {
    * Constructor
    */
   public RIEntry(K key, V value, V oldValue) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    if (oldValue == null) {
-      throw new NullPointerException("oldValue");
-    }
-
     this.key = key;
     this.value = value;
     this.oldValue = oldValue;
