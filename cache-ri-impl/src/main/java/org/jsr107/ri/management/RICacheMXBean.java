@@ -24,15 +24,16 @@ import javax.cache.management.CacheMXBean;
 /**
  * Class to help implementers
  *
- * todo add key and value types
- *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
  * @author Yannis Cosmadopoulos
  * @since 1.0
  */
 public class RICacheMXBean<K, V> implements CacheMXBean {
+
   private final Cache<K, V> cache;
+
+
 
   /**
    * Constructor
@@ -41,6 +42,16 @@ public class RICacheMXBean<K, V> implements CacheMXBean {
    */
   public RICacheMXBean(Cache<K, V> cache) {
     this.cache = cache;
+  }
+
+  @Override
+  public String getKeyType() {
+    return cache.getConfiguration(CompleteConfiguration.class).getKeyType().getName();
+  }
+
+  @Override
+  public String getValueType() {
+    return cache.getConfiguration(CompleteConfiguration.class).getValueType().getName();
   }
 
   /**
