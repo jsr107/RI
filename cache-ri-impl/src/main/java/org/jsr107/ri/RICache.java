@@ -65,6 +65,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static javax.cache.event.EventType.CREATED;
 import static javax.cache.event.EventType.EXPIRED;
@@ -321,7 +323,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         try {
           ((Closeable) cacheLoader).close();
         } catch (IOException e) {
-          //TODO: log the exception
+          Logger.getLogger(this.getName()).log(Level.WARNING, "Problem " +
+              "closing CacheLoader " + cacheLoader.getClass(), e);
         }
       }
 
@@ -330,7 +333,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         try {
           ((Closeable) cacheWriter).close();
         } catch (IOException e) {
-          //TODO: log the exception
+          Logger.getLogger(this.getName()).log(Level.WARNING, "Problem " +
+              "closing CacheWriter " + cacheWriter.getClass(), e);
         }
       }
 
@@ -339,7 +343,8 @@ public final class RICache<K, V> implements Cache<K, V> {
         try {
           ((Closeable) expiryPolicy).close();
         } catch (IOException e) {
-          //TODO: log the exception
+          Logger.getLogger(this.getName()).log(Level.WARNING, "Problem " +
+              "closing ExpiryPolicy " + cacheLoader.getClass(), e);
         }
       }
 
@@ -349,7 +354,8 @@ public final class RICache<K, V> implements Cache<K, V> {
           try {
             ((Closeable) registration).close();
           } catch (IOException e) {
-            //TODO: log the exception
+            Logger.getLogger(this.getName()).log(Level.WARNING, "Problem " +
+                "closing listener " + cacheLoader.getClass(), e);
           }
         }
       }
