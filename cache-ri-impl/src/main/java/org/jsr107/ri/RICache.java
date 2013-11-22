@@ -1054,6 +1054,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     long now = System.currentTimeMillis();
+    long hitCount = 0;
 
     long start = statisticsEnabled() ? System.nanoTime() : 0;
     boolean result;
@@ -1064,6 +1065,8 @@ public final class RICache<K, V> implements Cache<K, V> {
       if (cachedValue == null || cachedValue.isExpiredAt(now)) {
         result = false;
       } else {
+        hitCount++;
+
         Object internalValue = cachedValue.get();
         Object oldInternalValue = valueConverter.toInternal(oldValue);
 
@@ -1096,9 +1099,17 @@ public final class RICache<K, V> implements Cache<K, V> {
     } finally {
       lockManager.unLock(key);
     }
-    if (result && statisticsEnabled()) {
-      statistics.increaseCacheRemovals(1);
-      statistics.addRemoveTimeNano(System.nanoTime() - start);
+    if (statisticsEnabled()) {
+      if (result) {
+        statistics.increaseCacheRemovals(1);
+        statistics.addRemoveTimeNano(System.nanoTime() - start);
+      }
+      statistics.addGetTimeNano(System.nanoTime() - start);
+      if (hitCount == 1) {
+        statistics.increaseCacheHits(hitCount);
+      } else {
+        statistics.increaseCacheMisses(1);
+      }
     }
     return result;
   }
@@ -1163,6 +1174,8 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     long now = System.currentTimeMillis();
+    long start = statisticsEnabled() ? System.nanoTime() : 0;
+    long hitCount = 0;
 
     boolean result;
     lockManager.lock(key);
@@ -1172,6 +1185,8 @@ public final class RICache<K, V> implements Cache<K, V> {
       if (cachedValue == null || cachedValue.isExpiredAt(now)) {
         result = false;
       } else {
+        hitCount++;
+
         Object oldInternalValue = valueConverter.toInternal(oldValue);
 
         if (cachedValue.get().equals(oldInternalValue)) {
@@ -1217,8 +1232,17 @@ public final class RICache<K, V> implements Cache<K, V> {
     } finally {
       lockManager.unLock(key);
     }
-    if (result && statisticsEnabled()) {
-      statistics.increaseCachePuts(1);
+    if (statisticsEnabled()) {
+      if (result) {
+        statistics.increaseCachePuts(1);
+        statistics.addPutTimeNano(System.nanoTime() - start);
+      }
+      statistics.addGetTimeNano(System.nanoTime() - start);
+      if (hitCount == 1) {
+          statistics.increaseCacheHits(hitCount);
+      } else {
+          statistics.increaseCacheMisses(1);
+      }
     }
     return result;
   }
@@ -1234,7 +1258,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     }
 
     long now = System.currentTimeMillis();
-
+    long start = statisticsEnabled() ? System.nanoTime() : 0;
     boolean result;
     lockManager.lock(key);
     try {
@@ -1272,8 +1296,15 @@ public final class RICache<K, V> implements Cache<K, V> {
     } finally {
       lockManager.unLock(key);
     }
-    if (result && statisticsEnabled()) {
-      statistics.increaseCachePuts(1);
+    if (statisticsEnabled()) {
+        statistics.addGetTimeNano(System.nanoTime() - start);
+        if (result) {
+          statistics.increaseCachePuts(1);
+          statistics.increaseCacheHits(1);
+          statistics.addPutTimeNano(System.nanoTime() - start);
+      } else {
+        statistics.increaseCacheMisses(1);
+      }
     }
     return result;
   }
