@@ -268,11 +268,11 @@ public final class RICache<K, V> implements Cache<K, V> {
   }
 
   /**
-   * Requests a {@link FutureTask} to be performed.
+   * Requests a {@link Runnable} to be performed.
    *
-   * @param task the {@link FutureTask} to be performed
+   * @param task the {@link Runnable} to be performed
    */
-  protected void submit(FutureTask<?> task) {
+  protected void submit(Runnable task) {
     executorService.submit(task);
   }
 
@@ -484,7 +484,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         }
       }
 
-      executorService.submit(new Runnable() {
+      submit(new Runnable() {
         @Override
         public void run() {
           try {
@@ -633,18 +633,12 @@ public final class RICache<K, V> implements Cache<K, V> {
     Class valueType = configuration.getValueType();
     if (Object.class != keyType) {
       //means type checks required
-      if (keyType == null) {
-        return;
-      }
       if (!keyType.isAssignableFrom(key.getClass())) {
         throw new ClassCastException("Key " + key + "is not assignable to " + keyType);
       }
     }
     if (Object.class != valueType) {
       //means type checks required
-      if (valueType == null) {
-        return;
-      }
       if (!valueType.isAssignableFrom(value.getClass())) {
         throw new ClassCastException("Value " + value + "is not assignable to " + valueType);
       }
