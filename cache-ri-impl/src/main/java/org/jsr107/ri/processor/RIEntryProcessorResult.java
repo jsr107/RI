@@ -50,16 +50,6 @@ public class RIEntryProcessorResult<T> implements EntryProcessorResult<T> {
   }
 
   /**
-   * Constructs an {@link RIEntryProcessorResult} for an {@link CacheException}.
-   *
-   * @param exception  the {@link CacheException}
-   */
-  public RIEntryProcessorResult(CacheException exception) {
-    this.result = null;
-    this.exception = exception;
-  }
-
-  /**
    * Constructs an {@link RIEntryProcessorResult} for an {@link Exception},
    * that of which will be returned wrapped as an {@link EntryProcessorException}.
    *

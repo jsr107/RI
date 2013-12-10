@@ -65,9 +65,6 @@ public class RICacheManager implements CacheManager {
    * @throws NullPointerException if the URI and/or classLoader is null.
    */
   public RICacheManager(RICachingProvider cachingProvider, URI uri, ClassLoader classLoader, Properties properties) {
-    if (cachingProvider == null) {
-      throw new NullPointerException("No CachingProvider specified");
-    }
     this.cachingProvider = cachingProvider;
 
     if (uri == null) {
