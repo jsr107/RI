@@ -145,11 +145,10 @@ public class RICacheManager implements CacheManager {
   }
 
   /**
-   * Getter
-   *
-   * @return the class loader
+   * {@inheritDoc}
    */
-  protected ClassLoader getClassLoader() {
+  @Override
+  public ClassLoader getClassLoader() {
     return classLoaderReference.get();
   }
 
