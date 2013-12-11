@@ -144,6 +144,14 @@
                 <configuration>
                     <cloverDatabase>${java.io.tmpdir}/clover/clover.db</cloverDatabase>
                     <singleCloverDatabase>true</singleCloverDatabase>
+                    <instrumentation>method</instrumentation>
+                    <includesTestSourceRoots>false</includesTestSourceRoots>
+                    <license><![CDATA[rnoPMcldnhnfUFWEsSigvMFdsnMNFhiOOWxvTCfhbcslXDo
+mj2L0EsXFE6UxVMWw>OXnI1>A2K0n7u<0XxHZfbHCKAL4Bs
+RqnMTURNMMNQPPmnrOqSxoonrppnNNQoOPtswWXnoqtVOPP
+onnmqmUUnpupooqqmmmmmUUnpupooqqmmmmmUUAJInmtUUn
+mmmm
+]]></license>
                 </configuration>
             </plugin>
 
