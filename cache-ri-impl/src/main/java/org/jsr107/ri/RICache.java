@@ -261,7 +261,7 @@ public final class RICache<K, V> implements Cache<K, V> {
     for (RICacheEntryListenerRegistration<K, V> listenerRegistration : listenerRegistrations) {
       if (cacheEntryListenerConfiguration.equals(listenerRegistration.getConfiguration())) {
         listenerRegistrations.remove(listenerRegistration);
-        configuration.getCacheEntryListenerConfigurations().remove(cacheEntryListenerConfiguration);
+        configuration.removeCacheEntryListenerConfiguration(cacheEntryListenerConfiguration);
       }
     }
   }
