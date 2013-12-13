@@ -99,19 +99,7 @@ public abstract class AbstractCachePutInterceptor<I> extends AbstractKeyedCacheI
   protected void cacheValue(final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext,
                             final CachePutMethodDetails methodDetails, final Object value) {
 
-    final Object cachedValue;
-    if (value == null) {
-      if (methodDetails.getCacheAnnotation().cacheNull()) {
-        //Null values are cached, set value to the null placeholder
-        cachedValue = CacheContextSource.NULL_PLACEHOLDER;
-      } else {
-        //Ignore null values
-        return;
-      }
-    } else {
-      cachedValue = value;
-    }
-
+    final Object cachedValue = value;
 
     final CacheResolver cacheResolver = methodDetails.getCacheResolver();
     final Cache<Object, Object> cache = cacheResolver.resolveCache(cacheKeyInvocationContext);

@@ -29,10 +29,6 @@ import java.lang.reflect.Method;
  * @since 1.0
  */
 public interface CacheContextSource<I> {
-  /**
-   * Placeholder used for caching a null value
-   */
-  NullPlaceholder NULL_PLACEHOLDER = NullPlaceholder.INSTANCE;
 
   /**
    * Get information about an invocation annotated {@link javax.cache.annotation.CacheResult},
@@ -64,15 +60,4 @@ public interface CacheContextSource<I> {
    */
   StaticCacheInvocationContext<? extends Annotation> getMethodDetails(Method method, Class<? extends Object> targetClass);
 
-
-  /**
-   * Used to cache null values, there should never be more than the single INSTANCE
-   */
-  public enum NullPlaceholder {
-    /**
-     * Null Placeholder for use with {@link javax.cache.annotation.CachePut} and
-     * {@link javax.cache.annotation.CacheResult}
-     */
-    INSTANCE;
-  }
 }

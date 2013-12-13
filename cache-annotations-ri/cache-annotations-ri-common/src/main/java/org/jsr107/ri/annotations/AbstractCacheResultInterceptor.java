@@ -69,9 +69,7 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
     if (!cacheResultAnnotation.skipGet()) {
       //Look in cache for existing data
       result = cache.get(cacheKey);
-      if (cacheResultAnnotation.cacheNull() && CacheContextSource.NULL_PLACEHOLDER.equals(result)) {
-        return null;
-      } else if (result != null) {
+      if (result != null) {
         //Cache hit, return result
         return result;
       }
@@ -87,8 +85,6 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
       //Cache non-null result
       if (result != null) {
         cache.put(cacheKey, result);
-      } else if (cacheResultAnnotation.cacheNull()) {
-        cache.put(cacheKey, CacheContextSource.NULL_PLACEHOLDER);
       }
 
       return result;
