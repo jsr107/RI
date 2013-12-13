@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 
 
 /**
- * Defines API for looking up information about an invocation.
+ * Defines the API for looking up information about an invocation.
  *
  * @param <I> The intercepted method invocation
  * @author Eric Dalquist
@@ -70,7 +70,8 @@ public interface CacheContextSource<I> {
    */
   public enum NullPlaceholder {
     /**
-     * Null Placeholder for use with {@link javax.cache.CachePut} and {@link javax.cache.CacheResult}
+     * Null Placeholder for use with {@link javax.cache.annotation.CachePut} and
+     * {@link javax.cache.annotation.CacheResult}
      */
     INSTANCE;
   }
