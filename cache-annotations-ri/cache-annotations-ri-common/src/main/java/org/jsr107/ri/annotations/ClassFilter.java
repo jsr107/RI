@@ -17,7 +17,7 @@
 package org.jsr107.ri.annotations;
 
 /**
- * Utility which matches an object's type against a list of included and excluded classes.
+ * Utility that matches an object's type against a list of included and excluded classes.
  *
  * @author Eric Dalquist
  * @version $Revision$

@@ -59,11 +59,11 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
   }
 
   /**
-   * Get the {@link AbstractInternalCacheKeyInvocationContext} for the CDI invocation
+   * Get the {@link InternalCacheKeyInvocationContext} for the CDI invocation.
    *
    * @param invocation The CDI invocation context
    * @return The keyed cache invocation context
-   * @throws UnsupportedOperationException if the invocation context is not for a method that has an annotation for which CacheInvocationContext exists.
+   * @throws UnsupportedOperationException if the invocation context is available for the invocation
    */
   @Override
   public InternalCacheKeyInvocationContext<? extends Annotation> getCacheKeyInvocationContext(I invocation) {
@@ -84,7 +84,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
       }
       default: {
         throw new UnsupportedOperationException(
-            "Cannot get AbstractInternalCacheKeyInvocationContext for interceptor type: " +
+            "Cannot get InternalCacheKeyInvocationContext for interceptor type: " +
                 staticCacheInvocationContext.getInterceptorType());
       }
     }
@@ -130,7 +130,7 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
       StaticCacheInvocationContext<? extends Annotation> staticCacheInvocationContext, I invocation);
 
   /**
-   * Get the concrete annotation object for the method which will be invoked on the target class.
+   * Get the concrete annotation object for the method that will be invoked on the target class.
    * <p/>
    * Subclasses may override this to provide their own annotation resolution logic, the default implementation
    * uses {@link Method#getAnnotation(Class)}

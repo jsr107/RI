@@ -20,7 +20,8 @@ import javax.cache.annotation.CacheInvocationContext;
 import java.lang.annotation.Annotation;
 
 /**
- * RI Internal extension of {@link CacheInvocationContext} which provides access to the {@link AbstractStaticCacheInvocationContext}
+ * RI Internal extension of {@link CacheInvocationContext} that provides access to
+ * an {@link AbstractStaticCacheInvocationContext}.
  *
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
  *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemove}, or

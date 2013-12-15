@@ -581,7 +581,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         writeCacheEntry(entry);
 
 
-        //check that new entry is not already expired, in which case it should
+        // check that new entry is not already expired, in which case it should
         // not be added to the cache or listeners called or writers called.
         if (cachedValue.isExpiredAt(now)) {
           processExpiries(key, dispatcher, valueConverter.fromInternal(cachedValue.get()));
@@ -1406,7 +1406,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         //At this point, cacheWriterKeys will contain only those that were _not_ written
         //Now delete only those that the writer deleted
         for (K key : lockedKeys) {
-          //only delete those keys which the writer deleted. per CacheWriter spec.
+          //only delete those keys that the writer deleted. per CacheWriter spec.
           if (!cacheWriterKeys.contains(key)) {
             Object internalKey = keyConverter.toInternal(key);
             if (entries.containsKey(internalKey)) {
@@ -1430,7 +1430,7 @@ public final class RICache<K, V> implements Cache<K, V> {
       //work out what needs to be deleted
       if (!isWriteThrough) {
         for (K key : lockedKeys) {
-          //only delete those keys which the writer deleted. per CacheWriter spec.
+          //only delete those keys that the writer deleted. per CacheWriter spec.
           Object internalKey = keyConverter.toInternal(key);
           if (entries.containsKey(internalKey)) {
             RICachedValue cachedValue = entries.remove(internalKey);
