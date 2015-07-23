@@ -978,9 +978,17 @@ public final class RICache<K, V> implements Cache<K, V> {
       lockManager.unLock(key);
     }
 
-    if (result && statisticsEnabled()) {
-      statistics.increaseCachePuts(1);
-      statistics.addPutTimeNano(System.nanoTime() - start);
+    if (statisticsEnabled()) {
+
+      if (result) {
+        //this means that there was no key in the Cache and the put succeeded
+        statistics.increaseCachePuts(1);
+        statistics.increaseCacheMisses(1);
+        statistics.addPutTimeNano(System.nanoTime() - start);
+      } else {
+        //this means that there was a key in the Cache and the put did not succeed
+        statistics.increaseCacheHits(1);
+      }
     }
     return result;
   }
