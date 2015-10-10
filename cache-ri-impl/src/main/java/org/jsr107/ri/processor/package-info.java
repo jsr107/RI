@@ -17,7 +17,6 @@
 
 /**
  This package contains entry processor related implementation classes.
- <p/>
  @author Greg Luck
  */
 package org.jsr107.ri.processor;

@@ -59,8 +59,9 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
 
   /**
    * {@inheritDoc}
-   * <p/>
+   * <p>
    * Statistics will also automatically be cleared if internal counters overflow.
+   * </p>
    */
   @Override
   public void clear() {
@@ -128,9 +129,9 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
 
   /**
    * The total number of requests to the cache. This will be equal to the sum of the hits and misses.
-   * <p/>
+   * <p>
    * A "get" is an operation that returns the current or previous value.
-   *
+   * </p>
    * @return the number of hits
    */
   @Override
@@ -140,9 +141,9 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
 
   /**
    * The total number of puts to the cache.
-   * <p/>
+   * <p>
    * A put is counted even if it is immediately evicted. A replace includes a put and remove.
-   *
+   * </p>
    * @return the number of hits
    */
   @Override
@@ -153,9 +154,9 @@ public class RICacheStatisticsMXBean implements CacheStatisticsMXBean, Serializa
   /**
    * The total number of removals from the cache. This does not include evictions, where the cache itself
    * initiates the removal to make space.
-   * <p/>
+   * <p>
    * A replace invcludes a put and remove.
-   *
+   * </p>
    * @return the number of hits
    */
   @Override

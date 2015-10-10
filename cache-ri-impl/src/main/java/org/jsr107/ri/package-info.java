@@ -17,10 +17,10 @@
 
 /**
  This package contains the reference implementation for JSR107.
- <p/>
+ <p>
  This is meant to act as a proof of concept for the API. It is not threadsafe or high performance. It therefore is
  not suitable for use in production. Please use a production implementation of the API.
- <p/>
+ </p>
 
  @author Greg Luck
  @author Yannis Cosmadopoulos

@@ -39,8 +39,9 @@ class RISerializingInternalConverter<T> implements RIInternalConverter<T> {
 
   /**
    * The {@link ClassLoader} to use for locating classes to serialize/deserialize.
-   * <p/>
+   * <p>
    * This is a WeakReference to prevent ClassLoader memory leaks.
+   * </p>
    */
   private WeakReference<ClassLoader> classLoaderReference;
 

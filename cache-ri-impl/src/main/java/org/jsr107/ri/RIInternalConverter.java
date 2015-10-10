@@ -19,11 +19,11 @@ package org.jsr107.ri;
 
 /**
  * Converts values of a specified type to and from an internal representation.
- * <p/>
+ * <p>
  * {@link RIInternalConverter}s are typically used convert cache keys and values
  * to and from an appropriate internal representation, that of which is managed
  * by a cache.
- * <p/>
+ * </p>
  * The internal representation is declared as an Object as the type is typically
  * unknown until runtime.
  *

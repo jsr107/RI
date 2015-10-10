@@ -28,8 +28,9 @@ public final class ClassFilter {
 
   /**
    * Determines if a candidate object's type passes a set of included/excluded filters
-   * <p/>
+   * <p>
    * Returns true of one of the following conditions is true
+   * </p>
    * <ol>
    * <li>If included and excluded are both empty then the value passed as includeBothEmpty is returned</li>
    * <li>If included is not empty and excluded is empty and candidate is an instanceof a member of the included array</li>

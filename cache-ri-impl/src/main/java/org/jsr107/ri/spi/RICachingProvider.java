@@ -180,10 +180,10 @@ public class RICachingProvider implements CachingProvider {
    * Releases the CacheManager with the specified URI and ClassLoader
    * from this CachingProvider.  This does not close the CacheManager.  It
    * simply releases it from being tracked by the CachingProvider.
-   * <p/>
+   * <p>
    * This method does nothing if a CacheManager matching the specified
    * parameters is not being tracked.
-   *
+   * </p>
    * @param uri         the URI of the CacheManager
    * @param classLoader the ClassLoader of the CacheManager
    */

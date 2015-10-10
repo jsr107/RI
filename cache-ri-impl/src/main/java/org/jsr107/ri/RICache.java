@@ -76,13 +76,13 @@ import static org.jsr107.ri.management.MBeanServerRegistrationUtility.ObjectName
 
 /**
  * The reference implementation for JSR107.
- * <p/>
+ * <p>
  * This is meant to act as a proof of concept for the API. It is not threadsafe or
  * high performance and does limit
  * the size of caches or provide eviction. It therefore is not suitable for use in
  * production. Please use a
  * production implementation of the API.
- * <p/>
+ * </p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values*
@@ -1921,9 +1921,9 @@ public final class RICache<K, V> implements Cache<K, V> {
   /**
    * Gets the value for the specified key from the underlying cache, including
    * attempting to load it if a CacheLoader is configured (with read-through).
-   * <p/>
+   * <p>
    * Any events that need to be raised are added to the specified dispatcher.
-   *
+   * </p>
    * @param key        the key of the entry to get from the cache
    * @param dispatcher the dispatcher for events
    * @return the value loaded

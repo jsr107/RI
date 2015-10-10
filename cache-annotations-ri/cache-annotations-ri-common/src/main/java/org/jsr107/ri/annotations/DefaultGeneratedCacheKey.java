@@ -25,10 +25,10 @@ import java.util.Arrays;
  * the intercepted invocation and uses {@link Arrays#deepHashCode(Object[])} to
  * implement {@link #hashCode()} and {@link Arrays#deepEquals(Object[], Object[])} to implement
  * {@link #equals(Object)}
- * <p/>
+ * <p>
  * IMPORTANT: This implementation assumes that the entire object graph passed in as the parameters Object[]
  * is immutable. The value returned by {@link #hashCode()} is calculated in the constructor.
- *
+ * </p>
  * @author Eric Dalquist
  * @since 1.0
  */

@@ -131,10 +131,10 @@ public abstract class AbstractCacheLookupUtil<I> implements CacheContextSource<I
 
   /**
    * Get the concrete annotation object for the method that will be invoked on the target class.
-   * <p/>
+   * <p>
    * Subclasses may override this to provide their own annotation resolution logic, the default implementation
    * uses {@link Method#getAnnotation(Class)}
-   *
+   * </p>
    * @param annotationClass The annotation class
    * @param method          Target method
    * @param targetClass     Target Class

@@ -25,11 +25,11 @@ import java.util.Set;
 
 /**
  * Provides caching specific context about an intercepted method invocation.
- * <p/>
+ * <p>
  * NOTE: This class uses arrays instead of immutable collections due to the frequency of these objects
  * being created. In testing creating new arrays and cloning them requires less CPU time and fewer objects
  * than creating new immutable Lists.
- *
+ * </p>
  * @param <I> The intercepted method invocation
  * @param <A> The type of annotation this context information is for. One of {@link javax.cache.annotation.CacheResult},
  *            {@link javax.cache.annotation.CachePut}, {@link javax.cache.annotation.CacheRemove}, or
