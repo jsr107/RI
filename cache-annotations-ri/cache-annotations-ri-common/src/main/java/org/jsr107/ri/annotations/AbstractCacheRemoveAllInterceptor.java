@@ -20,6 +20,7 @@ package org.jsr107.ri.annotations;
 import javax.cache.Cache;
 import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheResolver;
+
 import java.lang.annotation.Annotation;
 
 
@@ -27,20 +28,21 @@ import java.lang.annotation.Annotation;
  * Interceptor for {@link CacheRemoveAll}
  *
  * @param <I> The intercepted method invocation
+ * @param <E> The exception type that is thrown
  * @author Rick Hightower
  * @author Eric Dalquist
  * @since 1.0
  */
-public abstract class AbstractCacheRemoveAllInterceptor<I> extends AbstractCacheInterceptor<I> {
+public abstract class AbstractCacheRemoveAllInterceptor<I, E extends Throwable> extends AbstractCacheInterceptor<I, E> {
   /**
    * Handles the {@link Cache#removeAll()} as specified for the {@link CacheRemoveAll} annotation
    *
    * @param cacheContextSource The intercepted invocation
    * @param invocation         The intercepted invocation
    * @return The result from {@link #proceed(Object)}
-   * @throws Throwable if {@link #proceed(Object)} threw
+   * @throws E if {@link #proceed(Object)} threw
    */
-  public final Object cacheRemoveAll(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
+  public final Object cacheRemoveAll(CacheContextSource<I> cacheContextSource, I invocation) throws E {
     final InternalCacheInvocationContext<? extends Annotation> cacheInvocationContext = cacheContextSource.getCacheInvocationContext(invocation);
 
     final StaticCacheInvocationContext<CacheRemoveAll> methodDetails =

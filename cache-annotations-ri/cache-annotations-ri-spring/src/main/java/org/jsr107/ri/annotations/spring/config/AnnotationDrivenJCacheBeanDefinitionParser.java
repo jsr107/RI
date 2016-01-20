@@ -154,7 +154,7 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
    *
    * @return Reference to the {@link org.aopalliance.intercept.MethodInterceptor}. Should never be null.
    */
-  protected RuntimeBeanReference setupInterceptor(Class<? extends AbstractCacheInterceptor<?>> interceptorClass,
+  protected RuntimeBeanReference setupInterceptor(Class<? extends AbstractCacheInterceptor<?, Throwable>> interceptorClass,
                                                   ParserContext parserContext, Object elementSource,
                                                   RuntimeBeanReference cacheOperationSourceRuntimeReference) {
 
@@ -175,7 +175,7 @@ public class AnnotationDrivenJCacheBeanDefinitionParser implements BeanDefinitio
    * Create {@link org.springframework.aop.PointcutAdvisor} that puts the
    * {@link org.springframework.aop.Pointcut} and {@link AbstractCacheInterceptor} together.
    */
-  protected void setupPointcutAdvisor(Class<? extends AbstractCacheInterceptor<?>> interceptorClass,
+  protected void setupPointcutAdvisor(Class<? extends AbstractCacheInterceptor<?, Throwable>> interceptorClass,
                                       Element element, ParserContext parserContext,
                                       Object elementSource, RuntimeBeanReference cacheOperationSourceReference) {
 

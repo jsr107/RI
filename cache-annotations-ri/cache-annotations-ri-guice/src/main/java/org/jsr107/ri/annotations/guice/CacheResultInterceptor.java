@@ -28,7 +28,7 @@ import javax.inject.Inject;
  * @author Michael Stachel
  * @version $Revision$
  */
-public class CacheResultInterceptor extends AbstractCacheResultInterceptor<MethodInvocation> implements CacheMethodInterceptor {
+public class CacheResultInterceptor extends AbstractCacheResultInterceptor<MethodInvocation, Throwable> implements CacheMethodInterceptor {
   private CacheContextSource<MethodInvocation> cacheContextSource;
 
   /**

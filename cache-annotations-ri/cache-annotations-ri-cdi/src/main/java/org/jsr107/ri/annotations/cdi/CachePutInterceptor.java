@@ -35,7 +35,7 @@ import javax.interceptor.InvocationContext;
  */
 @CachePut
 @Interceptor
-public class CachePutInterceptor extends AbstractCachePutInterceptor<InvocationContext> {
+public class CachePutInterceptor extends AbstractCachePutInterceptor<InvocationContext, Exception> {
 
   @Inject
   private CacheLookupUtil lookup;
@@ -44,10 +44,10 @@ public class CachePutInterceptor extends AbstractCachePutInterceptor<InvocationC
   /**
    * @param invocationContext The intercepted invocation
    * @return The result from {@link InvocationContext#proceed()}
-   * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
+   * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
    */
   @AroundInvoke
-  public Object cachePut(InvocationContext invocationContext) throws Throwable {
+  public Object cachePut(InvocationContext invocationContext) throws Exception {
     return this.cachePut(this.lookup, invocationContext);
   }
 
