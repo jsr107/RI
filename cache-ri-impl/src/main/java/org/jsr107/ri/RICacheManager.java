@@ -259,6 +259,9 @@ public class RICacheManager implements CacheManager {
    */
   @Override
   public Iterable<String> getCacheNames() {
+    if (isClosed()) {
+      throw new IllegalStateException();
+    }
     synchronized (caches) {
       HashSet<String> set = new HashSet<String>();
       for (Cache<?, ?> cache : caches.values()) {
