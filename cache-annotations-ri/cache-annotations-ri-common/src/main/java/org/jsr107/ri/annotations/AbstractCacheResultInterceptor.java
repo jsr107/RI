@@ -23,6 +23,8 @@ import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResult;
 import javax.cache.annotation.GeneratedCacheKey;
 import java.lang.annotation.Annotation;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 /**
@@ -34,6 +36,9 @@ import java.lang.annotation.Annotation;
  * @since 1.0
  */
 public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CacheResultMethodDetails> {
+
+  private final Logger logger = Logger.getLogger(getClass().getSimpleName());
+
 
   /**
    * Handles the {@link Cache#get(Object)} and {@link Cache#put(Object, Object)} logic as specified for the
@@ -65,10 +70,14 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
     final CacheResult cacheResultAnnotation = methodDetails.getCacheAnnotation();
 
     //If skip-get is false check for a cached result or a cached exception
-    Object result;
+    Object result = null;
     if (!cacheResultAnnotation.skipGet()) {
       //Look in cache for existing data
-      result = cache.get(cacheKey);
+      try {
+        result = cache.get(cacheKey);
+      } catch (RuntimeException ex) {
+        this.logger.log(Level.SEVERE, "Error getting value from the cache, returning non-cached value.", ex);
+      }
       if (result != null) {
         //Cache hit, return result
         return result;
@@ -84,7 +93,11 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
 
       //Cache non-null result
       if (result != null) {
-        cache.put(cacheKey, result);
+        try {
+          cache.put(cacheKey, result);
+        } catch (RuntimeException ex) {
+          this.logger.log(Level.SEVERE, "Error putting value to the cache.", ex);
+        }
       }
 
       return result;
@@ -109,7 +122,12 @@ public abstract class AbstractCacheResultInterceptor<I> extends AbstractKeyedCac
       return;
     }
 
-    final Throwable throwable = exceptionCache.get(cacheKey);
+    Throwable throwable = null;
+    try {
+      throwable = exceptionCache.get(cacheKey);
+    } catch (RuntimeException ex) {
+      this.logger.log(Level.SEVERE, "Error getting exception from exception cache.", ex);
+    }
     if (throwable != null) {
       //Found exception, re-throw
       throw throwable;
