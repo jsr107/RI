@@ -241,24 +241,7 @@ public class RICacheManager implements CacheManager {
       throw new IllegalStateException();
     }
     synchronized (caches) {
-      RICache cache = caches.get(cacheName);
-
-      if (cache == null) {
-        return null;
-      } else {
-        Configuration configuration = cache.getConfiguration(CompleteConfiguration.class);
-
-        if (configuration.getKeyType().equals(Object.class) &&
-            configuration.getValueType().equals(Object.class)) {
-          return cache;
-        } else {
-          throw new IllegalArgumentException("Cache " + cacheName + " was " +
-              "defined with specific types Cache<" +
-              configuration.getKeyType() + ", " + configuration.getValueType() + "> " +
-              "in which case CacheManager.getCache(String, Class, Class) must be used");
-        }
-
-      }
+      return caches.get(cacheName);
     }
   }
 
