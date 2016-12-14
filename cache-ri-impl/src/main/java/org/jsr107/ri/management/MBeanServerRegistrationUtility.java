@@ -23,9 +23,9 @@ import org.jsr107.ri.RICache;
 import javax.cache.Cache;
 import javax.cache.CacheException;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
 import java.util.Set;
 
 
@@ -38,7 +38,7 @@ import java.util.Set;
 public final class MBeanServerRegistrationUtility {
 
   //ensure everything gets put in one MBeanServer
-  private static MBeanServer mBeanServer = MBeanServerFactory.createMBeanServer();
+  private static MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
 
   /**
    * The type of registered Object
