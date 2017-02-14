@@ -17,8 +17,6 @@
 package org.jsr107.ri.annotations.cdi;
 
 import org.jsr107.ri.annotations.AbstractCacheLookupUtil;
-import org.jsr107.ri.annotations.DefaultCacheKeyGenerator;
-import org.jsr107.ri.annotations.DefaultCacheResolverFactory;
 import org.jsr107.ri.annotations.InternalCacheInvocationContext;
 import org.jsr107.ri.annotations.InternalCacheKeyInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
@@ -41,9 +39,13 @@ public class CacheLookupUtil extends AbstractCacheLookupUtil<InvocationContext> 
   @Inject
   private BeanManagerUtil beanManagerUtil;
 
-  private CacheKeyGenerator defaultCacheKeyGenerator = new DefaultCacheKeyGenerator();
-  private CacheResolverFactory defaultCacheResolverFactory = new DefaultCacheResolverFactory();
+  @Inject
+  @UsedByDefault
+  private CacheKeyGenerator defaultCacheKeyGenerator;
 
+  @Inject
+  @UsedByDefault
+  private CacheResolverFactory defaultCacheResolverFactory;
 
   /*
    * Annoation type cannot be known at compile time so ignore the warning
