@@ -351,7 +351,7 @@ public final class RICache<K, V> implements Cache<K, V> {
       for (RICacheEntryListenerRegistration registration : listenerRegistrations) {
         if (registration.getCacheEntryListener() instanceof Closeable) {
           try {
-            ((Closeable) registration).close();
+            ((Closeable) registration.getCacheEntryListener()).close();
           } catch (IOException e) {
             Logger.getLogger(this.getName()).log(Level.WARNING, "Problem " +
                 "closing listener " + cacheLoader.getClass(), e);
