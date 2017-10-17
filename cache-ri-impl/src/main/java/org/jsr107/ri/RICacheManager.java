@@ -80,9 +80,7 @@ public class RICacheManager implements CacheManager {
     //
     this.properties = new Properties();
     if (properties != null) {
-      for (Object key : properties.keySet()) {
-        this.properties.put(key, properties.get(key));
-      }
+      this.properties.putAll(properties);
     }
 
     //this.properties = properties == null ? new Properties() : new Properties(properties);
