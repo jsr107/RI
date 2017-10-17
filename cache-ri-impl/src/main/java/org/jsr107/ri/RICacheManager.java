@@ -77,15 +77,12 @@ public class RICacheManager implements CacheManager {
     }
     this.classLoaderReference = new WeakReference<ClassLoader>(classLoader);
 
-    //
     this.properties = new Properties();
     if (properties != null) {
-      for (Object key : properties.keySet()) {
-        this.properties.put(key, properties.get(key));
+      for (String key : properties.stringPropertyNames()) {
+        this.properties.setProperty(key, properties.getProperty(key));
       }
     }
-
-    //this.properties = properties == null ? new Properties() : new Properties(properties);
 
     isClosed = false;
   }
