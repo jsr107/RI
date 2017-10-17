@@ -22,11 +22,14 @@ import java.lang.annotation.Annotation;
  * Base class for all interceptor implementations, contains utility methods
  *
  * @param <I> The intercepted method invocation
+ * @param <E> The exception type that is thrown
  * @param <T> The type of static invocation context data expected
+ * 
  * @author Eric Dalquist
  * @since 1.0
  */
-public abstract class AbstractKeyedCacheInterceptor<I, T extends StaticCacheKeyInvocationContext<?>> extends AbstractCacheInterceptor<I> {
+public abstract class AbstractKeyedCacheInterceptor<I, E extends Throwable, T extends StaticCacheKeyInvocationContext<?>> 
+  extends AbstractCacheInterceptor<I, E> {
 
   /**
    * Get, check the {@link InterceptorType} and cast the {@link CacheMethodDetailsImpl} for the invocation.

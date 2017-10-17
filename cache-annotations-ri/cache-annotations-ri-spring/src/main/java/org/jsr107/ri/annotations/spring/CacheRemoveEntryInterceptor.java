@@ -26,7 +26,7 @@ import org.jsr107.ri.annotations.InterceptorType;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterceptor<MethodInvocation> implements CacheMethodInterceptor {
+public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterceptor<MethodInvocation, Throwable> implements CacheMethodInterceptor {
   private final CacheContextSource<MethodInvocation> cacheContextSource;
 
   /**

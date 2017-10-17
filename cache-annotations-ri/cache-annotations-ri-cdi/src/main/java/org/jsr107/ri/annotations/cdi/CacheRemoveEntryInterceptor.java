@@ -35,7 +35,7 @@ import javax.interceptor.InvocationContext;
  */
 @CacheRemove
 @Interceptor
-public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterceptor<InvocationContext> {
+public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterceptor<InvocationContext, Exception> {
 
   @Inject
   private CacheLookupUtil lookup;
@@ -44,10 +44,10 @@ public class CacheRemoveEntryInterceptor extends AbstractCacheRemoveEntryInterce
   /**
    * @param invocationContext The intercepted invocation
    * @return The result from {@link InvocationContext#proceed()}
-   * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
+   * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
    */
   @AroundInvoke
-  public Object cacheRemoveEntry(InvocationContext invocationContext) throws Throwable {
+  public Object cacheRemoveEntry(InvocationContext invocationContext) throws Exception {
     return this.cacheRemoveEntry(this.lookup, invocationContext);
   }
 

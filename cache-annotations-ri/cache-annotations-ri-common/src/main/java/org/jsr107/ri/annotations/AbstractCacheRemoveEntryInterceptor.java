@@ -22,6 +22,7 @@ import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheRemove;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.GeneratedCacheKey;
+
 import java.lang.annotation.Annotation;
 
 
@@ -29,11 +30,13 @@ import java.lang.annotation.Annotation;
  * Interceptor for {@link javax.cache.annotation.CacheRemove}
  *
  * @param <I> The intercepted method invocation
+ * @param <E> The exception type that is thrown
  * @author Rick Hightower
  * @author Eric Dalquist
  * @since 1.0
  */
-public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKeyedCacheInterceptor<I, CacheRemoveEntryMethodDetails> {
+public abstract class AbstractCacheRemoveEntryInterceptor<I, E extends Throwable> 
+  extends AbstractKeyedCacheInterceptor<I, E, CacheRemoveEntryMethodDetails> {
 
   /**
    * Handles the {@link Cache#remove(Object)} as specified for the {@link javax.cache.annotation.CacheRemove} annotation
@@ -41,9 +44,9 @@ public abstract class AbstractCacheRemoveEntryInterceptor<I> extends AbstractKey
    * @param cacheContextSource The intercepted invocation
    * @param invocation         The intercepted invocation
    * @return The result from {@link #proceed(Object)}
-   * @throws Throwable if {@link #proceed(Object)} threw
+   * @throws E if {@link #proceed(Object)} threw
    */
-  public final Object cacheRemoveEntry(CacheContextSource<I> cacheContextSource, I invocation) throws Throwable {
+  public final Object cacheRemoveEntry(CacheContextSource<I> cacheContextSource, I invocation) throws E {
     final InternalCacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext =
         cacheContextSource.getCacheKeyInvocationContext(invocation);
     final CacheRemoveEntryMethodDetails methodDetails =
