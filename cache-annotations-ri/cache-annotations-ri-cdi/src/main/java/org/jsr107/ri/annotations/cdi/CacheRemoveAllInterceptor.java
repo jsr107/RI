@@ -42,11 +42,19 @@ public class CacheRemoveAllInterceptor extends AbstractCacheRemoveAllInterceptor
   /**
    * @param invocationContext The intercepted invocation
    * @return The result from {@link InvocationContext#proceed()}
-   * @throws Throwable likely {@link InvocationContext#proceed()} threw an exception
+   * @throws Exception likely {@link InvocationContext#proceed()} threw an exception
    */
   @AroundInvoke
-  public Object cacheRemoveAll(InvocationContext invocationContext) throws Throwable {
-    return this.cacheRemoveAll(this.lookup, invocationContext);
+  public Object cacheRemoveAll(InvocationContext invocationContext) throws Exception {
+    try {
+        return this.cacheRemoveAll(this.lookup, invocationContext);
+    } catch (Throwable e) {
+        if (e instanceof Exception) {
+            throw (Exception) e;
+        } else {
+            throw new Exception(e);
+        }
+    }
   }
 
   /* (non-Javadoc)
