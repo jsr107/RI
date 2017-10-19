@@ -89,11 +89,11 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
    * {@inheritDoc}
    */
   @Override
-  public V getOldValue() throws UnsupportedOperationException {
+  public V getOldValue() {
     if (isOldValueAvailable()) {
       return oldValue;
     } else {
-      throw new UnsupportedOperationException("Old value is not available for key");
+      return null;
     }
   }
 
