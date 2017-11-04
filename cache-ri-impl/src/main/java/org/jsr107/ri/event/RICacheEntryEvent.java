@@ -70,6 +70,24 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
   }
 
   /**
+   * Constructs a cache entry event from a given cache as source
+   * with an old value, explicitly specifying whether old value is available
+   *
+   * @param source            the cache that originated the event
+   * @param key               the key
+   * @param value             the value
+   * @param oldValue          the oldValue
+   * @param oldValueAvailable indicates whether old value is available
+   */
+  public RICacheEntryEvent(Cache<K, V> source, K key, V value, V oldValue, EventType eventType, boolean oldValueAvailable) {
+    super(source, eventType);
+    this.key = key;
+    this.value = value;
+    this.oldValue = oldValue;
+    this.oldValueAvailable = oldValueAvailable;
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -93,7 +111,7 @@ public class RICacheEntryEvent<K, V> extends CacheEntryEvent<K, V> {
     if (isOldValueAvailable()) {
       return oldValue;
     } else {
-      throw new UnsupportedOperationException("Old value is not available for key");
+      return null;
     }
   }
 

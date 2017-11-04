@@ -997,7 +997,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                                V expiredValue) {
     entries.remove(key);
     dispatcher.addEvent(CacheEntryExpiredListener.class,
-        new RICacheEntryEvent<K, V>(this, key, expiredValue, EXPIRED));
+        new RICacheEntryEvent<K, V>(this, key, expiredValue, expiredValue, EXPIRED));
   }
 
   /**
@@ -1029,7 +1029,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K,
             V>();
         dispatcher.addEvent(CacheEntryRemovedListener.class,
-            new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+            new RICacheEntryEvent<K, V>(this, key, value, value, REMOVED));
         dispatcher.dispatch(listenerRegistrations);
 
         result = true;
@@ -1079,7 +1079,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           RICacheEventDispatcher<K, V> dispatcher = new
               RICacheEventDispatcher<K, V>();
           dispatcher.addEvent(CacheEntryRemovedListener.class,
-              new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
+              new RICacheEntryEvent<K, V>(this, key, oldValue, oldValue, REMOVED));
           dispatcher.dispatch(listenerRegistrations);
 
           result = true;
@@ -1141,7 +1141,7 @@ public final class RICache<K, V> implements Cache<K, V> {
         RICacheEventDispatcher<K, V> dispatcher = new RICacheEventDispatcher<K,
             V>();
         dispatcher.addEvent(CacheEntryRemovedListener.class,
-            new RICacheEntryEvent<K, V>(this, key, result, REMOVED));
+            new RICacheEntryEvent<K, V>(this, key, result, result, REMOVED));
         dispatcher.dispatch(listenerRegistrations);
       }
     } finally {
@@ -1427,7 +1427,7 @@ public final class RICache<K, V> implements Cache<K, V> {
                 processExpiries(key, dispatcher, value);
               } else {
                 dispatcher.addEvent(CacheEntryRemovedListener.class,
-                    new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+                    new RICacheEntryEvent<K, V>(this, key, value, value, REMOVED));
               }
             }
           }
@@ -1450,7 +1450,7 @@ public final class RICache<K, V> implements Cache<K, V> {
               processExpiries(key, dispatcher, value);
             } else {
               dispatcher.addEvent(CacheEntryRemovedListener.class,
-                  new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+                  new RICacheEntryEvent<K, V>(this, key, value, value, REMOVED));
             }
           }
 
@@ -1537,7 +1537,7 @@ public final class RICache<K, V> implements Cache<K, V> {
             processExpiries(key, dispatcher, value);
           } else {
             dispatcher.addEvent(CacheEntryRemovedListener.class,
-                new RICacheEntryEvent<K, V>(this, key, value, REMOVED));
+                new RICacheEntryEvent<K, V>(this, key, value, value, REMOVED));
             size++;
           }
         }
@@ -1729,7 +1729,7 @@ public final class RICache<K, V> implements Cache<K, V> {
           oldValue = cachedValue == null ? null : valueConverter.fromInternal(cachedValue.get());
           entries.remove(internalKey);
 
-          dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue, REMOVED));
+          dispatcher.addEvent(CacheEntryRemovedListener.class, new RICacheEntryEvent<K, V>(this, key, oldValue, oldValue, REMOVED));
 
           if (statisticsEnabled()) {
             statistics.increaseCacheRemovals(1);
@@ -2168,7 +2168,7 @@ public final class RICache<K, V> implements Cache<K, V> {
               RICacheEventDispatcher<K, V>();
           dispatcher.addEvent(CacheEntryRemovedListener.class,
               new RICacheEntryEvent<K, V>(RICache.this, lastEntry.getKey(),
-                  lastEntry.getValue(), REMOVED));
+                  lastEntry.getValue(), lastEntry.getValue(), REMOVED));
           dispatcher.dispatch(listenerRegistrations);
 
         } finally {

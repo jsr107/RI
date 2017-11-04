@@ -25,7 +25,9 @@ import javax.cache.event.CacheEntryListener;
 import javax.cache.event.CacheEntryListenerException;
 import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryUpdatedListener;
+import javax.cache.event.EventType;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -120,7 +122,7 @@ public class RICacheEventDispatcher<K, V> {
 
           CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
           if (listener instanceof CacheEntryExpiredListener) {
-            ((CacheEntryExpiredListener) listener).onExpired(iterable);
+            ((CacheEntryExpiredListener) listener).onExpired(cloneEvents(registration, iterable));
           }
         }
       }
@@ -150,7 +152,7 @@ public class RICacheEventDispatcher<K, V> {
 
           CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
           if (listener instanceof CacheEntryUpdatedListener) {
-            ((CacheEntryUpdatedListener) listener).onUpdated(iterable);
+            ((CacheEntryUpdatedListener) listener).onUpdated(cloneEvents(registration, iterable));
           }
         }
       }
@@ -165,7 +167,7 @@ public class RICacheEventDispatcher<K, V> {
 
           CacheEntryListener<? super K, ? super V> listener = registration.getCacheEntryListener();
           if (listener instanceof CacheEntryRemovedListener) {
-            ((CacheEntryRemovedListener) listener).onRemoved(iterable);
+            ((CacheEntryRemovedListener) listener).onRemoved(cloneEvents(registration, iterable));
           }
         }
       }
@@ -178,5 +180,28 @@ public class RICacheEventDispatcher<K, V> {
     }
   }
 
+  private List<CacheEntryEvent<K, V>> cloneEvents(RICacheEntryListenerRegistration<K, V> registration,
+                                                  Iterable<CacheEntryEvent<K, V>> events) {
+    List<CacheEntryEvent<K, V>> dispatchedEvents = new ArrayList<CacheEntryEvent<K, V>>();
+    // clone events, setting or not the old value depending on registration properties
+    for (CacheEntryEvent event : events) {
+      RICacheEntryEvent dispatchedEvent;
+      if (registration.isOldValueRequired()) {
+        dispatchedEvent = new RICacheEntryEvent(event.getSource(), event.getKey(), event.getValue(), event.getOldValue(), event.getEventType());
+      } else {
+        if (event.getEventType() == EventType.REMOVED || event.getEventType() == EventType.EXPIRED) {
+          // Since JCache 1.1, removed & expired events have to return oldValue or null when oldValueRequired == false
+          // RI chooses to return null as old value and oldValueAvailable is false in this case
+          dispatchedEvent = new RICacheEntryEvent(event.getSource(), event.getKey(), null, null,
+                  event.getEventType(), false);
+        } else {
+          dispatchedEvent = new RICacheEntryEvent(event.getSource(), event.getKey(), event.getValue(), null,
+                  event.getEventType(), false);
+        }
+      }
+      dispatchedEvents.add(dispatchedEvent);
+    }
+    return dispatchedEvents;
+  }
 
 }
