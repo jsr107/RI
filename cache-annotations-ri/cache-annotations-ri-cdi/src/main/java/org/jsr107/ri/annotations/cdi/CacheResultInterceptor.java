@@ -19,6 +19,7 @@ package org.jsr107.ri.annotations.cdi;
 
 import org.jsr107.ri.annotations.AbstractCacheResultInterceptor;
 
+import javax.annotation.Priority;
 import javax.cache.annotation.CacheResult;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -35,6 +36,7 @@ import javax.interceptor.InvocationContext;
  */
 @CacheResult
 @Interceptor
+@Priority(Interceptor.Priority.APPLICATION)
 public class CacheResultInterceptor extends AbstractCacheResultInterceptor<InvocationContext> {
 
   @Inject
