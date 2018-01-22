@@ -24,6 +24,7 @@ import javax.cache.annotation.CacheMethodDetails;
 import javax.cache.annotation.CacheResolver;
 import javax.cache.annotation.CacheResolverFactory;
 import javax.cache.annotation.CacheResult;
+import javax.cache.configuration.Configuration;
 import javax.cache.configuration.MutableConfiguration;
 import javax.cache.spi.CachingProvider;
 import java.lang.annotation.Annotation;
@@ -70,7 +71,7 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
 
     if (cache == null) {
       logger.warning("No Cache named '" + cacheName + "' was found in the CacheManager, a default cache will be created.");
-      cacheManager.createCache(cacheName, new MutableConfiguration<Object, Object>());
+      cacheManager.createCache(cacheName, newDefaultConfig());
       cache = cacheManager.getCache(cacheName);
     }
 
@@ -90,10 +91,19 @@ public class DefaultCacheResolverFactory implements CacheResolverFactory {
     if (cache == null) {
       logger.warning("No Cache named '" + exceptionCacheName +
           "' was found in the CacheManager, a default cache will be created.");
-      cacheManager.createCache(exceptionCacheName, new MutableConfiguration<Object, Object>());
+      cacheManager.createCache(exceptionCacheName, newDefaultConfig());
       cache = cacheManager.getCache(exceptionCacheName);
     }
 
     return new DefaultCacheResolver(cache);
+  }
+
+  /**
+   * Should be overridden to provide custom default configuration.
+   *
+   * @return default cache configuration used when the cache is created implicitly
+   */
+  protected Configuration<Object, Object> newDefaultConfig() {
+    return new MutableConfiguration<>();
   }
 }
