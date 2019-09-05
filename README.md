@@ -16,5 +16,5 @@ For example, some things that we leave out:
 Why did we do this? Because a much greater engineering effort, which gets put into the open source and commercial caches
 which implement this API, is required to accomplish these things.
 
-Having said that, the RI is Apache 2 and is a correct implementation of the spec. It can be used to create new cache
+Having said that, the RI uses the Apache 2.0 license and is a correct implementation of the spec. It can be used to create new cache
 implementations.
