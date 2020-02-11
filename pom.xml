@@ -217,12 +217,12 @@ mmmm
         <repository>
             <id>sourceforge-releases</id>
             <name>Sourceforge Release Repository</name>
-            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
         <snapshotRepository>
             <id>sourceforge-snapshots</id>
             <name>Sourceforge Snapshot Repository</name>
-            <url>http://oss.sonatype.org/content/repositories/sourceforge-snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/sourceforge-snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
