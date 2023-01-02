@@ -20,10 +20,10 @@ package org.jsr107.ri.annotations.cdi;
 import org.jsr107.ri.annotations.AbstractCacheRemoveAllInterceptor;
 
 import javax.cache.annotation.CacheRemoveAll;
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InvocationContext;
 
 
 /**

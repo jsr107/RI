@@ -6,6 +6,7 @@
         <groupId>org.jsr107.ri</groupId>
         <artifactId>cache-annotations-ri</artifactId>
         <version>1.1.2-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>cache-annotations-ri-spring</artifactId>
@@ -15,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>3.2.18.RELEASE</spring.version>
+        <spring.version>6.0.3</spring.version>
     </properties>
 
     <dependencies>

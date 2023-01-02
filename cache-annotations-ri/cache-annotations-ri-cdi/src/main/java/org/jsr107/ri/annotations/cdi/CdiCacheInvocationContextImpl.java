@@ -20,7 +20,7 @@ package org.jsr107.ri.annotations.cdi;
 import org.jsr107.ri.annotations.AbstractInternalCacheInvocationContext;
 import org.jsr107.ri.annotations.StaticCacheInvocationContext;
 
-import javax.interceptor.InvocationContext;
+import jakarta.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
