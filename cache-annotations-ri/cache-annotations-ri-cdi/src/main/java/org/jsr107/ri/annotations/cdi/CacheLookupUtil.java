@@ -26,8 +26,8 @@ import org.jsr107.ri.annotations.StaticCacheKeyInvocationContext;
 
 import javax.cache.annotation.CacheKeyGenerator;
 import javax.cache.annotation.CacheResolverFactory;
-import javax.inject.Inject;
-import javax.interceptor.InvocationContext;
+import jakarta.inject.Inject;
+import jakarta.interceptor.InvocationContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
